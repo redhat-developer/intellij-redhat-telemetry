@@ -1,0 +1,65 @@
+plugins {
+    id "org.jetbrains.intellij"
+    id "idea"
+}
+
+intellij {
+    version ideaVersion //for a full list of Jetbrains IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    pluginName 'com.redhat.devtools.intellij.telemetry'
+    updateSinceUntilBuild false
+}
+
+patchPluginXml {
+    sinceBuild sinceIdeaBuild
+    group 'com.redhat.devtools.intellij'
+    version projectVersion
+}
+
+publishPlugin {
+    token    jetBrainsToken
+    channels jetBrainsChannel
+}
+
+dependencies {
+    implementation(
+            'com.segment.analytics.java:analytics:2.1.1',
+            'com.squareup.okhttp3:okhttp:4.9.0'
+    )
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.6.0',
+            "org.assertj:assertj-core:3.17.1",
+            "org.mockito:mockito-inline:3.5.13"
+    )
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+test {
+    useJUnitPlatform()
+    afterSuite { desc, result ->
+        if (!desc.parent)
+            println("${result.resultType} " +
+                    "(${result.testCount} tests, " +
+                    "${result.successfulTestCount} successes, " +
+                    "${result.failedTestCount} failures, " +
+                    "${result.skippedTestCount} skipped)")
+    }
+}
+
+configurations {
+    compile {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url 'https://repository.jboss.org'
+    }
+}
+
+

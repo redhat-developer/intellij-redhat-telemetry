@@ -1,0 +1,16 @@
+<idea-plugin>
+    <id>com.redhat.devtools.intellij.telemetry</id>
+    <name>Telemetry by Red Hat</name>
+    <vendor email="developers@redhat.com" url="http://www.redhat.com">Red-Hat</vendor>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState"/>
+        <applicationConfigurable
+                parentId="tools"
+                instance="com.redhat.devtools.intellij.telemetry.ui.preferences.TelemetryConfigurable"
+                id="com.redhat.devtools.intellij.telemetry.ui.preferences.TelemetryConfigurable"
+                displayName="Red Hat Telemetry"/>
+        <applicationService serviceImplementation="com.redhat.devtools.intellij.telemetry.core.ITelemetryService"/>
+    </extensions>
+
+</idea-plugin>
