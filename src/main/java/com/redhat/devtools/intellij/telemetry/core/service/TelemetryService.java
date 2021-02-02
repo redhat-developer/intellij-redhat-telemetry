@@ -20,7 +20,7 @@ public class TelemetryService implements ITelemetryService {
 
     private static final Logger LOGGER = Logger.getInstance(TelemetryService.class);
 
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 128;
 
     private final IEventBroker broker;
     private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);

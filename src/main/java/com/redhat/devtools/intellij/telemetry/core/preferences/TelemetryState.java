@@ -16,6 +16,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,15 +26,20 @@ import org.jetbrains.annotations.Nullable;
  * these persistent application settings are stored.
  */
 @State(
-        name = "com.redhat.devtools.intellij.common.telemetry.service.TelemetryState",
-        storages = {@Storage("TelemetrySettings.xml")}
+        name = "com.redhat.devtools.intellij.common.telemetry.service.TelemetryState"
 )
 public class TelemetryState implements PersistentStateComponent<TelemetryState> {
 
     public boolean enabled = false;
 
+    private final TelemetryConfiguration configuration;
+
     public static TelemetryState getInstance() {
         return ServiceManager.getService(TelemetryState.class);
+    }
+
+    public TelemetryState() {
+        this.configuration = new TelemetryConfiguration();
     }
 
     @Nullable
@@ -44,7 +50,8 @@ public class TelemetryState implements PersistentStateComponent<TelemetryState> 
 
     @Override
     public void loadState(@NotNull TelemetryState state) {
-        XmlSerializerUtil.copyBean(state, this);
+
+
     }
 
 }
