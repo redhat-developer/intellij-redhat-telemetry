@@ -54,12 +54,19 @@ configurations {
     }
 }
 
+java {
+    withSourcesJar()
+}
+
+publishPlugin {
+    token    jetBrainsToken
+    channels jetBrainsChannel
+}
+
 repositories {
-    mavenLocal()
     mavenCentral()
-    maven {
-        url 'https://repository.jboss.org'
-    }
+    mavenLocal()
+    maven { url 'https://repository.jboss.org' }
 }
 
 

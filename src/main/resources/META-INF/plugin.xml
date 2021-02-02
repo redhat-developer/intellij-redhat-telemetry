@@ -2,6 +2,12 @@
     <id>com.redhat.devtools.intellij.telemetry</id>
     <name>Telemetry by Red Hat</name>
     <vendor email="developers@redhat.com" url="http://www.redhat.com">Red-Hat</vendor>
+    <description>
+        <![CDATA[
+        <p>A plugin that provides Telemetry APIs to be used by Red Hat IDEA plugins so that they can report user interactions.
+        Those allow us to identify problems and improve our products.</p>
+        ]]>
+    </description>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState"/>
@@ -10,7 +16,9 @@
                 instance="com.redhat.devtools.intellij.telemetry.ui.preferences.TelemetryConfigurable"
                 id="com.redhat.devtools.intellij.telemetry.ui.preferences.TelemetryConfigurable"
                 displayName="Red Hat Telemetry"/>
-        <applicationService serviceImplementation="com.redhat.devtools.intellij.telemetry.core.ITelemetryService"/>
+        <applicationService
+                serviceInterface="com.redhat.devtools.intellij.telemetry.core.ITelemetryService"
+                serviceImplementation="com.redhat.devtools.intellij.telemetry.core.service.TelemetryService"/>
     </extensions>
 
 </idea-plugin>
