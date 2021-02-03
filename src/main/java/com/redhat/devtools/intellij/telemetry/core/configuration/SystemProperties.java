@@ -12,7 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.configuration;
 
 import java.util.Properties;
 
-import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConstants.*;
+import static com.redhat.devtools.intellij.telemetry.core.configuration.ConfigurationConstants.*;
 
 public class SystemProperties extends AbstractConfiguration {
 

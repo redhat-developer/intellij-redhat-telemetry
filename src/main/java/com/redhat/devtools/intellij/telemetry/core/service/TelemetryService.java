@@ -18,6 +18,10 @@ import com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState;
 
 public class TelemetryService implements ITelemetryService {
 
+    public enum Type {
+        ACTION, STARTUP, SHUTDOWN
+    }
+
     private static final Logger LOGGER = Logger.getInstance(TelemetryService.class);
 
     private static final int BUFFER_SIZE = 128;
@@ -36,7 +40,7 @@ public class TelemetryService implements ITelemetryService {
     }
 
     @Override
-    public void send(TrackEvent event) {
+    public void send(TelemetryEvent event) {
         if (isEnabled()) {
             flushOnHold();
             broker.send(event);
@@ -57,7 +61,7 @@ public class TelemetryService implements ITelemetryService {
     }
 
     private void flushOnHold() {
-        onHold.pollAll().forEach(event -> event.send(broker));
+        onHold.pollAll().forEach(broker::send);
     }
 
     public void dispose() {

@@ -10,9 +10,9 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core;
 
-import com.redhat.devtools.intellij.telemetry.core.service.TrackEvent;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
 
 public interface ITelemetryService {
-    void send(TrackEvent event);
+    void send(TelemetryEvent event);
     void setEnabled(boolean enabled);
 }

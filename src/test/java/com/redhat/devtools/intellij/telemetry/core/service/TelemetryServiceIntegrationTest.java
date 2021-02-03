@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.telemetryState;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
 
 public class TelemetryServiceIntegrationTest {
 
@@ -48,7 +49,7 @@ public class TelemetryServiceIntegrationTest {
         SegmentBroker broker = new SegmentBroker(UserId.INSTANCE.get(), analytics, environment);
         TelemetryState state = telemetryState(true);
         this.service = new TelemetryService(broker, state);
-        this.event = new TrackEvent( "Testing Telemetry", service);
+        this.event = new TelemetryEvent(ACTION, "Testing Telemetry");
     }
 
     @AfterEach
@@ -67,7 +68,7 @@ public class TelemetryServiceIntegrationTest {
     public void should_send_track_event() {
         // given
         // when
-        event.send();
+        service.send(event);
         // then
     }
 

@@ -14,11 +14,12 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.redhat.devtools.intellij.telemetry.core.AnalyticsFactory;
 import com.redhat.devtools.intellij.telemetry.core.IEventBroker;
 import com.segment.analytics.Analytics;
+import com.segment.analytics.messages.IdentifyMessage;
 import com.segment.analytics.messages.MessageBuilder;
+import com.segment.analytics.messages.PageMessage;
 import com.segment.analytics.messages.TrackMessage;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Environment.*;
@@ -31,6 +32,36 @@ public class SegmentBroker implements IEventBroker {
     public static final String PROP_EXTENSION_VERSION = "extension_version";
     public static final String PROP_APPLICATION_NAME = "application_name";
     public static final String PROP_APPLICATION_VERSION = "application_version";
+
+    enum Type {
+        IDENTIFY {
+            MessageBuilder builder(String name) {
+                return IdentifyMessage.builder();
+            }
+        },
+        TRACK {
+            MessageBuilder builder(String name) {
+                return TrackMessage.builder(name);
+            }
+        },
+        PAGE {
+            MessageBuilder builder(String name) {
+                return PageMessage.builder(name);
+            }
+        };
+
+        abstract MessageBuilder builder(String name);
+
+        public static Type valueOf(TelemetryService.Type serviceEventType) {
+            switch(serviceEventType) {
+                case ACTION:
+                case STARTUP:
+                case SHUTDOWN:
+                default:
+                    return TRACK;
+            }
+        }
+    }
 
     private final String anonymousId;
     private final Environment environment;
@@ -47,19 +78,28 @@ public class SegmentBroker implements IEventBroker {
     }
 
     @Override
-    public void send(TrackEvent event) {
-        if (analytics == null) {
-            LOGGER.warn("Could not send " + event.getType() + " event '" + event.getName() + "': no analytics instance present.");
-            return;
+    public void send(TelemetryEvent event) {
+        try {
+            if (analytics == null) {
+                LOGGER.warn("Could not send " + event.getType() + " event '" + event.getName() + "': no analytics instance present.");
+                return;
+            }
+            HashMap<String, String> context = createContext(environment);
+            MessageBuilder builder = toMessage(event, context);
+            send(builder);
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("Could not send " + event.getName() + " event: unknown type '" + event.getType() + "'.");
         }
+    }
 
-        MessageBuilder builder = toMessage(event, createContext(environment));
-        LOGGER.debug("Sending message " + builder.type() + " to segment." );
+    public void send(MessageBuilder builder) {
+        LOGGER.debug("Sending message " + builder.type() + " to segment.");
         analytics.enqueue(builder);
     }
 
-    private MessageBuilder toMessage(TrackEvent event, Map<String, String> context) {
-        MessageBuilder builder = TrackMessage.builder(event.getName());
+    private MessageBuilder toMessage(TelemetryEvent event, Map<String, String> context) {
+        Type segmentType = Type.valueOf(event.getType());
+        MessageBuilder builder = segmentType.builder(event.getName());
         return builder
                 .anonymousId(anonymousId)
                 .context(context);

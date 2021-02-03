@@ -26,6 +26,7 @@ import static com.redhat.devtools.intellij.telemetry.core.service.SegmentBroker.
 import static com.redhat.devtools.intellij.telemetry.core.service.SegmentBroker.PROP_APPLICATION_VERSION;
 import static com.redhat.devtools.intellij.telemetry.core.service.SegmentBroker.PROP_EXTENSION_NAME;
 import static com.redhat.devtools.intellij.telemetry.core.service.SegmentBroker.PROP_EXTENSION_VERSION;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
@@ -40,7 +41,7 @@ public class SegmentBrokerTest {
     private static final String APPLICATION_NAME = SegmentBrokerTest.class.getSimpleName();
     private static final String APPLICATION_VERSION = "application-1.0.0";
     private static final String ANONYMOUS_ID = "42";
-    private static final TrackEvent EVENT_TRACK = new TrackEvent("Testing Telemetry", null);
+    private static final TelemetryEvent EVENT_ACTION = new TelemetryEvent(ACTION, "Testing Telemetry");
 
     private Analytics analytics;
     private Environment environment;
@@ -54,10 +55,10 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_enqueue_track_message() {
+    public void send_should_enqueue_track_message_for_action_event() {
         // given
         // when
-        broker.send(EVENT_TRACK);
+        broker.send(EVENT_ACTION);
         // then
         verify(analytics).enqueue(isA(TrackMessage.Builder.class));
     }
@@ -67,7 +68,7 @@ public class SegmentBrokerTest {
         // given
         ArgumentCaptor<MessageBuilder<?,?>> builder = ArgumentCaptor.forClass(MessageBuilder.class);
         // when
-        broker.send(EVENT_TRACK);
+        broker.send(EVENT_ACTION);
         // then
         verify(analytics).enqueue(builder.capture());
         Message message = builder.getValue().build();
@@ -79,7 +80,7 @@ public class SegmentBrokerTest {
         // given
         IEventBroker broker = new SegmentBroker(ANONYMOUS_ID, null, environment);
         // when
-        broker.send(EVENT_TRACK);
+        broker.send(EVENT_ACTION);
         // then
         verify(analytics, never()).enqueue(any());
     }
@@ -89,7 +90,7 @@ public class SegmentBrokerTest {
         // given
         ArgumentCaptor<MessageBuilder<?,?>> builder = ArgumentCaptor.forClass(MessageBuilder.class);
         // when
-        broker.send(EVENT_TRACK);
+        broker.send(EVENT_ACTION);
         // then
         verify(analytics).enqueue(builder.capture());
         Map<String, ?> context = builder.getValue().build().context();

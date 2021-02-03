@@ -16,6 +16,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.telemetryState;
+import static com.redhat.devtools.intellij.telemetry.core.service.SegmentBroker.Type.*;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -25,7 +27,7 @@ import static org.mockito.Mockito.verify;
 public class TelemetryServiceTest {
 
     private ITelemetryService service;
-    private TrackEvent event;
+    private TelemetryEvent event;
     private SegmentBroker broker;
 
     @BeforeEach
@@ -33,7 +35,7 @@ public class TelemetryServiceTest {
         this.broker = createSegmentBroker();
         TelemetryState state = telemetryState(true);
         this.service = new TelemetryService(broker, state);
-        this.event = new TrackEvent( "Testing Telemetry", service);
+        this.event = new TelemetryEvent(null, "Testing Telemetry");
     }
 
     @Test
@@ -42,7 +44,7 @@ public class TelemetryServiceTest {
         // when
         service.send(event);
         // then
-        verify(broker).send(any(TrackEvent.class));
+        verify(broker).send(any(TelemetryEvent.class));
     }
 
     @Test
@@ -50,26 +52,26 @@ public class TelemetryServiceTest {
         // given
         TelemetryService service = new TelemetryService(broker, telemetryState(false));
         // when
-        service.send(new TrackEvent( "Testing Telemetry", service));
+        service.send(new TelemetryEvent(null, "Testing Telemetry"));
         // then
-        verify(broker, never()).send(any(TrackEvent.class));
+        verify(broker, never()).send(any(TelemetryEvent.class));
     }
 
     @Test
     public void setEnabled_true_should_send_all_event_that_are_on_hold() {
         // given
         TelemetryService service = new TelemetryService(broker, telemetryState(false));
-        TrackEvent event1 = new TrackEvent( "Test1", service);
-        TrackEvent event2 = new TrackEvent( "Test2", service);
-        TrackEvent event3 = new TrackEvent( "Test3", service);
+        TelemetryEvent event1 = new TelemetryEvent(null, "Test1");
+        TelemetryEvent event2 = new TelemetryEvent(null, "Test2");
+        TelemetryEvent event3 = new TelemetryEvent(null, "Test3");
         service.send(event1);
         service.send(event2);
         service.send(event3);
-        verify(broker, never()).send(any(TrackEvent.class));
+        verify(broker, never()).send(any(TelemetryEvent.class));
         // when
         service.setEnabled(true);
         // then
-        verify(broker, times(3)).send(any(TrackEvent.class));
+        verify(broker, times(3)).send(any(TelemetryEvent.class));
     }
 
     private SegmentBroker createSegmentBroker() {

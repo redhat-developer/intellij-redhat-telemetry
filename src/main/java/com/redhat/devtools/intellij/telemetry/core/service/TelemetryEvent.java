@@ -10,9 +10,26 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-public class StartupEvent extends TrackEvent {
+import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 
-    public StartupEvent() {
-        super("startup");
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.*;
+
+public class TelemetryEvent {
+
+    private final Type type;
+    private final String name;
+    protected ITelemetryService service;
+
+    protected TelemetryEvent(Type type, String name) {
+        this.type = type;
+        this.name = name;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public String getName() {
+        return name;
     }
 }

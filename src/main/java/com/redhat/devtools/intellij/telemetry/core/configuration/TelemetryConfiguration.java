@@ -13,7 +13,7 @@ package com.redhat.devtools.intellij.telemetry.core.configuration;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConstants.*;
+import static com.redhat.devtools.intellij.telemetry.core.configuration.ConfigurationConstants.*;
 
 public class TelemetryConfiguration extends AbstractConfiguration {
 
