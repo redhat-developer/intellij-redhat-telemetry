@@ -26,7 +26,8 @@ import org.jetbrains.annotations.Nullable;
  * these persistent application settings are stored.
  */
 @State(
-        name = "com.redhat.devtools.intellij.common.telemetry.service.TelemetryState"
+        name = "com.redhat.devtools.intellij.common.telemetry.service.TelemetryState",
+        storages = {@Storage("TelemetrySettings.xml")}
 )
 public class TelemetryState implements PersistentStateComponent<TelemetryState> {
 
@@ -50,8 +51,7 @@ public class TelemetryState implements PersistentStateComponent<TelemetryState> 
 
     @Override
     public void loadState(@NotNull TelemetryState state) {
-
-
+        XmlSerializerUtil.copyBean(state, this);
     }
 
 }
