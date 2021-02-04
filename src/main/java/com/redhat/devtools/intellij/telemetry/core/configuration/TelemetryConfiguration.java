@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Properties;
 
@@ -17,7 +18,7 @@ import static com.redhat.devtools.intellij.telemetry.core.configuration.Configur
 
 public class TelemetryConfiguration extends AbstractConfiguration {
 
-    private static final IConfiguration GLOBAL_FILE = new FileConfiguration(Paths.get(
+    private static final FileConfiguration GLOBAL_FILE = new FileConfiguration(Paths.get(
             System.getProperty("user.home"),
             ".redhat",
             "com.redhat.devtools.intellij.telemetry"));
@@ -27,6 +28,9 @@ public class TelemetryConfiguration extends AbstractConfiguration {
 
         public static Mode safeValueOf(String value) {
             try {
+                if (value == null) {
+                    return UNKNOWN;
+                }
                 return Mode.valueOf(value);
             } catch (IllegalArgumentException e) {
                 return UNKNOWN;
@@ -64,12 +68,13 @@ public class TelemetryConfiguration extends AbstractConfiguration {
         return Mode.safeValueOf((String) get(KEY_MODE));
     }
 
-    public IConfiguration getWritable() {
-        return GLOBAL_FILE;
+    public void save() throws IOException {
+        GLOBAL_FILE.save();
     }
 
     @Override
     protected Properties loadProperties(IConfiguration parent) {
         return getParent().getProperties();
     }
+
 }

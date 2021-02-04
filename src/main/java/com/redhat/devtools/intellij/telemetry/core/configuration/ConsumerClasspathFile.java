@@ -25,7 +25,7 @@ public class ConsumerClasspathFile extends FileConfiguration {
 	}
 
 	@Override
-	protected InputStream createFileInputStream(Path file) throws FileNotFoundException {
-		return Thread.currentThread().getContextClassLoader().getResourceAsStream(file.toString());
+	protected InputStream createFileInputStream(Path path) throws FileNotFoundException {
+		return Thread.currentThread().getContextClassLoader().getResourceAsStream(path.toString());
 	}
 }

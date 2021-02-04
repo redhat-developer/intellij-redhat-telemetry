@@ -31,7 +31,9 @@ public class SystemProperties extends AbstractConfiguration {
 	}
 
 	private void copySystemProperty(String key, Properties properties) {
-		Object value = System.getProperties().get(key);
-		properties.put(key, value);
+		Object value = System.getProperty(key);
+		if (value != null) {
+			properties.put(key, value);
+		}
 	}
 }

@@ -51,13 +51,13 @@ public class TelemetryService implements ITelemetryService {
 
     @Override
     public void setEnabled(boolean enabled) {
-        state.enabled = enabled;
+        state.setEnabled(enabled);
         flushOnHold();
     }
 
     private boolean isEnabled() {
         return state == null
-                || state.enabled;
+                || state.isEnabled();
     }
 
     private void flushOnHold() {

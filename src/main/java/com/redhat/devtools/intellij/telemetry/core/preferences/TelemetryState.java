@@ -20,24 +20,22 @@ import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfig
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+
+import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.*;
+
 /**
  * Supports storing the application settings in a persistent way.
  * The {@link State} and {@link Storage} annotations define the name of the data and the file name where
  * these persistent application settings are stored.
  */
-@State(
-        name = "com.redhat.devtools.intellij.common.telemetry.service.TelemetryState",
-        storages = {@Storage("TelemetrySettings.xml")}
-)
 public class TelemetryState implements PersistentStateComponent<TelemetryState> {
-
-    public boolean enabled = false;
-
-    private final TelemetryConfiguration configuration;
 
     public static TelemetryState getInstance() {
         return ServiceManager.getService(TelemetryState.class);
     }
+
+    private final TelemetryConfiguration configuration;
 
     public TelemetryState() {
         this.configuration = new TelemetryConfiguration();
@@ -51,7 +49,29 @@ public class TelemetryState implements PersistentStateComponent<TelemetryState> 
 
     @Override
     public void loadState(@NotNull TelemetryState state) {
-        XmlSerializerUtil.copyBean(state, this);
     }
 
+    public void setEnabled(boolean enabled) {
+        Mode mode = null;
+        if (enabled) {
+            mode = Mode.NORMAL;
+        } else {
+            mode = Mode.DISABLED;
+        }
+        configuration.setMode(mode);
+    }
+
+    public boolean isEnabled() {
+        switch(configuration.getMode()) {
+            case NORMAL:
+            case TEST:
+               return true;
+            default:
+                return false;
+        }
+    }
+
+    public void save() throws IOException {
+        configuration.save();
+    }
 }

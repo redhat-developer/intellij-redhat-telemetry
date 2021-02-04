@@ -18,17 +18,21 @@ import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryServi
 public class Telemetry {
 
     public static TelemetryBuilder actionPerformed(String name) {
-        return new TelemetryBuilder(ACTION, name);
+        return new TelemetryBuilder(ACTION).name(name);
     }
 
     public static class TelemetryBuilder {
-        private TelemetryService.Type type;
+        private final TelemetryService.Type type;
         private String name;
         private ITelemetryService service;
 
-        private TelemetryBuilder(TelemetryService.Type type, String name) {
+        private TelemetryBuilder(TelemetryService.Type type) {
             this.type = type;
+        }
+
+        public TelemetryBuilder name(String name) {
             this.name = name;
+            return this;
         }
 
         public void send() {

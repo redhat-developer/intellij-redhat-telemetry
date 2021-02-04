@@ -10,24 +10,29 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.ui.preferences;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
 import com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryService;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JComponent;
+import java.io.IOException;
 
 /**
  * Controller for telemetry settings.
  */
 public class TelemetryConfigurable implements Configurable {
 
+    private static final Logger LOGGER = Logger.getInstance(TelemetryConfigurable.class);
+
     private TelemetryComponent component;
 
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public String getDisplayName() {
-        return "SDK: Application Settings Example";
+        return "Red Hat Telemetry";
     }
 
     @Override
@@ -46,20 +51,29 @@ public class TelemetryConfigurable implements Configurable {
     public boolean isModified() {
         TelemetryState state = TelemetryState.getInstance();
         boolean modified = false;
-        modified |= (component.isEnabled() != state.enabled);
+        modified |= (component.isEnabled() != state.isEnabled());
         return modified;
     }
 
     @Override
     public void apply() {
         TelemetryState state = TelemetryState.getInstance();
-        state.enabled = component.isEnabled();
+        state.setEnabled(component.isEnabled());
+        save(state);
+    }
+
+    private void save(TelemetryState state) {
+        try {
+            state.save();
+        } catch (IOException e) {
+            LOGGER.warn("Could not save telemetry configuration.", e);
+        }
     }
 
     @Override
     public void reset() {
         TelemetryState state = TelemetryState.getInstance();
-        component.setEnabled(state.enabled);
+        component.setEnabled(state.isEnabled());
     }
 
     @Override

@@ -43,17 +43,22 @@ public class FileConfiguration extends AbstractConfiguration {
         }
 
         try (InputStream in = createFileInputStream(file)) {
-            properties.load(in);
+            if (in != null) {
+                properties.load(in);
+            }
             return properties;
         } catch (IOException e) {
             LOGGER.warn("Could not load properties file " + file);
-            return null;
         }
+        return properties;
     }
 
-    protected InputStream createFileInputStream(Path file) throws IOException {
-        ensureExists(file);
-        return new FileInputStream(file.toFile());
+    protected InputStream createFileInputStream(Path path) throws IOException {
+        if (path == null) {
+            return null;
+        }
+        ensureExists(path);
+        return new FileInputStream(path.toFile());
     }
 
     private boolean ensureExists(Path file) throws IOException {
