@@ -41,24 +41,25 @@ public class SegmentBrokerTest {
     private static final String APPLICATION_NAME = SegmentBrokerTest.class.getSimpleName();
     private static final String APPLICATION_VERSION = "application-1.0.0";
     private static final String ANONYMOUS_ID = "42";
-    private static final TelemetryEvent EVENT_ACTION = new TelemetryEvent(ACTION, "Testing Telemetry");
 
     private Analytics analytics;
     private Environment environment;
     private SegmentBroker broker;
+    private TelemetryEvent event;
 
     @BeforeEach
     public void before() {
         this.analytics = createAnalytics();
         this.environment = environment(EXTENSION_NAME, EXTENSION_VERSION, APPLICATION_NAME, APPLICATION_VERSION);
-        this.broker = new SegmentBroker(ANONYMOUS_ID, analytics, environment);
+        this.broker = new SegmentBroker(ANONYMOUS_ID, analytics);
+        this.event = new TelemetryEvent(ACTION, "Testing Telemetry", environment);
     }
 
     @Test
     public void send_should_enqueue_track_message_for_action_event() {
         // given
         // when
-        broker.send(EVENT_ACTION);
+        broker.send(event);
         // then
         verify(analytics).enqueue(isA(TrackMessage.Builder.class));
     }
@@ -68,7 +69,7 @@ public class SegmentBrokerTest {
         // given
         ArgumentCaptor<MessageBuilder<?,?>> builder = ArgumentCaptor.forClass(MessageBuilder.class);
         // when
-        broker.send(EVENT_ACTION);
+        broker.send(event);
         // then
         verify(analytics).enqueue(builder.capture());
         Message message = builder.getValue().build();
@@ -78,9 +79,9 @@ public class SegmentBrokerTest {
     @Test
     public void send_should_NOT_enqueue_if_no_analytics() {
         // given
-        IEventBroker broker = new SegmentBroker(ANONYMOUS_ID, null, environment);
+        IEventBroker broker = new SegmentBroker(ANONYMOUS_ID, null);
         // when
-        broker.send(EVENT_ACTION);
+        broker.send(event);
         // then
         verify(analytics, never()).enqueue(any());
     }
@@ -90,7 +91,7 @@ public class SegmentBrokerTest {
         // given
         ArgumentCaptor<MessageBuilder<?,?>> builder = ArgumentCaptor.forClass(MessageBuilder.class);
         // when
-        broker.send(EVENT_ACTION);
+        broker.send(event);
         // then
         verify(analytics).enqueue(builder.capture());
         Map<String, ?> context = builder.getValue().build().context();

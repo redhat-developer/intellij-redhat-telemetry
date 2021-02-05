@@ -11,10 +11,14 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
+import com.intellij.ide.plugins.PluginManager;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationNamesInfo;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.util.Comparing;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -22,47 +26,62 @@ import java.util.Objects;
 
 public class Environment {
 
+    public static EnvironmentBuilder builder() {
+        return new EnvironmentBuilder();
+    }
+
     public static class EnvironmentBuilder {
 
         private static final Logger LOGGER = Logger.getInstance(EnvironmentBuilder.class);
 
-        private Application extension;
+        private Application plugin;
+        private Object emitter;
         private Application application;
         private Platform platform;
         private String timezone;
         private String locale;
         private String country;
 
-        public EnvironmentBuilder extension(Application extension) {
-            this.extension = extension;
+        private EnvironmentBuilder() {}
+
+        public EnvironmentBuilder plugin(Application plugin) {
+            this.plugin = plugin;
             return this;
         }
 
-        private Application getExtension() {
-            if (extension == null) {
-                IdeaPluginDescriptor descriptor = getCurrentDescriptor();
-                if (descriptor != null) {
-                    this.extension = new Application(descriptor.getName(), descriptor.getVersion());
-                }
-            }
-            return this.extension;
+        public EnvironmentBuilder emitter(Object emitter) {
+            this.emitter = emitter;
+            return this;
         }
 
-        private IdeaPluginDescriptor getCurrentDescriptor() {
+        private Application getPlugin() {
+            if (plugin == null
+                && emitter != null) {
+                PluginId pluginId = getPluginId(emitter);
+                IdeaPluginDescriptor descriptor = getDescriptor(pluginId);
+                if (descriptor != null) {
+                    this.plugin = new Application(descriptor.getName(), descriptor.getVersion());
+                }
+
+            }
+            return this.plugin;
+        }
+
+        private PluginId getPluginId(Object emitter) {
+            return PluginManagerCore.getPluginByClassName(emitter.getClass().getName());
+        }
+
+        private IdeaPluginDescriptor getDescriptor(PluginId pluginId) {
             try {
                 IdeaPluginDescriptor[] plugins = PluginManagerCore.getPlugins();
                 return Arrays.stream(plugins)
-                        .filter(plugin -> isCurrentClassLoader(plugin.getPluginClassLoader()))
+                        .filter(plugin -> pluginId.equals(plugin.getPluginId()))
                         .findFirst()
                         .orElse(null);
             } catch(Exception e) {
                 LOGGER.warn("Could not determine current plugin.", e);
                 return null;
             }
-        }
-
-        private boolean isCurrentClassLoader(ClassLoader classLoader) {
-            return Objects.equals(classLoader, Thread.currentThread().getContextClassLoader());
         }
 
         public EnvironmentBuilder application(Application application) {
@@ -127,14 +146,14 @@ public class Environment {
                  * Segment won't report countries for incoming requests.
                  * We thus currently dont have any better solution than use the country in the Locale.
                  */
-                this.country = Locale.getDefault().getCountry();
+                this.country = Locale.getDefault().getDisplayCountry();
             }
             return this.country;
         }
 
         public Environment build() {
             return new Environment(
-                    getExtension(),
+                    getPlugin(),
                     getApplication(),
                     getPlatform(),
                     getTimezone(),

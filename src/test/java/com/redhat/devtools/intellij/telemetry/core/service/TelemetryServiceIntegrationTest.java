@@ -46,10 +46,10 @@ public class TelemetryServiceIntegrationTest {
         this.blockingFlush = BlockingFlush.create();
         this.analytics = createAnalytics(blockingFlush, createClient());
         Environment environment = environment(APPLICATION_NAME, APPLICATION_VERSION, EXTENSION_NAME, EXTENSION_VERSION);
-        SegmentBroker broker = new SegmentBroker(UserId.INSTANCE.get(), analytics, environment);
+        SegmentBroker broker = new SegmentBroker(UserId.INSTANCE.get(), analytics);
         TelemetryState state = telemetryState(true);
         this.service = new TelemetryService(broker, state);
-        this.event = new TelemetryEvent(ACTION, "Testing Telemetry");
+        this.event = new TelemetryEvent(ACTION, "Testing Telemetry", environment);
     }
 
     @AfterEach

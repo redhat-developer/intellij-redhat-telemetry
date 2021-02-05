@@ -9,8 +9,8 @@ public class EnvironmentTest {
 
     @Test
     public void should_build_correct_environment() {
-        Environment env = new EnvironmentBuilder()
-                .extension(Mockito.mock(Application.class))
+        Environment env = Environment.builder()
+                .plugin(Mockito.mock(Application.class))
                 .application(Mockito.mock(Application.class))
                 .build();
     }

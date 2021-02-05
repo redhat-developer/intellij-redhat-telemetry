@@ -64,16 +64,14 @@ public class SegmentBroker implements IEventBroker {
     }
 
     private final String anonymousId;
-    private final Environment environment;
     private final Analytics analytics;
 
     public SegmentBroker() {
-        this(UserId.INSTANCE.get(), AnalyticsFactory.INSTANCE.create(), new EnvironmentBuilder().build());
+        this(UserId.INSTANCE.get(), AnalyticsFactory.INSTANCE.create());
     }
 
-    SegmentBroker(String anonymousId, Analytics analytics, Environment environment) {
+    SegmentBroker(String anonymousId, Analytics analytics) {
         this.anonymousId = anonymousId;
-        this.environment = environment;
         this.analytics = analytics;
     }
 
@@ -84,7 +82,7 @@ public class SegmentBroker implements IEventBroker {
                 LOGGER.warn("Could not send " + event.getType() + " event '" + event.getName() + "': no analytics instance present.");
                 return;
             }
-            HashMap<String, String> context = createContext(environment);
+            HashMap<String, String> context = createContext(event.getEnvironment());
             MessageBuilder builder = toMessage(event, context);
             send(builder);
         } catch (IllegalArgumentException e) {

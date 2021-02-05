@@ -13,30 +13,47 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 import com.intellij.openapi.components.ServiceManager;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.*;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
 
 public class Telemetry {
 
-    public static TelemetryBuilder actionPerformed(String name) {
-        return new TelemetryBuilder(ACTION).name(name);
+    public static MessageBuilder environment(Object emitter) {
+        Environment environment = Environment.builder().emitter(emitter).build();
+        return new MessageBuilder(environment);
     }
 
-    public static class TelemetryBuilder {
-        private final TelemetryService.Type type;
-        private String name;
-        private ITelemetryService service;
+    public static MessageBuilder environment(Environment environment) {
+        return new MessageBuilder(environment);
+    }
 
-        private TelemetryBuilder(TelemetryService.Type type) {
-            this.type = type;
+    public static class MessageBuilder {
+
+        private Environment environment;
+
+        private MessageBuilder(Environment environment) {
+            this.environment = environment;
         }
 
-        public TelemetryBuilder name(String name) {
+        public Sender actionPerformed(String event) {
+            return new Sender(ACTION, event, environment);
+        }
+    }
+
+    public static class Sender {
+        private final Environment environment;
+        private final Type type;
+        private final String name;
+        private ITelemetryService service;
+
+        private Sender(Type type, String name, Environment environment) {
+            this.type = type;
             this.name = name;
-            return this;
+            this.environment = environment;
         }
 
         public void send() {
-            TelemetryEvent event = new TelemetryEvent(type, name);
+            TelemetryEvent event = new TelemetryEvent(type, name, environment);
             getService().send(event);
         }
 

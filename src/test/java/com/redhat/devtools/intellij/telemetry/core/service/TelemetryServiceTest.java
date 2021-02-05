@@ -16,8 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.telemetryState;
-import static com.redhat.devtools.intellij.telemetry.core.service.SegmentBroker.Type.*;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -35,7 +33,7 @@ public class TelemetryServiceTest {
         this.broker = createSegmentBroker();
         TelemetryState state = telemetryState(true);
         this.service = new TelemetryService(broker, state);
-        this.event = new TelemetryEvent(null, "Testing Telemetry");
+        this.event = new TelemetryEvent(null, "Testing Telemetry", null);
     }
 
     @Test
@@ -52,7 +50,7 @@ public class TelemetryServiceTest {
         // given
         TelemetryService service = new TelemetryService(broker, telemetryState(false));
         // when
-        service.send(new TelemetryEvent(null, "Testing Telemetry"));
+        service.send(new TelemetryEvent(null, "Testing Telemetry", null));
         // then
         verify(broker, never()).send(any(TelemetryEvent.class));
     }
@@ -61,9 +59,9 @@ public class TelemetryServiceTest {
     public void setEnabled_true_should_send_all_event_that_are_on_hold() {
         // given
         TelemetryService service = new TelemetryService(broker, telemetryState(false));
-        TelemetryEvent event1 = new TelemetryEvent(null, "Test1");
-        TelemetryEvent event2 = new TelemetryEvent(null, "Test2");
-        TelemetryEvent event3 = new TelemetryEvent(null, "Test3");
+        TelemetryEvent event1 = new TelemetryEvent(null, "Test1", null);
+        TelemetryEvent event2 = new TelemetryEvent(null, "Test2", null);
+        TelemetryEvent event3 = new TelemetryEvent(null, "Test3", null);
         service.send(event1);
         service.send(event2);
         service.send(event3);

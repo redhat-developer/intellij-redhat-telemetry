@@ -9,15 +9,15 @@ public class Fakes {
             String extensionVersion,
             String applicationName,
             String applicationVersion) {
-        return new Environment.EnvironmentBuilder()
-                .extension(new Application(extensionName, extensionVersion))
+        return Environment.builder()
+                .plugin(new Application(extensionName, extensionVersion))
                 .application(new Application(applicationName, applicationVersion))
                 .build();
     }
 
     public static TelemetryState telemetryState(boolean enabled) {
         TelemetryState state = new TelemetryState();
-        state.enabled = enabled;
+        state.setEnabled(enabled);
         return state;
     }
 }
