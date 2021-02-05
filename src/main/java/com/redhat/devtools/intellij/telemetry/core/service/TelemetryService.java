@@ -12,7 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.redhat.devtools.intellij.telemetry.core.IEventBroker;
+import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState;
 
@@ -26,7 +26,7 @@ public class TelemetryService implements ITelemetryService {
 
     private static final int BUFFER_SIZE = 35;
 
-    private final IEventBroker broker;
+    private final IMessageBroker broker;
     private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);
     private final TelemetryState state;
 
@@ -34,7 +34,7 @@ public class TelemetryService implements ITelemetryService {
         this(new SegmentBroker(), ServiceManager.getService(TelemetryState.class));
     }
 
-    TelemetryService(IEventBroker broker, TelemetryState state) {
+    public TelemetryService(IMessageBroker broker, TelemetryState state) {
         this.broker = broker;
         this.state = state;
     }
@@ -47,12 +47,6 @@ public class TelemetryService implements ITelemetryService {
         } else {
             onHold.offer(event);
         }
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        state.setEnabled(enabled);
-        flushOnHold();
     }
 
     private boolean isEnabled() {

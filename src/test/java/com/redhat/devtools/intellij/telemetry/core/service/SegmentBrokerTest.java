@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-import com.redhat.devtools.intellij.telemetry.core.IEventBroker;
+import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.segment.analytics.Analytics;
 import com.segment.analytics.messages.Message;
 import com.segment.analytics.messages.MessageBuilder;
@@ -79,7 +79,7 @@ public class SegmentBrokerTest {
     @Test
     public void send_should_NOT_enqueue_if_no_analytics() {
         // given
-        IEventBroker broker = new SegmentBroker(ANONYMOUS_ID, null);
+        IMessageBroker broker = new SegmentBroker(ANONYMOUS_ID, null);
         // when
         broker.send(event);
         // then

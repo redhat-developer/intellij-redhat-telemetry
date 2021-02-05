@@ -12,7 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.redhat.devtools.intellij.telemetry.core.AnalyticsFactory;
-import com.redhat.devtools.intellij.telemetry.core.IEventBroker;
+import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.segment.analytics.Analytics;
 import com.segment.analytics.messages.IdentifyMessage;
 import com.segment.analytics.messages.MessageBuilder;
@@ -22,9 +22,7 @@ import com.segment.analytics.messages.TrackMessage;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.redhat.devtools.intellij.telemetry.core.service.Environment.*;
-
-public class SegmentBroker implements IEventBroker {
+public class SegmentBroker implements IMessageBroker {
 
     private static final Logger LOGGER = Logger.getInstance(SegmentBroker.class);
 

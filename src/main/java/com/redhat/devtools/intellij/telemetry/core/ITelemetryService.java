@@ -14,5 +14,4 @@ import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
 
 public interface ITelemetryService {
     void send(TelemetryEvent event);
-    void setEnabled(boolean enabled);
 }
