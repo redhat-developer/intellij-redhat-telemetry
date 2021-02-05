@@ -34,6 +34,25 @@ public class TelemetryService implements ITelemetryService {
         this(new SegmentBroker(), ServiceManager.getService(TelemetryState.class));
     }
 
+    /**
+     * Creates a telemetry service for the given broker and state. Present for testing purposes.
+     * <p>
+     * "Deprecated" annotation is required to avoid IDEA IC-2019.3+ complaining about non-empty constructor.
+     * Starting with IC-2019.3 there mustn't be (additional) service constructors with parameters.
+     * It'll throw a PluginException otherwise:
+     * <pre>
+     * com.intellij.diagnostic.PluginException:
+     * getComponentAdapterOfType is used to get com.redhat.devtools.intellij.telemetry.core.IEventBroker (requestorClass=com.redhat.devtools.intellij.telemetry.core.service.TelemetryService,
+     * requestorConstructor=com.redhat.devtools.intellij.telemetry.core.service.TelemetryService(com.redhat.devtools.intellij.telemetry.core.IEventBroker,com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState)).
+     * Probably constructor should be marked as NonInjectable. [Plugin: com.redhat.devtools.intellij.telemetry]
+     * </pre>
+     *
+     * @see "https://git.jetbrains.org/?p=idea%2Fcommunity.git&a=search&st=commit&s=getComponentAdapterOfType"
+     * @see "https://intellij-support.jetbrains.com/hc/en-us/community/posts/360005805879-PluginException-getComponentAdapterOfType-is-used-to-get-XXX-Probably-constructor-should-be-marked-as-NonInjectable-"
+     * @see "https://jira.sonarsource.com/browse/SLI-342"
+     * @see "https://github.com/SonarSource/sonarlint-intellij/commit/3cec478aa25ba45ca7b40587eba1ebc953787ac9#diff-c2ad48b42854127c9594a3f58d706856ee1e1c14b5e0053bc8a4dea4f212041eR58"
+     */
+    @Deprecated
     public TelemetryService(IMessageBroker broker, TelemetryState state) {
         this.broker = broker;
         this.state = state;
