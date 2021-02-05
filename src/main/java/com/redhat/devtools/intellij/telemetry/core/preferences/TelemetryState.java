@@ -29,36 +29,26 @@ import static com.redhat.devtools.intellij.telemetry.core.configuration.Telemetr
  * The {@link State} and {@link Storage} annotations define the name of the data and the file name where
  * these persistent application settings are stored.
  */
-public class TelemetryState implements PersistentStateComponent<TelemetryState> {
+public class TelemetryState {
 
-    public static TelemetryState getInstance() {
-        return ServiceManager.getService(TelemetryState.class);
-    }
+    public static TelemetryState INSTANCE = new TelemetryState();
 
     private final TelemetryConfiguration configuration;
 
-    public TelemetryState() {
-        this.configuration = new TelemetryConfiguration();
-    }
-
-    @Nullable
-    @Override
-    public TelemetryState getState() {
-        return this;
-    }
-
-    @Override
-    public void loadState(@NotNull TelemetryState state) {
+    private TelemetryState() {
+        this.configuration = TelemetryConfiguration.INSTANCE;
     }
 
     public void setEnabled(boolean enabled) {
-        Mode mode = null;
+        configuration.setMode(toMode(enabled));
+    }
+
+    private Mode toMode(boolean enabled) {
         if (enabled) {
-            mode = Mode.NORMAL;
+            return Mode.NORMAL;
         } else {
-            mode = Mode.DISABLED;
+            return Mode.DISABLED;
         }
-        configuration.setMode(mode);
     }
 
     public boolean isEnabled() {

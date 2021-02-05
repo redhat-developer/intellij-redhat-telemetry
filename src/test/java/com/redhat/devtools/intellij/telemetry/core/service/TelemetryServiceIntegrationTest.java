@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.jakewharton.retrofit.Ok3Client;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
+import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState;
 import com.redhat.devtools.intellij.telemetry.util.BlockingFlush;
 import com.redhat.devtools.intellij.telemetry.util.StdOutLogging;
@@ -48,7 +49,7 @@ public class TelemetryServiceIntegrationTest {
         Environment environment = environment(APPLICATION_NAME, APPLICATION_VERSION, EXTENSION_NAME, EXTENSION_VERSION);
         SegmentBroker broker = new SegmentBroker(UserId.INSTANCE.get(), analytics);
         TelemetryState state = telemetryState(true);
-        this.service = new TelemetryService(broker, state);
+        this.service = new TelemetryService(broker, TelemetryConfiguration.INSTANCE);
         this.event = new TelemetryEvent(ACTION, "Testing Telemetry", environment);
     }
 

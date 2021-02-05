@@ -10,11 +10,13 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
+import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState;
+
+import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.*;
 
 public class TelemetryService implements ITelemetryService {
 
@@ -28,10 +30,10 @@ public class TelemetryService implements ITelemetryService {
 
     private final IMessageBroker broker;
     private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);
-    private final TelemetryState state;
+    private final TelemetryConfiguration configuration;
 
     public TelemetryService() {
-        this(new SegmentBroker(), ServiceManager.getService(TelemetryState.class));
+        this(new SegmentBroker(), INSTANCE);
     }
 
     /**
@@ -53,9 +55,9 @@ public class TelemetryService implements ITelemetryService {
      * @see "https://github.com/SonarSource/sonarlint-intellij/commit/3cec478aa25ba45ca7b40587eba1ebc953787ac9#diff-c2ad48b42854127c9594a3f58d706856ee1e1c14b5e0053bc8a4dea4f212041eR58"
      */
     @Deprecated
-    public TelemetryService(IMessageBroker broker, TelemetryState state) {
+    public TelemetryService(IMessageBroker broker, TelemetryConfiguration configuration) {
         this.broker = broker;
-        this.state = state;
+        this.configuration = configuration;
     }
 
     @Override
@@ -69,8 +71,8 @@ public class TelemetryService implements ITelemetryService {
     }
 
     private boolean isEnabled() {
-        return state == null
-                || state.isEnabled();
+        return configuration == null
+                || configuration.getMode() != Mode.DISABLED;
     }
 
     private void flushOnHold() {

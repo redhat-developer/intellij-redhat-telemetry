@@ -10,7 +10,7 @@
     </description>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState"/>
+        <!-- <applicationService serviceImplementation="com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState"/> -->
         <applicationConfigurable
                 parentId="tools"
                 instance="com.redhat.devtools.intellij.telemetry.ui.preferences.TelemetryConfigurable"

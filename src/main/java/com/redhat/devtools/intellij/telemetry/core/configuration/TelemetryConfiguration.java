@@ -18,6 +18,8 @@ import static com.redhat.devtools.intellij.telemetry.core.configuration.Configur
 
 public class TelemetryConfiguration extends AbstractConfiguration {
 
+    public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
+
     private static final FileConfiguration GLOBAL_FILE = new FileConfiguration(Paths.get(
             System.getProperty("user.home"),
             ".redhat",
@@ -38,7 +40,7 @@ public class TelemetryConfiguration extends AbstractConfiguration {
         }
     }
 
-    public TelemetryConfiguration() {
+    private TelemetryConfiguration() {
         super(new SystemProperties(
                 new ConsumerClasspathFile(Paths.get("/segment.properties"),
                         GLOBAL_FILE)));

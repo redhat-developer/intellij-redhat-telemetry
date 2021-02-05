@@ -49,7 +49,7 @@ public class TelemetryConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-        TelemetryState state = TelemetryState.getInstance();
+        TelemetryState state = TelemetryState.INSTANCE;
         boolean modified = false;
         modified |= (component.isEnabled() != state.isEnabled());
         return modified;
@@ -57,7 +57,7 @@ public class TelemetryConfigurable implements Configurable {
 
     @Override
     public void apply() {
-        TelemetryState state = TelemetryState.getInstance();
+        TelemetryState state = TelemetryState.INSTANCE;
         state.setEnabled(component.isEnabled());
         save(state);
     }
@@ -72,7 +72,7 @@ public class TelemetryConfigurable implements Configurable {
 
     @Override
     public void reset() {
-        TelemetryState state = TelemetryState.getInstance();
+        TelemetryState state = TelemetryState.INSTANCE;
         component.setEnabled(state.isEnabled());
     }
 
