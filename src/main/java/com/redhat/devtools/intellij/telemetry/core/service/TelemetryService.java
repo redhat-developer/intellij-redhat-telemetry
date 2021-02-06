@@ -65,14 +65,19 @@ public class TelemetryService implements ITelemetryService {
         if (isEnabled()) {
             flushOnHold();
             broker.send(event);
-        } else {
+        } else if (!isConfigured()) {
             onHold.offer(event);
         }
     }
 
     private boolean isEnabled() {
-        return configuration == null
-                || configuration.getMode() != Mode.DISABLED;
+        return configuration != null
+                && configuration.getMode() != Mode.DISABLED;
+    }
+
+    private boolean isConfigured() {
+        return configuration != null
+                && configuration.getMode() != Mode.UNKNOWN;
     }
 
     private void flushOnHold() {
