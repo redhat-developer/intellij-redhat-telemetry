@@ -79,4 +79,8 @@ public class TelemetryConfiguration extends AbstractConfiguration {
         return getParent().getProperties();
     }
 
+    public void put(String key, String value) {
+        GLOBAL_FILE.getProperties().put(key, value);
+    }
+
 }
