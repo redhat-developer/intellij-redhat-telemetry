@@ -46,7 +46,6 @@ public class FileConfiguration extends AbstractConfiguration {
             if (in != null) {
                 properties.load(in);
             }
-            return properties;
         } catch (IOException e) {
             LOGGER.warn("Could not load properties file " + file);
         }

@@ -20,31 +20,16 @@ import static com.redhat.devtools.intellij.telemetry.core.configuration.Configur
 
 public class TelemetryConfiguration extends AbstractConfiguration implements ISegmentConfiguration {
 
-    public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
-
     private static final FileConfiguration GLOBAL_FILE = new FileConfiguration(Paths.get(
             System.getProperty("user.home"),
             ".redhat",
             "com.redhat.devtools.intellij.telemetry"));
 
-    public enum Mode {
-        NORMAL, DEBUG, DISABLED, UNKNOWN;
-
-        public static Mode safeValueOf(String value) {
-            try {
-                if (value == null) {
-                    return UNKNOWN;
-                }
-                return Mode.valueOf(value);
-            } catch (IllegalArgumentException e) {
-                return UNKNOWN;
-            }
-        }
-    }
+    public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
     private TelemetryConfiguration() {
         super(new SystemProperties(
-                new ConsumerClasspathFile(Paths.get("/segment.properties"),
+                new ConsumerClasspathConfiguration(Paths.get("/segment.properties"),
                         GLOBAL_FILE)));
     }
 
@@ -100,11 +85,26 @@ public class TelemetryConfiguration extends AbstractConfiguration implements ISe
 
     @Override
     protected Properties loadProperties(IConfiguration parent) {
-        return getParent().getProperties();
+        return parent.getProperties();
     }
 
     public void put(String key, String value) {
         GLOBAL_FILE.getProperties().put(key, value);
+    }
+
+    public enum Mode {
+        NORMAL, DEBUG, DISABLED, UNKNOWN;
+
+        public static Mode safeValueOf(String value) {
+            try {
+                if (value == null) {
+                    return UNKNOWN;
+                }
+                return Mode.valueOf(value);
+            } catch (IllegalArgumentException e) {
+                return UNKNOWN;
+            }
+        }
     }
 
 }

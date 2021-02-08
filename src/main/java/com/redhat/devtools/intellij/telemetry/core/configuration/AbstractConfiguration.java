@@ -26,7 +26,7 @@ public abstract class AbstractConfiguration implements IConfiguration {
     }
 
     public String get(String key) {
-        return (String) getProperties().get(key);
+        return getProperties().getProperty(key);
     }
 
     public void put(String key, String value) {

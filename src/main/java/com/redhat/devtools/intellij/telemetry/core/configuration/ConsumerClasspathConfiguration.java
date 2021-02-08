@@ -14,13 +14,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
-public class ConsumerClasspathFile extends FileConfiguration {
+public class ConsumerClasspathConfiguration extends FileConfiguration {
 
-	public ConsumerClasspathFile(Path file) {
-		this(file, null);
-	}
-
-	public ConsumerClasspathFile(Path file, IConfiguration parent) {
+	public ConsumerClasspathConfiguration(Path file, IConfiguration parent) {
 		super(file, parent);
 	}
 
