@@ -21,7 +21,7 @@ public class TelemetryEvent {
     private final Environment environment;
     protected ITelemetryService service;
 
-    protected TelemetryEvent(Type type, String name, Environment environment) {
+    public TelemetryEvent(Type type, String name, Environment environment) {
         this.type = type;
         this.name = name;
         this.environment = environment;

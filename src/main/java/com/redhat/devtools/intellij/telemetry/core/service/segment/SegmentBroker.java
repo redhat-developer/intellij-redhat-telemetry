@@ -8,19 +8,24 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package com.redhat.devtools.intellij.telemetry.core.service;
+package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.redhat.devtools.intellij.telemetry.core.AnalyticsFactory;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
+import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
+import com.redhat.devtools.intellij.telemetry.core.service.Environment;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryService;
 import com.segment.analytics.Analytics;
 import com.segment.analytics.messages.IdentifyMessage;
 import com.segment.analytics.messages.MessageBuilder;
 import com.segment.analytics.messages.PageMessage;
 import com.segment.analytics.messages.TrackMessage;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class SegmentBroker implements IMessageBroker {
 
@@ -30,6 +35,8 @@ public class SegmentBroker implements IMessageBroker {
     public static final String PROP_EXTENSION_VERSION = "extension_version";
     public static final String PROP_APPLICATION_NAME = "application_name";
     public static final String PROP_APPLICATION_VERSION = "application_version";
+
+    private static final int FLUSH_INTERVAL = 10000;
 
     enum Type {
         IDENTIFY {
@@ -51,7 +58,7 @@ public class SegmentBroker implements IMessageBroker {
         abstract MessageBuilder builder(String name);
 
         public static Type valueOf(TelemetryService.Type serviceEventType) {
-            switch(serviceEventType) {
+            switch (serviceEventType) {
                 case ACTION:
                 case STARTUP:
                 case SHUTDOWN:
@@ -62,15 +69,12 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private final String anonymousId;
-    private final Analytics analytics;
+    private final ISegmentConfiguration configuration;
+    protected Analytics analytics;
 
-    public SegmentBroker() {
-        this(UserId.INSTANCE.get(), AnalyticsFactory.INSTANCE.create());
-    }
-
-    SegmentBroker(String anonymousId, Analytics analytics) {
+    public SegmentBroker(String anonymousId, ISegmentConfiguration configuration) {
         this.anonymousId = anonymousId;
-        this.analytics = analytics;
+        this.configuration = configuration;
     }
 
     @Override
@@ -113,5 +117,23 @@ public class SegmentBroker implements IMessageBroker {
     public void dispose() {
         analytics.flush();
         analytics.shutdown();
+    }
+
+    protected Analytics getAnalytics(String writeKey) {
+        if (analytics == null) {
+            this.analytics = createAnalytics(writeKey);
+        }
+        return analytics;
+    }
+
+    private Analytics createAnalytics(String writeKey) {
+        if (writeKey == null) {
+            LOGGER.warn("Could not create Segment Analytics instance, missing writeKey");
+            return null;
+        }
+        return Analytics.builder(writeKey)
+                .flushQueueSize(1)
+                .flushInterval(FLUSH_INTERVAL, TimeUnit.MILLISECONDS)
+                .build();
     }
 }

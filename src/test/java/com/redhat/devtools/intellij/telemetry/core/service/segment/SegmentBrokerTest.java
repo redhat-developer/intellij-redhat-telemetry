@@ -8,9 +8,11 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package com.redhat.devtools.intellij.telemetry.core.service;
+package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
+import com.redhat.devtools.intellij.telemetry.core.service.Environment;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
 import com.segment.analytics.Analytics;
 import com.segment.analytics.messages.Message;
 import com.segment.analytics.messages.MessageBuilder;
@@ -21,15 +23,17 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.Map;
 
+import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.*;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
-import static com.redhat.devtools.intellij.telemetry.core.service.SegmentBroker.PROP_APPLICATION_NAME;
-import static com.redhat.devtools.intellij.telemetry.core.service.SegmentBroker.PROP_APPLICATION_VERSION;
-import static com.redhat.devtools.intellij.telemetry.core.service.SegmentBroker.PROP_EXTENSION_NAME;
-import static com.redhat.devtools.intellij.telemetry.core.service.SegmentBroker.PROP_EXTENSION_VERSION;
+import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APPLICATION_NAME;
+import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APPLICATION_VERSION;
+import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_EXTENSION_NAME;
+import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_EXTENSION_VERSION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -46,12 +50,14 @@ public class SegmentBrokerTest {
     private Environment environment;
     private SegmentBroker broker;
     private TelemetryEvent event;
+    private ISegmentConfiguration configuration;
 
     @BeforeEach
     public void before() {
         this.analytics = createAnalytics();
+        this.configuration = segmentConfiguration("writeKey_value", "debugWriteKey_value");
         this.environment = environment(EXTENSION_NAME, EXTENSION_VERSION, APPLICATION_NAME, APPLICATION_VERSION);
-        this.broker = new SegmentBroker(ANONYMOUS_ID, analytics);
+        this.broker = new TestableSegmentBroker(ANONYMOUS_ID, configuration, analytics);
         this.event = new TelemetryEvent(ACTION, "Testing Telemetry", environment);
     }
 

@@ -25,7 +25,7 @@ public class SystemProperties extends AbstractConfiguration {
 		Properties parentProperties = (parent == null? null : parent.getProperties());
 		Properties properties = new Properties(parentProperties);
 		copySystemProperty(KEY_SEGMENT_WRITE, properties);
-		copySystemProperty(KEY_DEBUG_SEGMENT_WRITE, properties);
+		copySystemProperty(KEY_SEGMENT_DEBUG_WRITE, properties);
 		copySystemProperty(KEY_MODE, properties);
 		return properties;
 	}

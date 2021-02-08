@@ -12,16 +12,14 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
-import com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState;
+import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.telemetryConfiguration;
-import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.telemetryState;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class TelemetryServiceTest {
@@ -34,7 +32,7 @@ public class TelemetryServiceTest {
     public void before() {
         this.broker = createSegmentBroker();
         TelemetryConfiguration configuration = telemetryConfiguration(true);
-        this.service = new TelemetryService(broker, configuration);
+        this.service = new TestableTelemetryService(configuration, broker);
         this.event = new TelemetryEvent(null, "Testing Telemetry", null);
     }
 
@@ -50,7 +48,8 @@ public class TelemetryServiceTest {
     @Test
     public void send_should_NOT_send_if_is_NOT_enabled() {
         // given
-        TelemetryService service = new TelemetryService(broker, telemetryConfiguration(false));
+        TelemetryConfiguration configuration = telemetryConfiguration(false);
+        TelemetryService service = new TestableTelemetryService(configuration, broker);
         // when
         service.send(new TelemetryEvent(null, "Testing Telemetry", null));
         // then
@@ -60,4 +59,5 @@ public class TelemetryServiceTest {
     private SegmentBroker createSegmentBroker() {
         return mock(SegmentBroker.class);
     }
+
 }

@@ -1,7 +1,11 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
+import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState;
+import com.redhat.devtools.intellij.telemetry.core.service.Application;
+import com.redhat.devtools.intellij.telemetry.core.service.Environment;
+import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
 
 import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.*;
 import static org.mockito.Mockito.doReturn;
@@ -29,8 +33,17 @@ public class Fakes {
     }
 
     public static TelemetryState telemetryState(boolean enabled) {
-        TelemetryState state = new TelemetryState();
+        TelemetryState state = TelemetryState.INSTANCE;
         state.setEnabled(enabled);
         return state;
+    }
+
+    public static ISegmentConfiguration segmentConfiguration(String writeKey, String debugWriteKey) {
+        ISegmentConfiguration configuration = mock(ISegmentConfiguration.class);
+        doReturn(writeKey)
+                .when(configuration).getSegmentKey();
+        doReturn(debugWriteKey)
+                .when(configuration).getSegmentDebugKey();
+        return configuration;
     }
 }

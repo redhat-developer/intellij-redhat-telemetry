@@ -10,13 +10,15 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
+import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Properties;
 
 import static com.redhat.devtools.intellij.telemetry.core.configuration.ConfigurationConstants.*;
 
-public class TelemetryConfiguration extends AbstractConfiguration {
+public class TelemetryConfiguration extends AbstractConfiguration implements ISegmentConfiguration {
 
     public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
@@ -46,20 +48,24 @@ public class TelemetryConfiguration extends AbstractConfiguration {
                         GLOBAL_FILE)));
     }
 
+    @Override
     public void setSegmentKey(String key) {
         put(KEY_SEGMENT_WRITE, key);
     }
 
+    @Override
     public String getSegmentKey() {
-        return (String) get(KEY_SEGMENT_WRITE);
+        return get(KEY_SEGMENT_WRITE);
     }
 
+    @Override
     public void setSegmentDebugKey(String key) {
-        put(KEY_DEBUG_SEGMENT_WRITE, key);
+        put(KEY_SEGMENT_DEBUG_WRITE, key);
     }
 
-    public String getDebugSegmentKey() {
-        return (String) get(KEY_DEBUG_SEGMENT_WRITE);
+    @Override
+    public String getSegmentDebugKey() {
+        return get(KEY_SEGMENT_DEBUG_WRITE);
     }
 
     public void setMode(Mode mode) {
@@ -67,7 +73,16 @@ public class TelemetryConfiguration extends AbstractConfiguration {
     }
 
     public Mode getMode() {
-        return Mode.safeValueOf((String) get(KEY_MODE));
+        return Mode.safeValueOf(get(KEY_MODE));
+    }
+
+    public boolean isEnabled() {
+        return getMode() == Mode.NORMAL
+                || getMode() != Mode.TEST;
+    }
+
+    public boolean isConfigured() {
+        return getMode() != Mode.UNKNOWN;
     }
 
     public void save() throws IOException {
