@@ -50,7 +50,7 @@ public class TelemetryServiceIntegrationTest {
     public void before() {
         this.blockingFlush = BlockingFlush.create();
         this.analytics = createAnalytics(blockingFlush, createClient());
-        ISegmentConfiguration configuration = segmentConfiguration(SEGMENT_WRITE_KEY, "");
+        ISegmentConfiguration configuration = segmentConfiguration(false, SEGMENT_WRITE_KEY, "");
         SegmentBroker broker = new TestableSegmentBroker(UserId.INSTANCE.get(), configuration, analytics);
         TelemetryState state = telemetryState(true);
         this.service = new TestableTelemetryService(TelemetryConfiguration.INSTANCE, broker);

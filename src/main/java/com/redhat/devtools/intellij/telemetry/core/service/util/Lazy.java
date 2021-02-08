@@ -8,15 +8,24 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package com.redhat.devtools.intellij.telemetry.core.service.segment;
+package com.redhat.devtools.intellij.telemetry.core.service.util;
 
-import com.redhat.devtools.intellij.telemetry.core.service.util.Lazy;
-import com.segment.analytics.Analytics;
+import java.util.function.Supplier;
 
-public class TestableSegmentBroker extends SegmentBroker {
+public class Lazy<T> implements Supplier<T> {
 
-    public TestableSegmentBroker(String anonymousId, ISegmentConfiguration configuration, Analytics analytics) {
-        super(anonymousId, configuration);
-        this.analytics = new Lazy(() -> analytics);
+    private final Supplier<T> factory;
+    private volatile T value;
+
+    public Lazy(Supplier<T> factory) {
+        this.factory = factory;
+    }
+
+    @Override
+    public T get() {
+        if (value == null) {
+            this.value = factory.get();
+        }
+        return value;
     }
 }

@@ -12,8 +12,8 @@ package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
-import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.Environment;
+import com.redhat.devtools.intellij.telemetry.core.service.util.Lazy;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryService;
 import com.segment.analytics.Analytics;
@@ -21,7 +21,6 @@ import com.segment.analytics.messages.IdentifyMessage;
 import com.segment.analytics.messages.MessageBuilder;
 import com.segment.analytics.messages.PageMessage;
 import com.segment.analytics.messages.TrackMessage;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,31 +69,28 @@ public class SegmentBroker implements IMessageBroker {
 
     private final String anonymousId;
     private final ISegmentConfiguration configuration;
-    protected Analytics analytics;
+    protected Lazy<Analytics> analytics;
 
     public SegmentBroker(String anonymousId, ISegmentConfiguration configuration) {
         this.anonymousId = anonymousId;
         this.configuration = configuration;
+        this.analytics = new Lazy<>(() -> createAnalytics(configuration.getSegmentKey()));
     }
 
     @Override
     public void send(TelemetryEvent event) {
         try {
-            if (analytics == null) {
+            if (analytics.get() == null) {
                 LOGGER.warn("Could not send " + event.getType() + " event '" + event.getName() + "': no analytics instance present.");
                 return;
             }
             HashMap<String, String> context = createContext(event.getEnvironment());
             MessageBuilder builder = toMessage(event, context);
-            send(builder);
+            LOGGER.debug("Sending message " + builder.type() + " to segment.");
+            analytics.get().enqueue(builder);
         } catch (IllegalArgumentException e) {
             LOGGER.warn("Could not send " + event.getName() + " event: unknown type '" + event.getType() + "'.");
         }
-    }
-
-    public void send(MessageBuilder builder) {
-        LOGGER.debug("Sending message " + builder.type() + " to segment.");
-        analytics.enqueue(builder);
     }
 
     private MessageBuilder toMessage(TelemetryEvent event, Map<String, String> context) {
@@ -115,22 +111,16 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     public void dispose() {
-        analytics.flush();
-        analytics.shutdown();
-    }
-
-    protected Analytics getAnalytics(String writeKey) {
-        if (analytics == null) {
-            this.analytics = createAnalytics(writeKey);
-        }
-        return analytics;
+        analytics.get().flush();
+        analytics.get().shutdown();
     }
 
     private Analytics createAnalytics(String writeKey) {
         if (writeKey == null) {
-            LOGGER.warn("Could not create Segment Analytics instance, missing writeKey");
+            LOGGER.warn("Could not create Segment Analytics instance, missing writeKey.");
             return null;
         }
+        LOGGER.debug("Creating Segment Analytics instance using " + writeKey + " writeKey.");
         return Analytics.builder(writeKey)
                 .flushQueueSize(1)
                 .flushInterval(FLUSH_INTERVAL, TimeUnit.MILLISECONDS)

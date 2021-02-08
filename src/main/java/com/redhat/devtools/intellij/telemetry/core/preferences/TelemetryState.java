@@ -11,14 +11,9 @@
 
 package com.redhat.devtools.intellij.telemetry.core.preferences;
 
-import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -54,7 +49,7 @@ public class TelemetryState {
     public boolean isEnabled() {
         switch(configuration.getMode()) {
             case NORMAL:
-            case TEST:
+            case DEBUG:
                return true;
             default:
                 return false;

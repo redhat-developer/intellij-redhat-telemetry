@@ -28,7 +28,7 @@ public class TelemetryConfiguration extends AbstractConfiguration implements ISe
             "com.redhat.devtools.intellij.telemetry"));
 
     public enum Mode {
-        NORMAL, TEST, DISABLED, UNKNOWN;
+        NORMAL, DEBUG, DISABLED, UNKNOWN;
 
         public static Mode safeValueOf(String value) {
             try {
@@ -49,22 +49,22 @@ public class TelemetryConfiguration extends AbstractConfiguration implements ISe
     }
 
     @Override
-    public void setSegmentKey(String key) {
-        put(KEY_SEGMENT_WRITE, key);
+    public String getSegmentKey() {
+        switch (getMode()) {
+            case NORMAL:
+                return getSegmentNormalKey();
+            case DEBUG:
+                return getSegmentDebugKey();
+            default:
+                return null;
+        }
     }
 
-    @Override
-    public String getSegmentKey() {
+    private String getSegmentNormalKey() {
         return get(KEY_SEGMENT_WRITE);
     }
 
-    @Override
-    public void setSegmentDebugKey(String key) {
-        put(KEY_SEGMENT_DEBUG_WRITE, key);
-    }
-
-    @Override
-    public String getSegmentDebugKey() {
+    private String getSegmentDebugKey() {
         return get(KEY_SEGMENT_DEBUG_WRITE);
     }
 
@@ -77,8 +77,17 @@ public class TelemetryConfiguration extends AbstractConfiguration implements ISe
     }
 
     public boolean isEnabled() {
-        return getMode() == Mode.NORMAL
-                || getMode() != Mode.TEST;
+        switch(getMode()) {
+            case NORMAL:
+            case DEBUG:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean isDebug() {
+        return getMode() == Mode.DEBUG;
     }
 
     public boolean isConfigured() {

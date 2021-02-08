@@ -15,6 +15,7 @@ import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
+import com.redhat.devtools.intellij.telemetry.core.service.util.Lazy;
 
 public class TelemetryService implements ITelemetryService {
 
@@ -26,7 +27,7 @@ public class TelemetryService implements ITelemetryService {
 
     private static final int BUFFER_SIZE = 35;
 
-    protected IMessageBroker broker;
+    protected Lazy<IMessageBroker> broker;
 
     private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);
     private final TelemetryConfiguration configuration;
@@ -56,13 +57,14 @@ public class TelemetryService implements ITelemetryService {
     @Deprecated
     public TelemetryService(TelemetryConfiguration configuration) {
         this.configuration = configuration;
+        this.broker = new Lazy<>(() -> new SegmentBroker(UserId.INSTANCE.get(), configuration));
     }
 
     @Override
     public void send(TelemetryEvent event) {
         if (isEnabled()) {
             flushOnHold();
-            getBroker().send(event);
+            broker.get().send(event);
         } else if (!isConfigured()) {
             onHold.offer(event);
         }
@@ -79,19 +81,12 @@ public class TelemetryService implements ITelemetryService {
     }
 
     private void flushOnHold() {
-        onHold.pollAll().forEach(getBroker()::send);
+        onHold.pollAll().forEach(this::send);
     }
 
     public void dispose() {
         flushOnHold();
         onHold.clear();
-        getBroker().dispose();
-    }
-
-    protected IMessageBroker getBroker() {
-        if (broker == null) {
-            this.broker = new SegmentBroker(UserId.INSTANCE.get(), configuration);
-        }
-        return broker;
+        broker.get().dispose();
     }
 }
