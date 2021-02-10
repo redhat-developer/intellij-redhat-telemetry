@@ -78,7 +78,7 @@ public class Environment {
         return country;
     }
 
-    public static class Builder implements Buildable {
+    public static class Builder {
 
         private Application application;
         private Application plugin;
@@ -168,7 +168,7 @@ public class Environment {
 
         public Buildable plugin(Application plugin) {
             this.plugin = plugin;
-            return this;
+            return new Buildable();
         }
 
         private Application createPlugin(ClassLoader classLoader) {
@@ -186,20 +186,18 @@ public class Environment {
                     .orElse(null);
         }
 
-        @Override
-        public Environment build() {
-            ensureApplication();
-            ensurePlatform();
-            ensureCountry();
-            ensureLocale();
-            ensurePlatform();
-            ensureTimezone();
-            return new Environment(plugin, application, platform, timezone, locale, country);
+        class Buildable {
+            public Environment build() {
+                ensureApplication();
+                ensurePlatform();
+                ensureCountry();
+                ensureLocale();
+                ensurePlatform();
+                ensureTimezone();
+                return new Environment(plugin, application, platform, timezone, locale, country);
+            }
         }
     }
 
-    interface Buildable {
-        Environment build();
-    }
 }
 
