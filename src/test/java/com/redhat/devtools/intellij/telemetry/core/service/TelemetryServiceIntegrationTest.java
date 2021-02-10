@@ -13,7 +13,6 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 import com.jakewharton.retrofit.Ok3Client;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
-import com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.TestableSegmentBroker;
@@ -30,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.*;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
-import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.telemetryState;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
 
 public class TelemetryServiceIntegrationTest {
@@ -51,8 +49,7 @@ public class TelemetryServiceIntegrationTest {
         this.blockingFlush = BlockingFlush.create();
         this.analytics = createAnalytics(blockingFlush, createClient());
         ISegmentConfiguration configuration = segmentConfiguration(false, SEGMENT_WRITE_KEY, "");
-        SegmentBroker broker = new TestableSegmentBroker(UserId.INSTANCE.get(), configuration, analytics);
-        TelemetryState state = telemetryState(true);
+        SegmentBroker broker = new TestableSegmentBroker(AnonymousId.INSTANCE.get(), configuration, analytics);
         this.service = new TestableTelemetryService(TelemetryConfiguration.INSTANCE, broker);
         Environment environment = environment(APPLICATION_NAME, APPLICATION_VERSION, EXTENSION_NAME, EXTENSION_VERSION);
         this.event = new TelemetryEvent(ACTION, "Testing Telemetry", environment);

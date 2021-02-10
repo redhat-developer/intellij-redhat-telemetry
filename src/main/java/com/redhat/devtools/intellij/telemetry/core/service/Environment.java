@@ -11,166 +11,24 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManager;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationNamesInfo;
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.extensions.PluginId;
-import com.intellij.openapi.util.Comparing;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Objects;
 
 public class Environment {
 
-    public static EnvironmentBuilder builder() {
-        return new EnvironmentBuilder();
-    }
-
-    public static class EnvironmentBuilder {
-
-        private static final Logger LOGGER = Logger.getInstance(EnvironmentBuilder.class);
-
-        private Application plugin;
-        private Object emitter;
-        private Application application;
-        private Platform platform;
-        private String timezone;
-        private String locale;
-        private String country;
-
-        private EnvironmentBuilder() {}
-
-        public EnvironmentBuilder plugin(Application plugin) {
-            this.plugin = plugin;
-            return this;
-        }
-
-        public EnvironmentBuilder emitter(Object emitter) {
-            this.emitter = emitter;
-            return this;
-        }
-
-        private Application getPlugin() {
-            if (plugin == null
-                && emitter != null) {
-                PluginId pluginId = getPluginId(emitter);
-                IdeaPluginDescriptor descriptor = getDescriptor(pluginId);
-                if (descriptor != null) {
-                    this.plugin = new Application(descriptor.getName(), descriptor.getVersion());
-                }
-
-            }
-            return this.plugin;
-        }
-
-        private PluginId getPluginId(Object emitter) {
-            return PluginManagerCore.getPluginByClassName(emitter.getClass().getName());
-        }
-
-        private IdeaPluginDescriptor getDescriptor(PluginId pluginId) {
-            try {
-                IdeaPluginDescriptor[] plugins = PluginManagerCore.getPlugins();
-                return Arrays.stream(plugins)
-                        .filter(plugin -> pluginId.equals(plugin.getPluginId()))
-                        .findFirst()
-                        .orElse(null);
-            } catch(Exception e) {
-                LOGGER.warn("Could not determine current plugin.", e);
-                return null;
-            }
-        }
-
-        public EnvironmentBuilder application(Application application) {
-            this.application = application;
-            return this;
-        }
-
-        private Application getApplication() {
-            if (application == null) {
-                this.application = new Application(
-                        ApplicationNamesInfo.getInstance().getFullProductName(),
-                        ApplicationInfo.getInstance().getFullVersion());
-            }
-            return this.application;
-        }
-
-        public EnvironmentBuilder platform(Platform platform) {
-            this.platform = platform;
-            return this;
-        }
-
-        private Platform getPlatform() {
-            if (platform == null) {
-                this.platform = new Platform();
-            }
-            return platform;
-        }
-
-        public EnvironmentBuilder timezone(String timezone) {
-            this.timezone = timezone;
-            return this;
-        }
-
-        private String getTimezone() {
-            if (timezone == null) {
-                this.timezone = System.getProperty("user.timezone", "");
-            }
-            return timezone;
-        }
-
-        public EnvironmentBuilder locale(String locale) {
-            this.locale = locale;
-            return this;
-        }
-
-        private String getLocale() {
-            if (locale == null) {
-                this.locale = Locale.getDefault().toString();
-            }
-            return locale;
-        }
-
-        public EnvironmentBuilder country(String country) {
-            this.country = country;
-            return this;
-        }
-
-        private String getCountry() {
-            if (country == null) {
-                /*
-                 * We're not allowed to query 3rd party services to determine the country.
-                 * Segment won't report countries for incoming requests.
-                 * We thus currently dont have any better solution than use the country in the Locale.
-                 */
-                this.country = Locale.getDefault().getDisplayCountry();
-            }
-            return this.country;
-        }
-
-        public Environment build() {
-            return new Environment(
-                    getPlugin(),
-                    getApplication(),
-                    getPlatform(),
-                    getTimezone(),
-                    getLocale(),
-                    getCountry());
-        }
-    }
-
-    private Application extension;
+    private Application plugin;
     private Application application;
     private Platform platform;
     private String timezone;
     private String locale;
     private String country;
 
-    Environment(Application extension, Application application, Platform platform, String timezone, String locale, String country) {
-        this.extension = extension;
+    private Environment(Application plugin, Application application, Platform platform, String timezone, String locale, String country) {
+        this.plugin = plugin;
         this.application = application;
         this.platform = platform;
         this.timezone = timezone;
@@ -179,10 +37,10 @@ public class Environment {
     }
 
     /**
-     * Returns the extension from which Telemetry events are sent.
+     * Returns the plugin from which Telemetry events are sent.
      */
-    public Application getExtension() {
-        return extension;
+    public Application getPlugin() {
+        return plugin;
     }
 
     /**
@@ -219,4 +77,129 @@ public class Environment {
     public String getCountry() {
         return country;
     }
+
+    public static class Builder implements Buildable {
+
+        private Application application;
+        private Application plugin;
+        private Platform platform;
+        private String timezone;
+        private String locale;
+        private String country;
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public Builder application(Application application) {
+            this.application = application;
+            return this;
+        }
+
+        public Builder application(ApplicationNamesInfo names, ApplicationInfo info) {
+            this.application = createApplication(names, info);
+            return this;
+        }
+
+        private Application createApplication(ApplicationNamesInfo names, ApplicationInfo info) {
+            return new Application(
+                    names.getFullProductName(),
+                    info.getFullVersion());
+        }
+
+        private void ensureApplication() {
+            if (application == null) {
+                this.application = createApplication(ApplicationNamesInfo.getInstance(), ApplicationInfo.getInstance());
+            }
+        }
+
+        public Builder platform(Platform platform) {
+            this.platform = platform;
+            return this;
+        }
+
+        private void ensurePlatform() {
+            if (platform == null) {
+                this.platform = new Platform();
+            }
+        }
+
+        public Builder timezone(String timezone) {
+            this.timezone = timezone;
+            return this;
+        }
+
+        private void ensureTimezone() {
+            if (timezone == null) {
+                this.timezone = System.getProperty("user.timezone", "");
+            }
+        }
+
+        public Builder locale(String locale) {
+            this.locale = locale;
+            return this;
+        }
+
+        private void ensureLocale() {
+            if (locale == null) {
+                locale = Locale.getDefault().toString();
+            }
+        }
+
+        public Builder country(String country) {
+            this.country = country;
+            return this;
+        }
+
+        private void ensureCountry() {
+            if (this.country == null) {
+                /*
+                 * We're not allowed to query 3rd party services to determine the country.
+                 * Segment won't report countries for incoming requests.
+                 * We thus currently dont have any better solution than use the country in the Locale.
+                 */
+                this.country = Locale.getDefault().getDisplayCountry();
+            }
+        }
+
+        public Buildable plugin(ClassLoader classLoader) {
+            return plugin(createPlugin(classLoader));
+        }
+
+        public Buildable plugin(Application plugin) {
+            this.plugin = plugin;
+            return this;
+        }
+
+        private Application createPlugin(ClassLoader classLoader) {
+            IdeaPluginDescriptor descriptor = getPluginDescriptor(classLoader);
+            if (descriptor == null) {
+                return null;
+            }
+            return new Application(descriptor.getName(), descriptor.getVersion());
+        }
+
+        private IdeaPluginDescriptor getPluginDescriptor(ClassLoader classLoader) {
+            return Arrays.stream(PluginManagerCore.getPlugins())
+                    .filter(descriptor -> classLoader.equals(descriptor.getPluginClassLoader()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        @Override
+        public Environment build() {
+            ensureApplication();
+            ensurePlatform();
+            ensureCountry();
+            ensureLocale();
+            ensurePlatform();
+            ensureTimezone();
+            return new Environment(plugin, application, platform, timezone, locale, country);
+        }
+    }
+
+    interface Buildable {
+        Environment build();
+    }
 }
+

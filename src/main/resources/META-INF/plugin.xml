@@ -17,8 +17,7 @@
                 id="com.redhat.devtools.intellij.telemetry.ui.preferences.TelemetryConfigurable"
                 displayName="Red Hat Telemetry"/>
         <applicationService
-                serviceInterface="com.redhat.devtools.intellij.telemetry.core.ITelemetryService"
-                serviceImplementation="com.redhat.devtools.intellij.telemetry.core.service.TelemetryService"/>
+                serviceImplementation="com.redhat.devtools.intellij.telemetry.core.service.TelemetryServiceFactory"/>
     </extensions>
 
 </idea-plugin>

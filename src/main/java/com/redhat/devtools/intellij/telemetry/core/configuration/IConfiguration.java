@@ -13,6 +13,6 @@ package com.redhat.devtools.intellij.telemetry.core.configuration;
 import java.util.Properties;
 
 public interface IConfiguration {
-    Properties getProperties();
-    IConfiguration getParent();
+    String get(String key);
+    void put(String key, String value);
 }

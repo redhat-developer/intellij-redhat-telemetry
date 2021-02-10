@@ -27,17 +27,13 @@ public class FileConfiguration extends AbstractConfiguration {
     private final Path file;
 
     public FileConfiguration(Path file) {
-        this(file, null);
-    }
-
-    public FileConfiguration(Path file, IConfiguration parent) {
-        super(parent);
+        super();
         this.file = file;
     }
 
-    protected Properties loadProperties(IConfiguration parent) {
-        Properties parentProperties = (parent == null ? null : parent.getProperties());
-        Properties properties = new Properties(parentProperties);
+    @Override
+    protected Properties loadProperties() {
+        Properties properties = new Properties();
         if (file == null) {
             return properties;
         }

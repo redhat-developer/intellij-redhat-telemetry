@@ -14,14 +14,17 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
-public class ConsumerClasspathConfiguration extends FileConfiguration {
+public class ClasspathConfiguration extends FileConfiguration {
 
-	public ConsumerClasspathConfiguration(Path file, IConfiguration parent) {
-		super(file, parent);
+	private final ClassLoader classloader;
+
+	public ClasspathConfiguration(Path file, ClassLoader classLoader) {
+		super(file);
+		this.classloader = classLoader;
 	}
 
 	@Override
 	protected InputStream createFileInputStream(Path path) throws FileNotFoundException {
-		return Thread.currentThread().getContextClassLoader().getResourceAsStream(path.toString());
+		return classloader.getResourceAsStream(path.toString());
 	}
 }

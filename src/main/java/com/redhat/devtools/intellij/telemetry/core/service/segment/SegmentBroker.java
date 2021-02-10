@@ -69,12 +69,14 @@ public class SegmentBroker implements IMessageBroker {
 
     private final String anonymousId;
     private final ISegmentConfiguration configuration;
+    private final Environment environment;
     protected Lazy<Analytics> analytics;
 
-    public SegmentBroker(String anonymousId, ISegmentConfiguration configuration) {
+    public SegmentBroker(boolean isDebug, String anonymousId, Environment environment, ISegmentConfiguration configuration) {
         this.anonymousId = anonymousId;
         this.configuration = configuration;
-        this.analytics = new Lazy<>(() -> createAnalytics(configuration.getSegmentKey()));
+        this.environment = environment;
+        this.analytics = new Lazy<>(() -> createAnalytics(getWriteKey(isDebug, configuration)));
     }
 
     @Override
@@ -84,7 +86,7 @@ public class SegmentBroker implements IMessageBroker {
                 LOGGER.warn("Could not send " + event.getType() + " event '" + event.getName() + "': no analytics instance present.");
                 return;
             }
-            HashMap<String, String> context = createContext(event.getEnvironment());
+            HashMap<String, String> context = createContext(environment);
             MessageBuilder builder = toMessage(event, context);
             LOGGER.debug("Sending message " + builder.type() + " to segment.");
             analytics.get().enqueue(builder);
@@ -103,8 +105,8 @@ public class SegmentBroker implements IMessageBroker {
 
     private HashMap<String, String> createContext(Environment environment) {
         HashMap<String, String> context = new HashMap<>();
-        context.put(PROP_EXTENSION_NAME, environment.getExtension().getName());
-        context.put(PROP_EXTENSION_VERSION, environment.getExtension().getVersion());
+        context.put(PROP_EXTENSION_NAME, environment.getPlugin().getName());
+        context.put(PROP_EXTENSION_VERSION, environment.getPlugin().getVersion());
         context.put(PROP_APPLICATION_NAME, environment.getApplication().getName());
         context.put(PROP_APPLICATION_VERSION, environment.getApplication().getVersion());
         return context;
@@ -116,6 +118,7 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private Analytics createAnalytics(String writeKey) {
+
         if (writeKey == null) {
             LOGGER.warn("Could not create Segment Analytics instance, missing writeKey.");
             return null;
@@ -126,4 +129,13 @@ public class SegmentBroker implements IMessageBroker {
                 .flushInterval(FLUSH_INTERVAL, TimeUnit.MILLISECONDS)
                 .build();
     }
+
+    public String getWriteKey(boolean isDebug, ISegmentConfiguration configuration) {
+        if (isDebug) {
+            return configuration.getSegmentDebugKey();
+        } else {
+            return configuration.getSegmentNormalKey();
+        }
+    }
+
 }

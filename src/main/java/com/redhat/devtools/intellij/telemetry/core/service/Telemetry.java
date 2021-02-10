@@ -11,54 +11,44 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.components.ServiceManager;
-import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.*;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
 
 public class Telemetry {
 
-    public static MessageBuilder environment(Object emitter) {
-        Environment environment = Environment.builder().emitter(emitter).build();
-        return new MessageBuilder(environment);
+    public static ServiceBuilder service(ClassLoader classLoader) {
+        return new ServiceBuilder(classLoader);
     }
 
-    public static MessageBuilder environment(Environment environment) {
-        return new MessageBuilder(environment);
-    }
+    public static class ServiceBuilder {
 
-    public static class MessageBuilder {
+        private final TelemetryService service;
 
-        private Environment environment;
-
-        private MessageBuilder(Environment environment) {
-            this.environment = environment;
+        private ServiceBuilder(final ClassLoader classLoader) {
+            TelemetryServiceFactory factory = ServiceManager.getService(TelemetryServiceFactory.class);
+            this.service = factory.create(classLoader);
         }
 
-        public Sender actionPerformed(String event) {
-            return new Sender(ACTION, event, environment);
+        public Sender actionPerformed(String name) {
+            return new Sender(ACTION, name, service);
         }
     }
 
     public static class Sender {
-        private final Environment environment;
         private final Type type;
         private final String name;
-        private ITelemetryService service;
+        private TelemetryService service;
 
-        private Sender(Type type, String name, Environment environment) {
+        private Sender(Type type, String name, TelemetryService service) {
             this.type = type;
             this.name = name;
-            this.environment = environment;
+            this.service = service;
         }
 
         public void send() {
-            TelemetryEvent event = new TelemetryEvent(type, name, environment);
-            getService().send(event);
-        }
-
-        private static ITelemetryService getService() {
-            return ServiceManager.getService(ITelemetryService.class);
+            TelemetryEvent event = new TelemetryEvent(type, name);
+            service.send(event);
         }
     }
 }

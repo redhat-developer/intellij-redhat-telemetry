@@ -18,7 +18,7 @@ public class Fakes {
             String extensionVersion,
             String applicationName,
             String applicationVersion) {
-        return Environment.builder()
+        return Environment.EnvironmentBuilder()
                 .plugin(new Application(extensionName, extensionVersion))
                 .application(new Application(applicationName, applicationVersion))
                 .build();

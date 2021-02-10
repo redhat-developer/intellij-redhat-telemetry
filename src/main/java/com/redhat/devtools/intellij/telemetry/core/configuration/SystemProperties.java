@@ -12,28 +12,10 @@ package com.redhat.devtools.intellij.telemetry.core.configuration;
 
 import java.util.Properties;
 
-import static com.redhat.devtools.intellij.telemetry.core.configuration.ConfigurationConstants.*;
-
 public class SystemProperties extends AbstractConfiguration {
 
-	public SystemProperties(IConfiguration parent) {
-		super(parent);
-	}
-
 	@Override
-	protected Properties loadProperties(IConfiguration parent) {
-		Properties parentProperties = (parent == null? null : parent.getProperties());
-		Properties properties = new Properties(parentProperties);
-		copySystemProperty(KEY_SEGMENT_WRITE, properties);
-		copySystemProperty(KEY_SEGMENT_DEBUG_WRITE, properties);
-		copySystemProperty(KEY_MODE, properties);
-		return properties;
-	}
-
-	private void copySystemProperty(String key, Properties properties) {
-		Object value = System.getProperty(key);
-		if (value != null) {
-			properties.put(key, value);
-		}
+	protected Properties loadProperties() {
+		return System.getProperties();
 	}
 }

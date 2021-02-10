@@ -26,7 +26,7 @@ import static com.redhat.devtools.intellij.telemetry.core.configuration.Telemetr
  */
 public class TelemetryState {
 
-    public static TelemetryState INSTANCE = new TelemetryState();
+    public static final TelemetryState INSTANCE = new TelemetryState();
 
     private final TelemetryConfiguration configuration;
 

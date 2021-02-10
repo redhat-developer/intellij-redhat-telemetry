@@ -10,29 +10,25 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
-import java.util.Properties;
+import java.util.Arrays;
+import java.util.List;
 
-public abstract class AbstractConfiguration implements IConfiguration {
-
-    private Properties properties;
-
-    protected AbstractConfiguration() {}
+public abstract class CompositeConfiguration implements IConfiguration {
 
     @Override
-    public String get(String key) {
-        return getProperties().getProperty(key);
-    }
-
-    public void put(String key, String value) {
-        getProperties().put(key, value);
-    }
-
-    Properties getProperties() {
-        if (properties == null) {
-            this.properties = loadProperties();
+    public String get(final String key) {
+        List<IConfiguration> configurations = getConfigurations();
+        if (getConfigurations() == null
+                || configurations.isEmpty()) {
+            return null;
         }
-        return properties;
+        return configurations.stream()
+                .map(configuration -> configuration.get(key))
+                .filter(value -> value != null)
+                .findFirst()
+                .orElse(null);
     }
 
-    protected abstract Properties loadProperties();
+    protected abstract List<IConfiguration> getConfigurations();
+
 }

@@ -14,44 +14,22 @@ import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfi
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Properties;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.redhat.devtools.intellij.telemetry.core.configuration.ConfigurationConstants.*;
 
-public class TelemetryConfiguration extends AbstractConfiguration implements ISegmentConfiguration {
-
-    private static final FileConfiguration GLOBAL_FILE = new FileConfiguration(Paths.get(
-            System.getProperty("user.home"),
-            ".redhat",
-            "com.redhat.devtools.intellij.telemetry"));
+public class TelemetryConfiguration extends CompositeConfiguration {
 
     public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
     private TelemetryConfiguration() {
-        super(new SystemProperties(
-                new ConsumerClasspathConfiguration(Paths.get("/segment.properties"),
-                        GLOBAL_FILE)));
     }
 
-    @Override
-    public String getSegmentKey() {
-        switch (getMode()) {
-            case NORMAL:
-                return getSegmentNormalKey();
-            case DEBUG:
-                return getSegmentDebugKey();
-            default:
-                return null;
-        }
-    }
-
-    private String getSegmentNormalKey() {
-        return get(KEY_SEGMENT_WRITE);
-    }
-
-    private String getSegmentDebugKey() {
-        return get(KEY_SEGMENT_DEBUG_WRITE);
-    }
+    public static final FileConfiguration GLOBAL_FILE = new FileConfiguration(Paths.get(
+            System.getProperty("user.home"),
+            ".redhat",
+            "com.redhat.devtools.intellij.telemetry"));
 
     public void setMode(Mode mode) {
         put(KEY_MODE, mode.toString());
@@ -79,17 +57,20 @@ public class TelemetryConfiguration extends AbstractConfiguration implements ISe
         return getMode() != Mode.UNKNOWN;
     }
 
+    @Override
+    public void put(String key, String value) {
+        GLOBAL_FILE.getProperties().put(key, value);
+    }
+
     public void save() throws IOException {
         GLOBAL_FILE.save();
     }
 
     @Override
-    protected Properties loadProperties(IConfiguration parent) {
-        return parent.getProperties();
-    }
-
-    public void put(String key, String value) {
-        GLOBAL_FILE.getProperties().put(key, value);
+    protected List<IConfiguration> getConfigurations() {
+        return Arrays.asList(
+                new SystemProperties(),
+                GLOBAL_FILE);
     }
 
     public enum Mode {

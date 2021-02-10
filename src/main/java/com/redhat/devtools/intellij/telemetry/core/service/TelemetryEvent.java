@@ -18,13 +18,11 @@ public class TelemetryEvent {
 
     private final Type type;
     private final String name;
-    private final Environment environment;
     protected ITelemetryService service;
 
-    public TelemetryEvent(Type type, String name, Environment environment) {
+    public TelemetryEvent(Type type, String name) {
         this.type = type;
         this.name = name;
-        this.environment = environment;
     }
 
     public Type getType() {
@@ -33,9 +31,5 @@ public class TelemetryEvent {
 
     public String getName() {
         return name;
-    }
-
-    public Environment getEnvironment() {
-        return environment;
     }
 }
