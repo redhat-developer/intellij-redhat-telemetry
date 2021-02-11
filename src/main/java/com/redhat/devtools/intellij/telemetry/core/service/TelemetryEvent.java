@@ -12,17 +12,20 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 
+import java.util.Map;
+
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.*;
 
 public class TelemetryEvent {
 
     private final Type type;
     private final String name;
-    protected ITelemetryService service;
+    private final Map<String, String> properties;
 
-    public TelemetryEvent(Type type, String name) {
+    public TelemetryEvent(Type type, String name, Map<String, String> properties) {
         this.type = type;
         this.name = name;
+        this.properties = properties;
     }
 
     public Type getType() {
@@ -31,5 +34,9 @@ public class TelemetryEvent {
 
     public String getName() {
         return name;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
     }
 }

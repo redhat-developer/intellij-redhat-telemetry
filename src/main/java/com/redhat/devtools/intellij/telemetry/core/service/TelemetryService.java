@@ -14,9 +14,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
-import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
-import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentConfiguration;
-import com.redhat.devtools.intellij.telemetry.core.service.util.Lazy;
 
 public class TelemetryService implements ITelemetryService {
 

@@ -16,19 +16,31 @@ import com.redhat.devtools.intellij.telemetry.core.service.Environment;
 import com.redhat.devtools.intellij.telemetry.core.service.util.Lazy;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryService;
+import com.redhat.devtools.intellij.telemetry.core.service.util.MapBuilder;
 import com.segment.analytics.Analytics;
 import com.segment.analytics.messages.IdentifyMessage;
 import com.segment.analytics.messages.MessageBuilder;
 import com.segment.analytics.messages.PageMessage;
 import com.segment.analytics.messages.TrackMessage;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class SegmentBroker implements IMessageBroker {
 
     private static final Logger LOGGER = Logger.getInstance(SegmentBroker.class);
+
+    public static final String PROP_NAME = "name";
+    public static final String PROP_VERSION = "version";
+    public static final String PROP_APP = "app";
+    public static final String PROP_IP = "ip";
+    public static final String PROP_COUNTRY = "country";
+    public static final String PROP_LOCALE = "locale";
+    public static final String PROP_LOCATION = "location";
+    public static final String PROP_OS = "os";
+    public static final String PROP_TIMEZONE = "timezone";
+
+    public static final String VALUE_NULL_IP = "0.0.0.0"; // fixed, faked ip addr
 
     public static final String PROP_EXTENSION_NAME = "extension_name";
     public static final String PROP_EXTENSION_VERSION = "extension_version";
@@ -39,22 +51,23 @@ public class SegmentBroker implements IMessageBroker {
 
     enum Type {
         IDENTIFY {
-            MessageBuilder builder(String name) {
-                return IdentifyMessage.builder();
+            public MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker) {
+                return broker.toMessage(IdentifyMessage.builder(), event, context);
             }
         },
         TRACK {
-            MessageBuilder builder(String name) {
-                return TrackMessage.builder(name);
+            public MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker) {
+                return broker.toMessage(TrackMessage.builder(event.getName()), event, context);
             }
         },
         PAGE {
-            MessageBuilder builder(String name) {
-                return PageMessage.builder(name);
+            public MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker) {
+                return broker.toMessage(PageMessage.builder(event.getName()), event, context);
             }
+
         };
 
-        abstract MessageBuilder builder(String name);
+        public abstract MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker);
 
         public static Type valueOf(TelemetryService.Type serviceEventType) {
             switch (serviceEventType) {
@@ -86,8 +99,9 @@ public class SegmentBroker implements IMessageBroker {
                 LOGGER.warn("Could not send " + event.getType() + " event '" + event.getName() + "': no analytics instance present.");
                 return;
             }
-            HashMap<String, String> context = createContext(environment);
-            MessageBuilder builder = toMessage(event, context);
+            Map<String, Object> context = createContext(environment);
+            Type type = Type.valueOf(event.getType());
+            MessageBuilder builder = type.toMessage(event, context, this);
             LOGGER.debug("Sending message " + builder.type() + " to segment.");
             analytics.get().enqueue(builder);
         } catch (IllegalArgumentException e) {
@@ -95,21 +109,52 @@ public class SegmentBroker implements IMessageBroker {
         }
     }
 
-    private MessageBuilder toMessage(TelemetryEvent event, Map<String, String> context) {
-        Type segmentType = Type.valueOf(event.getType());
-        MessageBuilder builder = segmentType.builder(event.getName());
+    private MessageBuilder toMessage(IdentifyMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
         return builder
                 .anonymousId(anonymousId)
+                .traits(event.getProperties())
                 .context(context);
     }
 
-    private HashMap<String, String> createContext(Environment environment) {
-        HashMap<String, String> context = new HashMap<>();
-        context.put(PROP_EXTENSION_NAME, environment.getPlugin().getName());
-        context.put(PROP_EXTENSION_VERSION, environment.getPlugin().getVersion());
-        context.put(PROP_APPLICATION_NAME, environment.getApplication().getName());
-        context.put(PROP_APPLICATION_VERSION, environment.getApplication().getVersion());
-        return context;
+    private MessageBuilder toMessage(TrackMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
+        return builder
+                .anonymousId(anonymousId)
+                .properties(addEnvironment(event.getProperties()))
+                .context(context);
+    }
+
+    private Map<String,?> addEnvironment(Map<String, String> properties) {
+        properties.put(PROP_APPLICATION_NAME, environment.getApplication().getName());
+        properties.put(PROP_APPLICATION_VERSION, environment.getApplication().getVersion());
+        properties.put(PROP_EXTENSION_NAME, environment.getPlugin().getName());
+        properties.put(PROP_EXTENSION_VERSION, environment.getPlugin().getVersion());
+        return properties;
+    }
+
+    private MessageBuilder toMessage(PageMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
+        return builder
+                .anonymousId(anonymousId)
+                .properties(event.getProperties())
+                .context(context);
+    }
+
+    private Map<String, Object> createContext(Environment environment) {
+        return MapBuilder.instance()
+                .map(PROP_APP)
+                    .pair(PROP_NAME, environment.getApplication().getName())
+                    .pair(PROP_VERSION, environment.getApplication().getVersion())
+                    .build()
+                .pair(PROP_IP, VALUE_NULL_IP)
+                .pair(PROP_LOCALE, environment.getLocale())
+                .map(PROP_LOCATION)
+                    .pair(PROP_COUNTRY, environment.getCountry())
+                    .build()
+                .map(PROP_OS)
+                    .pair(PROP_NAME, environment.getPlatform().getName())
+                    .pair(PROP_VERSION, environment.getPlatform().getVersion())
+                    .build()
+                .pair(PROP_TIMEZONE, environment.getTimezone())
+                .build();
     }
 
     public void dispose() {
