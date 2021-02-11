@@ -23,6 +23,7 @@ public abstract class AbstractConfiguration implements IConfiguration {
         return getProperties().getProperty(key);
     }
 
+    @Override
     public void put(String key, String value) {
         getProperties().put(key, value);
     }

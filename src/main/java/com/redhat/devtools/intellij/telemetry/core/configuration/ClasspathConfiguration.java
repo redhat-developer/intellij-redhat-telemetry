@@ -18,6 +18,10 @@ public class ClasspathConfiguration extends FileConfiguration {
 
 	private final ClassLoader classloader;
 
+	public ClasspathConfiguration(Path file) {
+		this(file, ClasspathConfiguration.class.getClassLoader());
+	}
+
 	public ClasspathConfiguration(Path file, ClassLoader classLoader) {
 		super(file);
 		this.classloader = classLoader;

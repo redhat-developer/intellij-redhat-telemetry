@@ -24,19 +24,19 @@ import static com.redhat.devtools.intellij.telemetry.core.configuration.Configur
 
 public class SegmentConfiguration extends CompositeConfiguration implements ISegmentConfiguration {
 
-    private final ClasspathConfiguration classpathConfiguration;
+    private final ClasspathConfiguration consumerClasspathConfiguration;
 
     public SegmentConfiguration(ClassLoader classLoader) {
         this(new ClasspathConfiguration(Paths.get("/segment.properties"), classLoader));
     }
 
-    protected SegmentConfiguration(ClasspathConfiguration classpathConfiguration) {
-        this.classpathConfiguration = classpathConfiguration;
+    protected SegmentConfiguration(ClasspathConfiguration consumerClasspathConfiguration) {
+        this.consumerClasspathConfiguration = consumerClasspathConfiguration;
     }
 
     @Override
     public void put(String key, String value) {
-        classpathConfiguration.put(key, value);
+        consumerClasspathConfiguration.put(key, value);
     }
 
 
@@ -44,7 +44,10 @@ public class SegmentConfiguration extends CompositeConfiguration implements ISeg
     public List<IConfiguration> getConfigurations() {
         return Arrays.asList(
                 new SystemProperties(),
-                classpathConfiguration);
+                // segment.properties in consuming plugin
+                consumerClasspathConfiguration,
+                // segment-defaults.properties in this plugin
+                new ClasspathConfiguration(Paths.get("/segment-defaults.properties"), getClass().getClassLoader()));
     }
 
     @Override

@@ -10,8 +10,6 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
-import java.util.Properties;
-
 public interface IConfiguration {
     String get(String key);
     void put(String key, String value);
