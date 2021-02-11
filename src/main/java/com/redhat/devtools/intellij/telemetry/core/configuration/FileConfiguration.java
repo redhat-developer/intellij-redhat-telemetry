@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.Properties;
 
 public class FileConfiguration extends AbstractConfiguration {
@@ -71,7 +72,7 @@ public class FileConfiguration extends AbstractConfiguration {
             return;
         }
         try (Writer writer = new FileWriter(file.toFile());) {
-            properties.get().store(writer, "");
+            properties.get().store(writer, "updated " + LocalDate.now());
         }
     }
 }
