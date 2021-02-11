@@ -27,7 +27,6 @@ public class FileConfiguration extends AbstractConfiguration {
     private final Path file;
 
     public FileConfiguration(Path file) {
-        super();
         this.file = file;
     }
 
@@ -72,7 +71,7 @@ public class FileConfiguration extends AbstractConfiguration {
             return;
         }
         try (Writer writer = new FileWriter(file.toFile());) {
-            getProperties().store(writer, "");
+            properties.get().store(writer, "");
         }
     }
 }

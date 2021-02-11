@@ -10,29 +10,22 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
+import com.redhat.devtools.intellij.telemetry.core.service.util.Lazy;
+
 import java.util.Properties;
 
 public abstract class AbstractConfiguration implements IConfiguration {
 
-    private Properties properties;
-
-    protected AbstractConfiguration() {}
+    protected Lazy<Properties> properties = new Lazy<>(this::loadProperties);
 
     @Override
     public String get(String key) {
-        return getProperties().getProperty(key);
+        return properties.get().getProperty(key);
     }
 
     @Override
     public void put(String key, String value) {
-        getProperties().put(key, value);
-    }
-
-    Properties getProperties() {
-        if (properties == null) {
-            this.properties = loadProperties();
-        }
-        return properties;
+        properties.get().put(key, value);
     }
 
     protected abstract Properties loadProperties();

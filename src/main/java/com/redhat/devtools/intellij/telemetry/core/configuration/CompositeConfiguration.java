@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
-import java.util.Arrays;
 import java.util.List;
 
 public abstract class CompositeConfiguration implements IConfiguration {

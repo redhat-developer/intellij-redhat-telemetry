@@ -19,15 +19,18 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.redhat.devtools.intellij.telemetry.core.configuration.ConfigurationConstants.KEY_SEGMENT_DEBUG_WRITE;
-import static com.redhat.devtools.intellij.telemetry.core.configuration.ConfigurationConstants.KEY_SEGMENT_WRITE;
-
 public class SegmentConfiguration extends CompositeConfiguration implements ISegmentConfiguration {
+
+    public static final String KEY_SEGMENT_WRITE = "writeKey";
+    public static final String KEY_SEGMENT_DEBUG_WRITE = "debugWriteKey";
+
+    private static final String SEGMENT_PROPERTIES = "/segment.properties";
+    private static final String SEGMENT_DEFAULTS_PROPERTIES = "/segment-defaults.properties";
 
     private final ClasspathConfiguration consumerClasspathConfiguration;
 
     public SegmentConfiguration(ClassLoader classLoader) {
-        this(new ClasspathConfiguration(Paths.get("/segment.properties"), classLoader));
+        this(new ClasspathConfiguration(Paths.get(SEGMENT_PROPERTIES), classLoader));
     }
 
     protected SegmentConfiguration(ClasspathConfiguration consumerClasspathConfiguration) {
@@ -47,7 +50,7 @@ public class SegmentConfiguration extends CompositeConfiguration implements ISeg
                 // segment.properties in consuming plugin
                 consumerClasspathConfiguration,
                 // segment-defaults.properties in this plugin
-                new ClasspathConfiguration(Paths.get("/segment-defaults.properties"), getClass().getClassLoader()));
+                new ClasspathConfiguration(Paths.get(SEGMENT_DEFAULTS_PROPERTIES), getClass().getClassLoader()));
     }
 
     @Override

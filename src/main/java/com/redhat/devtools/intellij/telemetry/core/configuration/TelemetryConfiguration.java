@@ -10,21 +10,18 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
-import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
-
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.redhat.devtools.intellij.telemetry.core.configuration.ConfigurationConstants.*;
-
 public class TelemetryConfiguration extends CompositeConfiguration {
+
+    public static final String KEY_MODE = "mode";
 
     public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
-    private TelemetryConfiguration() {
-    }
+    private TelemetryConfiguration() {}
 
     public static final FileConfiguration GLOBAL_FILE = new FileConfiguration(Paths.get(
             System.getProperty("user.home"),
@@ -59,7 +56,7 @@ public class TelemetryConfiguration extends CompositeConfiguration {
 
     @Override
     public void put(String key, String value) {
-        GLOBAL_FILE.getProperties().put(key, value);
+        GLOBAL_FILE.properties.get().put(key, value);
     }
 
     public void save() throws IOException {
