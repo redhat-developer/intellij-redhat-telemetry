@@ -142,7 +142,7 @@ public class Environment {
 
         private void ensureLocale() {
             if (locale == null) {
-                locale = Locale.getDefault().toString();
+                locale = Locale.getDefault().toString().replace('_', '-');
             }
         }
 
