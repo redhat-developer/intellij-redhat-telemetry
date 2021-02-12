@@ -18,6 +18,7 @@
                 displayName="Red Hat Telemetry"/>
         <applicationService
                 serviceImplementation="com.redhat.devtools.intellij.telemetry.core.service.TelemetryServiceFactory"/>
+        <applicationInitializedListener implementation="com.redhat.devtools.intellij.telemetry.core.TelemetryApplicationInitializer" />
     </extensions>
 
 </idea-plugin>

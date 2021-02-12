@@ -18,7 +18,7 @@ import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfig
 public class TelemetryService implements ITelemetryService {
 
     public enum Type {
-        ACTION, STARTUP, SHUTDOWN
+        USER, ACTION, STARTUP, SHUTDOWN
     }
 
     private static final Logger LOGGER = Logger.getInstance(TelemetryService.class);

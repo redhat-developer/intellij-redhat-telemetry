@@ -38,6 +38,8 @@ public class SegmentBroker implements IMessageBroker {
     public static final String PROP_LOCALE = "locale";
     public static final String PROP_LOCATION = "location";
     public static final String PROP_OS = "os";
+    public static final String PROP_OS_NAME = "os_name";
+    public static final String PROP_OS_VERSION = "os_version";
     public static final String PROP_TIMEZONE = "timezone";
 
     public static final String VALUE_NULL_IP = "0.0.0.0"; // fixed, faked ip addr
@@ -69,8 +71,10 @@ public class SegmentBroker implements IMessageBroker {
 
         public abstract MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker);
 
-        public static Type valueOf(TelemetryService.Type serviceEventType) {
-            switch (serviceEventType) {
+        public static Type valueOf(TelemetryService.Type serviceType) {
+            switch (serviceType) {
+                case USER:
+                    return IDENTIFY;
                 case ACTION:
                 case STARTUP:
                 case SHUTDOWN:
@@ -81,13 +85,11 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private final String anonymousId;
-    private final ISegmentConfiguration configuration;
     private final Environment environment;
     protected Lazy<Analytics> analytics;
 
     public SegmentBroker(boolean isDebug, String anonymousId, Environment environment, ISegmentConfiguration configuration) {
         this.anonymousId = anonymousId;
-        this.configuration = configuration;
         this.environment = environment;
         this.analytics = new Lazy<>(() -> createAnalytics(getWriteKey(isDebug, configuration)));
     }
@@ -112,18 +114,26 @@ public class SegmentBroker implements IMessageBroker {
     private MessageBuilder toMessage(IdentifyMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
         return builder
                 .anonymousId(anonymousId)
-                .traits(event.getProperties())
+                .traits(addTraitsEnvironment(event.getProperties()))
                 .context(context);
+    }
+
+    private Map<String, ?> addTraitsEnvironment(Map<String, String> properties) {
+        properties.put(PROP_LOCALE, environment.getLocale());
+        properties.put(PROP_OS_NAME, environment.getPlatform().getName());
+        properties.put(PROP_OS_VERSION, environment.getPlatform().getVersion());
+        properties.put(PROP_TIMEZONE, environment.getTimezone());
+        return properties;
     }
 
     private MessageBuilder toMessage(TrackMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
         return builder
                 .anonymousId(anonymousId)
-                .properties(addEnvironment(event.getProperties()))
+                .properties(addIdentifyEnvironment(event.getProperties()))
                 .context(context);
     }
 
-    private Map<String,?> addEnvironment(Map<String, String> properties) {
+    private Map<String, ?> addIdentifyEnvironment(Map<String, String> properties) {
         properties.put(PROP_APPLICATION_NAME, environment.getApplication().getName());
         properties.put(PROP_APPLICATION_VERSION, environment.getApplication().getVersion());
         properties.put(PROP_EXTENSION_NAME, environment.getPlugin().getName());
@@ -141,18 +151,18 @@ public class SegmentBroker implements IMessageBroker {
     private Map<String, Object> createContext(Environment environment) {
         return MapBuilder.instance()
                 .map(PROP_APP)
-                    .pair(PROP_NAME, environment.getApplication().getName())
-                    .pair(PROP_VERSION, environment.getApplication().getVersion())
-                    .build()
+                .pair(PROP_NAME, environment.getApplication().getName())
+                .pair(PROP_VERSION, environment.getApplication().getVersion())
+                .build()
                 .pair(PROP_IP, VALUE_NULL_IP)
                 .pair(PROP_LOCALE, environment.getLocale())
                 .map(PROP_LOCATION)
-                    .pair(PROP_COUNTRY, environment.getCountry())
-                    .build()
+                .pair(PROP_COUNTRY, environment.getCountry())
+                .build()
                 .map(PROP_OS)
-                    .pair(PROP_NAME, environment.getPlatform().getName())
-                    .pair(PROP_VERSION, environment.getPlatform().getVersion())
-                    .build()
+                .pair(PROP_NAME, environment.getPlatform().getName())
+                .pair(PROP_VERSION, environment.getPlatform().getVersion())
+                .build()
                 .pair(PROP_TIMEZONE, environment.getTimezone())
                 .build();
     }
