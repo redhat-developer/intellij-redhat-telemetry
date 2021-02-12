@@ -97,19 +97,15 @@ public class Environment {
         }
 
         public Builder application(ApplicationNamesInfo names, ApplicationInfo info) {
-            this.application = createApplication(names, info);
+            this.application = new Application(names.getFullProductName(), info.getFullVersion());
             return this;
-        }
-
-        private Application createApplication(ApplicationNamesInfo names, ApplicationInfo info) {
-            return new Application(
-                    names.getFullProductName(),
-                    info.getFullVersion());
         }
 
         private void ensureApplication() {
             if (application == null) {
-                this.application = createApplication(ApplicationNamesInfo.getInstance(), ApplicationInfo.getInstance());
+                application(new Application(
+                        ApplicationNamesInfo.getInstance().getFullProductName(),
+                        ApplicationInfo.getInstance().getFullVersion()));
             }
         }
 
@@ -120,7 +116,7 @@ public class Environment {
 
         private void ensurePlatform() {
             if (platform == null) {
-                this.platform = new Platform();
+                platform(new Platform());
             }
         }
 
@@ -131,7 +127,7 @@ public class Environment {
 
         private void ensureTimezone() {
             if (timezone == null) {
-                this.timezone = System.getProperty("user.timezone", "");
+                timezone(System.getProperty("user.timezone", ""));
             }
         }
 
@@ -142,7 +138,7 @@ public class Environment {
 
         private void ensureLocale() {
             if (locale == null) {
-                locale = Locale.getDefault().toString().replace('_', '-');
+                locale(Locale.getDefault().toString().replace('_', '-'));
             }
         }
 
@@ -158,7 +154,7 @@ public class Environment {
                  * Segment won't report countries for incoming requests.
                  * We thus currently dont have any better solution than use the country in the Locale.
                  */
-                this.country = Locale.getDefault().getDisplayCountry();
+                country(Locale.getDefault().getDisplayCountry());
             }
         }
 
