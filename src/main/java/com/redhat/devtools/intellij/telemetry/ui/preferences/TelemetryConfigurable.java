@@ -12,8 +12,7 @@ package com.redhat.devtools.intellij.telemetry.ui.preferences;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
-import com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState;
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryService;
+import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +27,7 @@ public class TelemetryConfigurable implements Configurable {
     private static final Logger LOGGER = Logger.getInstance(TelemetryConfigurable.class);
 
     private TelemetryComponent component;
+    TelemetryConfiguration configuration = TelemetryConfiguration.INSTANCE;
 
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
@@ -49,31 +49,24 @@ public class TelemetryConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-        TelemetryState state = TelemetryState.INSTANCE;
         boolean modified = false;
-        modified |= (component.isEnabled() != state.isEnabled());
+        modified |= (configuration.isEnabled() != configuration.isEnabled());
         return modified;
     }
 
     @Override
     public void apply() {
-        TelemetryState state = TelemetryState.INSTANCE;
-        state.setEnabled(component.isEnabled());
-        save(state);
-    }
-
-    private void save(TelemetryState state) {
+        configuration.setEnabled(component.isEnabled());
         try {
-            state.save();
+            configuration.save();
         } catch (IOException e) {
             LOGGER.warn("Could not save telemetry configuration.", e);
         }
     }
 
     @Override
-    public void reset() {
-        TelemetryState state = TelemetryState.INSTANCE;
-        component.setEnabled(state.isEnabled());
+    public void reset() { ;
+        component.setEnabled(configuration.isEnabled());
     }
 
     @Override

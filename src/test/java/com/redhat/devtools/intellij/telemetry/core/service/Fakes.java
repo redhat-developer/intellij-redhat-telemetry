@@ -31,12 +31,6 @@ public class Fakes {
         return configuration;
     }
 
-    public static TelemetryState telemetryState(boolean enabled) {
-        TelemetryState state = TelemetryState.INSTANCE;
-        state.setEnabled(enabled);
-        return state;
-    }
-
     public static ISegmentConfiguration segmentConfiguration(boolean debug, String writeKey, String debugWriteKey) {
         ISegmentConfiguration configuration = mock(ISegmentConfiguration.class);
         when(configuration.getSegmentKey())

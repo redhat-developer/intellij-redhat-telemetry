@@ -36,6 +36,18 @@ public class TelemetryConfiguration extends CompositeConfiguration {
         return Mode.safeValueOf(get(KEY_MODE));
     }
 
+    public void setEnabled(boolean enabled) {
+        setMode(toMode(enabled));
+    }
+
+    private Mode toMode(boolean enabled) {
+        if (enabled) {
+            return Mode.NORMAL;
+        } else {
+            return Mode.DISABLED;
+        }
+    }
+
     public boolean isEnabled() {
         switch(getMode()) {
             case NORMAL:

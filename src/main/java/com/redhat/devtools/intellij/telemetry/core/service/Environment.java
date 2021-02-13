@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class Environment {
-
     private Application plugin;
     private Application application;
     private Platform platform;
