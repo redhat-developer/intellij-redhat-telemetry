@@ -10,15 +10,21 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.SHUTDOWN;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.STARTUP;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.USER;
 
@@ -45,20 +51,75 @@ public class Telemetry {
             return new ActionMessage(ACTION, name, service);
         }
 
-        public ActionMessage startupPerformed(String name) {
-            return new ActionMessage(STARTUP, name, service);
+        public StartupMessage startupPerformed() {
+            return new StartupMessage(service);
         }
 
-        public ActionMessage shutdownPerformed(String name) {
-            return new ActionMessage(STARTUP, name, service);
+        public ShutdownMessage shutdownPerformed() {
+            long appStartTime = ApplicationManager.getApplication().getStartTime();
+            return shutdownPerformed(toLocalTime(appStartTime));
+        }
+
+        private LocalTime toLocalTime(long millis) {
+            Instant instant = new Date(millis).toInstant();
+            ZonedDateTime time = instant.atZone(ZoneId.systemDefault());
+            return time.toLocalTime();
+        }
+
+        public ShutdownMessage shutdownPerformed(LocalTime startupTime) {
+            return new ShutdownMessage(startupTime, service);
+        }
+    }
+
+    public static class StartupMessage extends Message<StartupMessage> {
+
+        private final LocalTime time;
+
+        private StartupMessage(TelemetryService service) {
+            this(LocalTime.now(), service);
+        }
+
+        private StartupMessage(LocalTime time, TelemetryService service) {
+            super(STARTUP, "startup", service);
+            this.time = time;
+        }
+
+        public LocalTime getTime() {
+            return time;
+        }
+    }
+
+    public static class ShutdownMessage extends Message<ShutdownMessage> {
+
+        private static final String PROP_SESSION_DURATION = "session_duration";
+
+        private ShutdownMessage(LocalTime startupTime, TelemetryService service) {
+            super(SHUTDOWN, "shutdown", service);
+            sessionDuration(startupTime);
+        }
+
+        public ShutdownMessage sessionDuration(LocalTime startupTime) {
+            return sessionDuration(Duration.between(startupTime, LocalTime.now()));
+        }
+
+        public ShutdownMessage sessionDuration(Duration duration) {
+            return property(PROP_SESSION_DURATION, toString(duration));
+        }
+
+    }
+
+    public static class UserMessage extends Message<UserMessage> {
+
+        private UserMessage(TelemetryService service) {
+            super(USER, "Anonymous ID: " + AnonymousId.INSTANCE.get(), service);
         }
     }
 
     public static class ActionMessage extends Message<ActionMessage> {
 
-        private final String PROP_DURATION = "duration";
-        private final String PROP_ERROR = "error";
-        private final String PROP_RESULT = "result";
+        private static final String PROP_DURATION = "duration";
+        private static final String PROP_ERROR = "error";
+        private static final String PROP_RESULT = "result";
 
         private final LocalTime startTime;
 
@@ -72,10 +133,7 @@ public class Telemetry {
         }
 
         public ActionMessage duration(Duration duration) {
-            return property(PROP_DURATION, String.format("%02d:%02d:%02d",
-                    duration.toHours(),
-                    duration.toMinutes() % 60,
-                    duration.getSeconds() % 60));
+            return property(PROP_DURATION, toString(duration));
         }
 
         public ActionMessage success() {
@@ -93,36 +151,17 @@ public class Telemetry {
         public ActionMessage error(Exception exception) {
             return property(PROP_ERROR, exception.getMessage());
         }
-
-        private void ensureDuration() {
-            if (hasKey(PROP_DURATION)) {
-                finished();
-            }
-        }
-
-        private void ensureSuccessOrError() {
-            if (hasKey(PROP_ERROR)
-                    && hasKey(PROP_RESULT)) {
-                success();
-            }
-        }
-
-    }
-
-    public static class UserMessage extends Message<UserMessage> {
-
-        private UserMessage(TelemetryService service) {
-            super(USER, "Anonymous ID: " + AnonymousId.INSTANCE.get(), service);
-        }
     }
 
     abstract static class Message<T extends Message> {
 
         private final Type type;
         private final Map<String, String> properties = new HashMap<>();
+        private final String name;
         private TelemetryService service;
 
         private Message(Type type, String name, TelemetryService service) {
+            this.name = name;   
             this.type = type;
             this.service = service;
         }
@@ -132,8 +171,14 @@ public class Telemetry {
             return (T) this;
         }
 
+        protected String toString(Duration duration) {
+            return String.format("%02d:%02d:%02d",
+                    duration.toHours(),
+                    duration.toMinutes() % 60,
+                    duration.getSeconds() % 60);
+        }
+
         public void send() {
-            String name = AnonymousId.INSTANCE.get();
             TelemetryEvent event = new TelemetryEvent(type, name, properties);
             service.send(event);
         }

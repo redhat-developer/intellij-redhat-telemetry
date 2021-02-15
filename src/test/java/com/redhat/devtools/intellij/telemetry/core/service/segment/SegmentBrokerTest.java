@@ -25,8 +25,8 @@ import java.util.Map;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.*;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
-import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APPLICATION_NAME;
-import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APPLICATION_VERSION;
+import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP_NAME;
+import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP_VERSION;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_EXTENSION_NAME;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_EXTENSION_VERSION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
@@ -103,8 +103,8 @@ public class SegmentBrokerTest {
         Map<String, ?> context = builder.getValue().build().context();
         assertThat(context.get(PROP_EXTENSION_NAME)).isEqualTo(EXTENSION_NAME);
         assertThat(context.get(PROP_EXTENSION_VERSION)).isEqualTo(EXTENSION_VERSION);
-        assertThat(context.get(PROP_APPLICATION_NAME)).isEqualTo(APPLICATION_NAME);
-        assertThat(context.get(PROP_APPLICATION_VERSION)).isEqualTo(APPLICATION_VERSION);
+        assertThat(context.get(PROP_APP_NAME)).isEqualTo(APPLICATION_NAME);
+        assertThat(context.get(PROP_APP_VERSION)).isEqualTo(APPLICATION_VERSION);
     }
 
     @Test

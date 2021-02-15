@@ -46,8 +46,8 @@ public class SegmentBroker implements IMessageBroker {
 
     public static final String PROP_EXTENSION_NAME = "extension_name";
     public static final String PROP_EXTENSION_VERSION = "extension_version";
-    public static final String PROP_APPLICATION_NAME = "application_name";
-    public static final String PROP_APPLICATION_VERSION = "application_version";
+    public static final String PROP_APP_NAME = "app_name";
+    public static final String PROP_APP_VERSION = "app_version";
 
     private static final int FLUSH_INTERVAL = 10000;
 
@@ -134,8 +134,8 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private Map<String, ?> addIdentifyEnvironment(Map<String, String> properties) {
-        properties.put(PROP_APPLICATION_NAME, environment.getApplication().getName());
-        properties.put(PROP_APPLICATION_VERSION, environment.getApplication().getVersion());
+        properties.put(PROP_APP_NAME, environment.getApplication().getName());
+        properties.put(PROP_APP_VERSION, environment.getApplication().getVersion());
         properties.put(PROP_EXTENSION_NAME, environment.getPlugin().getName());
         properties.put(PROP_EXTENSION_VERSION, environment.getPlugin().getVersion());
         return properties;
