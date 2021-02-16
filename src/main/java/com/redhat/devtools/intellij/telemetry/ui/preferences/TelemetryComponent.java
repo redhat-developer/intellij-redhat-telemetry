@@ -29,7 +29,7 @@ public class TelemetryComponent {
                     + "hardware and software configuration.<br/>"
                     + "<br/>"
                     + "Please note that this will not include personal data or any sensitive Information.<br/>"
-                    + "The data sent complies with the <a href=\"https://www.redhat.com/en/about/privacy-policy\">Red Hat Privacy Policy</a>.";
+                    + "The data sent complies with the <a href=\"https://developers.redhat.com/article/tool-data-collection\">Red Hat Privacy Policy</a>.";
 
     public TelemetryComponent() {
         this.panel = FormBuilder.createFormBuilder()
