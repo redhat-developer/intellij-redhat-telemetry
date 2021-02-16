@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
+import com.intellij.ide.AppLifecycleListener;
+import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 
@@ -30,17 +32,18 @@ import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryServi
 
 public class Telemetry {
 
-    public static ServiceBuilder service(ClassLoader classLoader) {
-        return new ServiceBuilder(classLoader);
+    private static ServiceSingleton serviceSingleton = new ServiceSingleton();
+
+    public static MessageBuilder builder(ClassLoader classLoader) {
+        return new MessageBuilder(classLoader, serviceSingleton);
     }
 
-    public static class ServiceBuilder {
+    public static class MessageBuilder {
 
         private final TelemetryService service;
 
-        private ServiceBuilder(final ClassLoader classLoader) {
-            TelemetryServiceFactory factory = ServiceManager.getService(TelemetryServiceFactory.class);
-            this.service = factory.create(classLoader);
+        private MessageBuilder(final ClassLoader classLoader, ServiceSingleton serviceSingleton) {
+            this.service = serviceSingleton.getService(this, classLoader);
         }
 
         public UserMessage user() {
@@ -52,6 +55,10 @@ public class Telemetry {
         }
 
         public StartupMessage startupPerformed() {
+            return new StartupMessage(service);
+        }
+
+        private StartupMessage startupPerformed(TelemetryService service) {
             return new StartupMessage(service);
         }
 
@@ -94,12 +101,16 @@ public class Telemetry {
         private static final String PROP_SESSION_DURATION = "session_duration";
 
         private ShutdownMessage(LocalTime startupTime, TelemetryService service) {
-            super(SHUTDOWN, "shutdown", service);
-            sessionDuration(startupTime);
+            this(startupTime, LocalTime.now(), service);
         }
 
-        public ShutdownMessage sessionDuration(LocalTime startupTime) {
-            return sessionDuration(Duration.between(startupTime, LocalTime.now()));
+        private ShutdownMessage(LocalTime startupTime, LocalTime shutdownTime, TelemetryService service) {
+            super(SHUTDOWN, "shutdown", service);
+            sessionDuration(startupTime, shutdownTime);
+        }
+
+        public ShutdownMessage sessionDuration(LocalTime startupTime, LocalTime shutdownTime) {
+            return sessionDuration(Duration.between(startupTime, shutdownTime));
         }
 
         public ShutdownMessage sessionDuration(Duration duration) {
@@ -161,7 +172,7 @@ public class Telemetry {
         private TelemetryService service;
 
         private Message(Type type, String name, TelemetryService service) {
-            this.name = name;   
+            this.name = name;
             this.type = type;
             this.service = service;
         }
@@ -179,12 +190,36 @@ public class Telemetry {
         }
 
         public void send() {
-            TelemetryEvent event = new TelemetryEvent(type, name, properties);
-            service.send(event);
+            service.send(new TelemetryEvent(type, name, properties));
         }
 
         protected boolean hasKey(String key) {
             return properties.containsKey(key);
+        }
+    }
+
+    private static final class ServiceSingleton {
+        private TelemetryService service;
+
+        public TelemetryService getService(MessageBuilder builder, ClassLoader classLoader) {
+            if (service == null) {
+                TelemetryServiceFactory factory = ServiceManager.getService(TelemetryServiceFactory.class);
+                this.service = factory.create(classLoader);
+                reportPluginLifecycle(builder, service);
+            }
+            return service;
+        }
+
+        private void reportPluginLifecycle(MessageBuilder builder, TelemetryService service) {
+            // this seems to cause "startup" to be notified before "identify" in segment
+            builder.startupPerformed(service).send();
+            Application application = ApplicationManager.getApplication();
+            application.getMessageBus().connect().subscribe(AppLifecycleListener.TOPIC, new AppLifecycleListener() {
+                @Override
+                public void appWillBeClosed(boolean isRestart) {
+                    builder.shutdownPerformed().send();
+                }
+            });
         }
     }
 

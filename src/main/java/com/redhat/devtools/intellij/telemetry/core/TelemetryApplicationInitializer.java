@@ -16,6 +16,6 @@ import com.redhat.devtools.intellij.telemetry.core.service.Telemetry;
 public class TelemetryApplicationInitializer implements ApplicationInitializedListener {
 	@Override
 	public void componentsInitialized() {
-		Telemetry.service(getClass().getClassLoader()).user().send();
+		Telemetry.builder(getClass().getClassLoader()).user().send();
 	}
 }
