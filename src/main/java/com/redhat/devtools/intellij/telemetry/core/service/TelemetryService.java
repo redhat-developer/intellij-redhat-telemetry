@@ -14,6 +14,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
+import com.redhat.devtools.intellij.telemetry.core.service.util.CircularBuffer;
 
 public class TelemetryService implements ITelemetryService {
 
