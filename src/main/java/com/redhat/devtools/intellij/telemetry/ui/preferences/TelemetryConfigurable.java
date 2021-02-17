@@ -50,7 +50,7 @@ public class TelemetryConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         boolean modified = false;
-        modified |= (configuration.isEnabled() != configuration.isEnabled());
+        modified |= (component.isEnabled() != configuration.isEnabled());
         return modified;
     }
 
