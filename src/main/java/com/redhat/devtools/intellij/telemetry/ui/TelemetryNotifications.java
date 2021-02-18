@@ -35,15 +35,20 @@ public class TelemetryNotifications {
                 NotificationType.INFORMATION,
                 new NotificationListener.UrlOpeningListener(false));
         DumbAwareAction accept = NotificationAction.create("Accept",
-                e -> TelemetryConfiguration.INSTANCE.setEnabled(true));
+                e -> enableTelemetry(true, notification));
         DumbAwareAction deny = NotificationAction.create("Deny",
-                e -> TelemetryConfiguration.INSTANCE.setEnabled(false));
+                e -> enableTelemetry(false, notification));
         notification
                 .addAction(accept)
                 .addAction(deny)
                 .setIcon(AllIcons.General.TodoQuestion)
                 .notify(null);
 
+    }
+
+    private static void enableTelemetry(boolean enable, Notification notification) {
+        TelemetryConfiguration.INSTANCE.setEnabled(enable);
+        notification.expire();
     }
 
 }

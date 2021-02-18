@@ -52,7 +52,7 @@ public class TelemetryServiceIntegrationTest {
         SegmentBroker broker = new TestableSegmentBroker(AnonymousId.INSTANCE.get(), configuration, analytics);
         this.service = new TestableTelemetryService(TelemetryConfiguration.INSTANCE, broker);
         Environment environment = environment(APPLICATION_NAME, APPLICATION_VERSION, EXTENSION_NAME, EXTENSION_VERSION);
-        this.event = new TelemetryEvent(ACTION, "Testing Telemetry", environment);
+        this.event = new TelemetryEvent(ACTION, "Testing Telemetry");
     }
 
     @AfterEach

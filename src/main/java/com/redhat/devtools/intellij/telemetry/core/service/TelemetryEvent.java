@@ -10,17 +10,20 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
-
+import java.util.HashMap;
 import java.util.Map;
 
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.*;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type;
 
 public class TelemetryEvent {
 
     private final Type type;
     private final String name;
     private final Map<String, String> properties;
+
+    public TelemetryEvent(Type type, String name) {
+        this(type, name, new HashMap<>());
+    }
 
     public TelemetryEvent(Type type, String name, Map<String, String> properties) {
         this.type = type;

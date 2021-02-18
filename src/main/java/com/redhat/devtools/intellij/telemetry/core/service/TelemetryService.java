@@ -15,8 +15,12 @@ import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.util.CircularBuffer;
+import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TelemetryService implements ITelemetryService {
+
 
     public enum Type {
         USER, ACTION, STARTUP, SHUTDOWN
@@ -26,17 +30,35 @@ public class TelemetryService implements ITelemetryService {
 
     private static final int BUFFER_SIZE = 35;
 
-    protected final IMessageBroker broker;
     private final TelemetryConfiguration configuration;
+    protected final IMessageBroker broker;
+    private AtomicBoolean userInfoSent = new AtomicBoolean(false);
     private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);
 
-    public TelemetryService(final TelemetryConfiguration telemetryConfig, final IMessageBroker broker) {
-        this.configuration = telemetryConfig;
+    public TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker) {
+        this.configuration = configuration;
         this.broker = broker;
     }
 
     @Override
     public void send(TelemetryEvent event) {
+        sendUserInfo();
+        doSend(event);
+        if (!isConfigured()) {
+            TelemetryNotifications.queryUserConsent();
+        }
+    }
+
+    private void sendUserInfo() {
+        if (!userInfoSent.get()) {
+            doSend(new TelemetryEvent(
+                    Type.USER,
+                    "Anonymous ID: " + AnonymousId.INSTANCE.get()));
+            userInfoSent.set(true);
+        }
+    }
+
+    private void doSend(TelemetryEvent event) {
         if (isEnabled()) {
             flushOnHold();
             broker.send(event);

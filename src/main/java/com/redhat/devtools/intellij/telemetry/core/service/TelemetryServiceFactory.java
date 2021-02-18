@@ -19,7 +19,6 @@ import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentConfig
 
 public class TelemetryServiceFactory {
 
-    private final TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.INSTANCE;
     private final Environment.Builder builder = new Environment.Builder().application(
             ApplicationNamesInfo.getInstance(),
             ApplicationInfo.getInstance());
@@ -27,13 +26,13 @@ public class TelemetryServiceFactory {
     public TelemetryService create(ClassLoader classLoader) {
         Environment environment = builder.plugin(classLoader).build();
         IMessageBroker broker = createSegmentBroker(classLoader, environment);
-        return new TelemetryService(telemetryConfiguration, broker);
+        return new TelemetryService(TelemetryConfiguration.INSTANCE, broker);
     }
 
     private IMessageBroker createSegmentBroker(ClassLoader classLoader, Environment environment) {
         SegmentConfiguration brokerConfiguration = new SegmentConfiguration(classLoader);
         return new SegmentBroker(
-                telemetryConfiguration.isDebug(),
+                TelemetryConfiguration.INSTANCE.isDebug(),
                 AnonymousId.INSTANCE.get(),
                 environment,
                 brokerConfiguration);

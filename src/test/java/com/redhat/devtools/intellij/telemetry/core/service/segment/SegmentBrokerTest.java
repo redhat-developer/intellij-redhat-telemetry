@@ -58,7 +58,7 @@ public class SegmentBrokerTest {
         this.configuration = segmentConfiguration(false,"writeKey_value", "debugWriteKey_value");
         this.environment = environment(EXTENSION_NAME, EXTENSION_VERSION, APPLICATION_NAME, APPLICATION_VERSION);
         this.broker = new TestableSegmentBroker(ANONYMOUS_ID, configuration, analytics);
-        this.event = new TelemetryEvent(ACTION, "Testing Telemetry", environment);
+        this.event = new TelemetryEvent(ACTION, "Testing Telemetry");
     }
 
     @Test
@@ -85,7 +85,7 @@ public class SegmentBrokerTest {
     @Test
     public void send_should_NOT_enqueue_if_no_analytics() {
         // given
-        IMessageBroker broker = new SegmentBroker(ANONYMOUS_ID, configuration);
+        IMessageBroker broker = new SegmentBroker(false, ANONYMOUS_ID, environment, configuration);
         // when
         broker.send(event);
         // then

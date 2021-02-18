@@ -14,13 +14,10 @@ import com.intellij.ide.AppLifecycleListener;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
+import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,65 +25,40 @@ import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryServi
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.SHUTDOWN;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.STARTUP;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.USER;
+import static com.redhat.devtools.intellij.telemetry.core.service.util.TimeUtils.toLocalTime;
 
 public class Telemetry {
 
-    private static final ServiceSingleton serviceSingleton = new ServiceSingleton();
-
     public static MessageBuilder builder(ClassLoader classLoader) {
-        return new MessageBuilder(classLoader, serviceSingleton);
+        return new MessageBuilder(new ServiceFacade(classLoader));
+    }
+
+    private Telemetry() {
     }
 
     public static class MessageBuilder {
 
-        private final TelemetryService service;
+        private final ServiceFacade service;
 
-        private MessageBuilder(final ClassLoader classLoader, ServiceSingleton serviceSingleton) {
-            this.service = serviceSingleton.getService(this, classLoader);
-        }
-
-        public UserMessage user() {
-            return new UserMessage(service);
+        private MessageBuilder(ServiceFacade serviceFacade) {
+            this.service = serviceFacade;
         }
 
         public ActionMessage actionPerformed(String name) {
             return new ActionMessage(ACTION, name, service);
         }
 
-        public StartupMessage startupPerformed() {
-            return new StartupMessage(service);
-        }
-
-        private StartupMessage startupPerformed(TelemetryService service) {
-            return new StartupMessage(service);
-        }
-
-        public ShutdownMessage shutdownPerformed() {
-            long appStartTime = ApplicationManager.getApplication().getStartTime();
-            return shutdownPerformed(toLocalTime(appStartTime));
-        }
-
-        private LocalTime toLocalTime(long millis) {
-            Instant instant = new Date(millis).toInstant();
-            ZonedDateTime time = instant.atZone(ZoneId.systemDefault());
-            return time.toLocalTime();
-        }
-
-        public ShutdownMessage shutdownPerformed(LocalTime startupTime) {
-            return new ShutdownMessage(startupTime, service);
-        }
     }
 
     public static class StartupMessage extends Message<StartupMessage> {
 
         private final LocalTime time;
 
-        private StartupMessage(TelemetryService service) {
+        private StartupMessage(ServiceFacade service) {
             this(LocalTime.now(), service);
         }
 
-        private StartupMessage(LocalTime time, TelemetryService service) {
+        private StartupMessage(LocalTime time, ServiceFacade service) {
             super(STARTUP, "startup", service);
             this.time = time;
         }
@@ -100,11 +72,15 @@ public class Telemetry {
 
         private static final String PROP_SESSION_DURATION = "session_duration";
 
-        private ShutdownMessage(LocalTime startupTime, TelemetryService service) {
+        private ShutdownMessage(ServiceFacade service) {
+            this(toLocalTime(ApplicationManager.getApplication().getStartTime()), service);
+        }
+
+        private ShutdownMessage(LocalTime startupTime, ServiceFacade service) {
             this(startupTime, LocalTime.now(), service);
         }
 
-        private ShutdownMessage(LocalTime startupTime, LocalTime shutdownTime, TelemetryService service) {
+        private ShutdownMessage(LocalTime startupTime, LocalTime shutdownTime, ServiceFacade service) {
             super(SHUTDOWN, "shutdown", service);
             sessionDuration(startupTime, shutdownTime);
         }
@@ -118,13 +94,6 @@ public class Telemetry {
         }
     }
 
-    public static class UserMessage extends Message<UserMessage> {
-
-        private UserMessage(TelemetryService service) {
-            super(USER, "Anonymous ID: " + AnonymousId.INSTANCE.get(), service);
-        }
-    }
-
     public static class ActionMessage extends Message<ActionMessage> {
 
         private static final String PROP_DURATION = "duration";
@@ -133,7 +102,7 @@ public class Telemetry {
 
         private final LocalTime startTime;
 
-        private ActionMessage(Type type, String name, TelemetryService service) {
+        private ActionMessage(Type type, String name, ServiceFacade service) {
             super(type, name, service);
             this.startTime = LocalTime.now();
         }
@@ -168,9 +137,9 @@ public class Telemetry {
         private final Type type;
         private final Map<String, String> properties = new HashMap<>();
         private final String name;
-        private final TelemetryService service;
+        private final ServiceFacade service;
 
-        private Message(Type type, String name, TelemetryService service) {
+        private Message(Type type, String name, ServiceFacade service) {
             this.name = name;
             this.type = type;
             this.service = service;
@@ -193,26 +162,38 @@ public class Telemetry {
         }
     }
 
-    private static final class ServiceSingleton {
-        private TelemetryService service;
+    private static final class ServiceFacade {
+        private final ClassLoader classLoader;
+        private ITelemetryService service;
 
-        public TelemetryService getService(MessageBuilder builder, ClassLoader classLoader) {
+        private ServiceFacade(ClassLoader classLoader) {
+            this.classLoader = classLoader;
+        }
+
+        private ITelemetryService get() {
             if (service == null) {
                 TelemetryServiceFactory factory = ServiceManager.getService(TelemetryServiceFactory.class);
                 this.service = factory.create(classLoader);
-                reportPluginLifecycle(builder, service);
+                sendStartup();
+                hookShutdown();
             }
             return service;
         }
 
-        private void reportPluginLifecycle(MessageBuilder builder, TelemetryService service) {
-            // this seems to cause "startup" to be notified before "identify" in segment
-            builder.startupPerformed(service).send();
+        private void send(TelemetryEvent event) {
+            get().send(event);
+        }
+
+        private void sendStartup() {
+            new StartupMessage(this).send();
+        }
+
+        private void hookShutdown() {
             Application application = ApplicationManager.getApplication();
             application.getMessageBus().connect().subscribe(AppLifecycleListener.TOPIC, new AppLifecycleListener() {
                 @Override
                 public void appWillBeClosed(boolean isRestart) {
-                    builder.shutdownPerformed().send();
+                    new ShutdownMessage(ServiceFacade.this).send();
                 }
             });
         }
