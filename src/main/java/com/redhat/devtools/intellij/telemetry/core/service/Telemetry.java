@@ -32,7 +32,7 @@ import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryServi
 
 public class Telemetry {
 
-    private static ServiceSingleton serviceSingleton = new ServiceSingleton();
+    private static final ServiceSingleton serviceSingleton = new ServiceSingleton();
 
     public static MessageBuilder builder(ClassLoader classLoader) {
         return new MessageBuilder(classLoader, serviceSingleton);
@@ -116,7 +116,6 @@ public class Telemetry {
         public ShutdownMessage sessionDuration(Duration duration) {
             return property(PROP_SESSION_DURATION, toString(duration));
         }
-
     }
 
     public static class UserMessage extends Message<UserMessage> {
@@ -169,7 +168,7 @@ public class Telemetry {
         private final Type type;
         private final Map<String, String> properties = new HashMap<>();
         private final String name;
-        private TelemetryService service;
+        private final TelemetryService service;
 
         private Message(Type type, String name, TelemetryService service) {
             this.name = name;
@@ -191,10 +190,6 @@ public class Telemetry {
 
         public void send() {
             service.send(new TelemetryEvent(type, name, properties));
-        }
-
-        protected boolean hasKey(String key) {
-            return properties.containsKey(key);
         }
     }
 
