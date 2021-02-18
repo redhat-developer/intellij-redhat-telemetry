@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.telemetry.core;
 
 import com.intellij.ide.ApplicationInitializedListener;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
@@ -29,7 +30,7 @@ public class OnPluginStarted implements ApplicationInitializedListener, StartupA
     public void runActivity(Project project) {
         // ask user to consent to telemetry
         if (!TelemetryConfiguration.INSTANCE.isConfigured()) {
-            TelemetryNotifications.queryUserConsent();
+            ApplicationManager.getApplication().executeOnPooledThread(() -> TelemetryNotifications.queryUserConsent());
         }
     }
 }
