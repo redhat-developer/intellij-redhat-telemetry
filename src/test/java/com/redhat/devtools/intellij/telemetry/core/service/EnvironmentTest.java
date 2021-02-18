@@ -3,8 +3,6 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static com.redhat.devtools.intellij.telemetry.core.service.Environment.*;
-
 public class EnvironmentTest {
 
     @Test

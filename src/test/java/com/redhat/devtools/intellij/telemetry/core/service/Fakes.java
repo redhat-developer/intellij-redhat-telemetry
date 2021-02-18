@@ -1,12 +1,10 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
-import com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

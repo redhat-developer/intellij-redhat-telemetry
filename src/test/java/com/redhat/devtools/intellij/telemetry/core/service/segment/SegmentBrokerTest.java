@@ -23,17 +23,16 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.Map;
 
-import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.*;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
+import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.segmentConfiguration;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP_NAME;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP_VERSION;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_EXTENSION_NAME;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_EXTENSION_VERSION;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;

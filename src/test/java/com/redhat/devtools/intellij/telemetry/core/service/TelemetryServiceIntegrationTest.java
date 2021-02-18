@@ -27,9 +27,9 @@ import retrofit.client.Client;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.*;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.*;
+import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.segmentConfiguration;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
 
 public class TelemetryServiceIntegrationTest {
 
