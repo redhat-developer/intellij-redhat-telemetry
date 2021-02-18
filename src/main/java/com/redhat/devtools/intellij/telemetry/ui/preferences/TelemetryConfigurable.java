@@ -27,7 +27,7 @@ public class TelemetryConfigurable implements Configurable {
     private static final Logger LOGGER = Logger.getInstance(TelemetryConfigurable.class);
 
     private TelemetryComponent component;
-    TelemetryConfiguration configuration = TelemetryConfiguration.INSTANCE;
+    private final TelemetryConfiguration configuration = TelemetryConfiguration.INSTANCE;
 
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
@@ -65,7 +65,7 @@ public class TelemetryConfigurable implements Configurable {
     }
 
     @Override
-    public void reset() { ;
+    public void reset() {
         component.setEnabled(configuration.isEnabled());
     }
 

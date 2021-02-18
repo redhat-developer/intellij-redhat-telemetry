@@ -132,7 +132,7 @@ public class Telemetry {
         }
     }
 
-    abstract static class Message<T extends Message> {
+    abstract static class Message<T extends Message<?>> {
 
         private final Type type;
         private final Map<String, String> properties = new HashMap<>();

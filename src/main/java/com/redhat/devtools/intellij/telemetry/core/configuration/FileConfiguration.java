@@ -71,7 +71,7 @@ public class FileConfiguration extends AbstractConfiguration {
         if (file == null) {
             return;
         }
-        try (Writer writer = new FileWriter(file.toFile());) {
+        try (Writer writer = new FileWriter(file.toFile())) {
             properties.get().store(writer, "updated " + LocalDate.now());
         }
     }

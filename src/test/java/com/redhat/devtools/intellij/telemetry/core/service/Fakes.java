@@ -3,7 +3,6 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -31,16 +30,13 @@ public class Fakes {
 
     public static ISegmentConfiguration segmentConfiguration(boolean debug, String writeKey, String debugWriteKey) {
         ISegmentConfiguration configuration = mock(ISegmentConfiguration.class);
-        when(configuration.getSegmentKey())
-                .thenAnswer(new Answer<String>() {
-                    @Override
-                    public String answer(InvocationOnMock invocation) throws Throwable {
+        when(configuration.getSegmentNormalKey())
+                .thenAnswer((InvocationOnMock invocation) -> {
                         if (debug) {
                             return debugWriteKey;
                         } else {
                             return writeKey;
                         }
-                    }
                 });
         return configuration;
     }

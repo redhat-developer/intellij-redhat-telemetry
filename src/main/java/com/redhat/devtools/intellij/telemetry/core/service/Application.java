@@ -13,7 +13,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 public class Application {
 
     private final String name;
-    private String version;
+    private final String version;
 
     Application(String name, String version) {
         this.name = name;

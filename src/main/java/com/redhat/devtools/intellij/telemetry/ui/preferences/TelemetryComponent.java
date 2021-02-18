@@ -22,14 +22,15 @@ import javax.swing.JPanel;
  */
 public class TelemetryComponent {
 
-    private final JPanel panel;
-    private final JBCheckBox enabled = new JBCheckBox("Send usage statistics");
-    private final String dataDescription =
+    private static final String dataDescription =
             "Help Red Hat improve its products by sending anonymous data about features and plugins used, "
                     + "hardware and software configuration.<br/>"
                     + "<br/>"
                     + "Please note that this will not include personal data or any sensitive Information.<br/>"
                     + "The data sent complies with the <a href=\"https://developers.redhat.com/article/tool-data-collection\">Red Hat Privacy Policy</a>.";
+
+    private final JPanel panel;
+    private final JBCheckBox enabled = new JBCheckBox("Send usage statistics");
 
     public TelemetryComponent() {
         this.panel = FormBuilder.createFormBuilder()

@@ -29,9 +29,9 @@ public class Platform {
         this.version = version;
     }
 
-    private String name;
-    private String distribution;
-    private String version;
+    private final String name;
+    private final String distribution;
+    private final String version;
 
     public String getName() {
         return name;

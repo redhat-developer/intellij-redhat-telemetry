@@ -18,7 +18,7 @@ public class AnonymousId {
     private static final Path REDHAT_DIRECTORY = Paths.get(System.getProperty("user.home"), ".redhat");
     private static final Path UUID_FILE = REDHAT_DIRECTORY.resolve("anonymousId");
 
-    private Lazy<String> uuid = new Lazy<>(() -> loadOrCreate(UUID_FILE));
+    private final Lazy<String> uuid = new Lazy<>(() -> loadOrCreate(UUID_FILE));
 
     private AnonymousId() {}
 

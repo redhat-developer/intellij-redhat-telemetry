@@ -19,12 +19,12 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class Environment {
-    private Application plugin;
-    private Application application;
-    private Platform platform;
-    private String timezone;
-    private String locale;
-    private String country;
+    private final Application plugin;
+    private final Application application;
+    private final Platform platform;
+    private final String timezone;
+    private final String locale;
+    private final String country;
 
     private Environment(Application plugin, Application application, Platform platform, String timezone, String locale, String country) {
         this.plugin = plugin;
@@ -85,10 +85,6 @@ public class Environment {
         private String timezone;
         private String locale;
         private String country;
-
-        public static Builder builder() {
-            return new Builder();
-        }
 
         public Builder application(Application application) {
             this.application = application;

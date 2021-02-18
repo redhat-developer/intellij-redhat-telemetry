@@ -32,7 +32,7 @@ public class TelemetryService implements ITelemetryService {
 
     private final TelemetryConfiguration configuration;
     protected final IMessageBroker broker;
-    private AtomicBoolean userInfoSent = new AtomicBoolean(false);
+    private final AtomicBoolean userInfoSent = new AtomicBoolean(false);
     private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);
 
     public TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker) {

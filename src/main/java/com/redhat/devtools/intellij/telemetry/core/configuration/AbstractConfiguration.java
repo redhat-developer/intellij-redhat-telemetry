@@ -16,7 +16,7 @@ import java.util.Properties;
 
 public abstract class AbstractConfiguration implements IConfiguration {
 
-    protected Lazy<Properties> properties = new Lazy<>(this::loadProperties);
+    protected final Lazy<Properties> properties = new Lazy<>(this::loadProperties);
 
     @Override
     public String get(String key) {

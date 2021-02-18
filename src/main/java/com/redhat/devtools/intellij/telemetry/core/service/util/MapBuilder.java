@@ -11,7 +11,7 @@ public class MapBuilder {
         return new MapBuilder();
     }
 
-    private Map<String, Object> map = new HashMap<>();
+    private final Map<String, Object> map = new HashMap<>();
 
     public MapBuilder pair(String key, String value) {
         map.put(key, value);
