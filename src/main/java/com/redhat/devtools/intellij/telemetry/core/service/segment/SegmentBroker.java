@@ -149,20 +149,20 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private Map<String, Object> createContext(Environment environment) {
-        return MapBuilder.instance()
-                .map(PROP_APP)
-                .pair(PROP_NAME, environment.getApplication().getName())
-                .pair(PROP_VERSION, environment.getApplication().getVersion())
-                .build()
+        return new MapBuilder()
+                .mapPair(PROP_APP)
+                    .pair(PROP_NAME, environment.getApplication().getName())
+                    .pair(PROP_VERSION, environment.getApplication().getVersion())
+                    .build()
                 .pair(PROP_IP, VALUE_NULL_IP)
                 .pair(PROP_LOCALE, environment.getLocale())
-                .map(PROP_LOCATION)
-                .pair(PROP_COUNTRY, environment.getCountry())
-                .build()
-                .map(PROP_OS)
-                .pair(PROP_NAME, environment.getPlatform().getName())
-                .pair(PROP_VERSION, environment.getPlatform().getVersion())
-                .build()
+                .mapPair(PROP_LOCATION)
+                    .pair(PROP_COUNTRY, environment.getCountry())
+                    .build()
+                .mapPair(PROP_OS)
+                    .pair(PROP_NAME, environment.getPlatform().getName())
+                    .pair(PROP_VERSION, environment.getPlatform().getVersion())
+                    .build()
                 .pair(PROP_TIMEZONE, environment.getTimezone())
                 .build();
     }

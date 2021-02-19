@@ -5,12 +5,6 @@ import java.util.Map;
 
 public class MapBuilder {
 
-    private MapBuilder() {}
-
-    public static MapBuilder instance() {
-        return new MapBuilder();
-    }
-
     private final Map<String, Object> map = new HashMap<>();
 
     public MapBuilder pair(String key, String value) {
@@ -23,7 +17,7 @@ public class MapBuilder {
         return this;
     }
 
-    public MapValueBuilder map(String key) {
+    public MapValueBuilder mapPair(String key) {
         return new MapValueBuilder(key);
     }
 
