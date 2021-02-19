@@ -17,18 +17,23 @@ import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 
+import java.io.IOException;
+
 public class TelemetryNotifications {
 
-    private static final NotificationGroup TELEMETRY_NOTIFICATION = new NotificationGroup(
-            "Telemetry Notification Group",
+    private static final Logger LOGGER = Logger.getInstance(TelemetryNotifications.class);
+
+    private static final NotificationGroup QUERY_USER_CONSENT = new NotificationGroup(
+            "Enable Telemetry",
             NotificationDisplayType.STICKY_BALLOON,
             true);
 
     public static void queryUserConsent() {
-        Notification notification = TELEMETRY_NOTIFICATION.createNotification("Enable Telemetry",
+        Notification notification = QUERY_USER_CONSENT.createNotification("Enable Telemetry",
                 "Help Red Hat improve its extensions by allowing them to collect usage data. " +
                         "Read our <a href=\"https://developers.redhat.com/article/tool-data-collection\">privacy statement</a> " +
                         "and learn how to <a href=\"\">opt out</a>.",
@@ -46,9 +51,16 @@ public class TelemetryNotifications {
 
     }
 
-    private static void enableTelemetry(boolean enable, Notification notification) {
-        TelemetryConfiguration.INSTANCE.setEnabled(enable);
-        notification.expire();
+    private static void enableTelemetry(boolean enabled, Notification notification) {
+        TelemetryConfiguration configuration = TelemetryConfiguration.INSTANCE;
+        configuration.setEnabled(enabled);
+        try {
+            configuration.save();
+        } catch (IOException e) {
+            LOGGER.warn("Could not save telemetry configuration.", e);
+        } finally {
+            notification.expire();
+        }
     }
 
 }

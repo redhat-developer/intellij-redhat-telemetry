@@ -33,6 +33,7 @@ public class TelemetryService implements ITelemetryService {
     private final TelemetryConfiguration configuration;
     protected final IMessageBroker broker;
     private final AtomicBoolean userInfoSent = new AtomicBoolean(false);
+    private final AtomicBoolean userQueried = new AtomicBoolean(false);
     private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);
 
     public TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker) {
@@ -44,7 +45,12 @@ public class TelemetryService implements ITelemetryService {
     public void send(TelemetryEvent event) {
         sendUserInfo();
         doSend(event);
-        if (!isConfigured()) {
+        queryUserConsent();
+    }
+
+    private void queryUserConsent() {
+        if (!isConfigured()
+            && userQueried.compareAndSet(false, true)) {
             TelemetryNotifications.queryUserConsent();
         }
     }

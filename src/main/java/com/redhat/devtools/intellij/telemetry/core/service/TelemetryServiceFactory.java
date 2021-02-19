@@ -27,14 +27,15 @@ public class TelemetryServiceFactory {
 
     public TelemetryService create(ClassLoader classLoader) {
         Environment environment = builder.plugin(classLoader).build();
-        IMessageBroker broker = createSegmentBroker(classLoader, environment);
-        return new TelemetryService(TelemetryConfiguration.INSTANCE, broker);
+        TelemetryConfiguration configuration = TelemetryConfiguration.INSTANCE;
+        IMessageBroker broker = createSegmentBroker(configuration.isDebug(), classLoader, environment);
+        return new TelemetryService(configuration, broker);
     }
 
-    private IMessageBroker createSegmentBroker(ClassLoader classLoader, Environment environment) {
+    private IMessageBroker createSegmentBroker(boolean isDebug, ClassLoader classLoader, Environment environment) {
         SegmentConfiguration brokerConfiguration = new SegmentConfiguration(classLoader);
         return new SegmentBroker(
-                TelemetryConfiguration.INSTANCE.isDebug(),
+                isDebug,
                 AnonymousId.INSTANCE.get(),
                 environment,
                 brokerConfiguration);
