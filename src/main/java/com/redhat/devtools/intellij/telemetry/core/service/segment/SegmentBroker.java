@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
+import com.redhat.devtools.intellij.telemetry.core.service.Application;
 import com.redhat.devtools.intellij.telemetry.core.service.Environment;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryService;
@@ -134,8 +135,11 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private Map<String, ?> addIdentifyEnvironment(Map<String, String> properties) {
-        properties.put(PROP_APP_NAME, environment.getApplication().getName());
-        properties.put(PROP_APP_VERSION, environment.getApplication().getVersion());
+        Application application = environment.getApplication();
+        properties.put(PROP_APP_NAME, application.getName());
+        properties.put(PROP_APP_VERSION, application.getVersion());
+        application.getProperties().forEach(
+                appProperty -> properties.put(appProperty.getKey(), String.valueOf(appProperty.getValue())));
         properties.put(PROP_EXTENSION_NAME, environment.getPlugin().getName());
         properties.put(PROP_EXTENSION_VERSION, environment.getPlugin().getVersion());
         return properties;
@@ -153,6 +157,7 @@ public class SegmentBroker implements IMessageBroker {
                 .mapPair(PROP_APP)
                     .pair(PROP_NAME, environment.getApplication().getName())
                     .pair(PROP_VERSION, environment.getApplication().getVersion())
+                    .pairs(environment.getApplication().getProperties())
                     .build()
                 .pair(PROP_IP, VALUE_NULL_IP)
                 .pair(PROP_LOCALE, environment.getLocale())

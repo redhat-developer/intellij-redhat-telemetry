@@ -91,11 +91,6 @@ public class Environment {
             return this;
         }
 
-        public Builder application(ApplicationNamesInfo names, ApplicationInfo info) {
-            this.application = new Application(names.getFullProductName(), info.getFullVersion());
-            return this;
-        }
-
         private void ensureApplication() {
             if (application == null) {
                 application(new Application(

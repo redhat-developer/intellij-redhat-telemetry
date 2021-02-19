@@ -10,10 +10,17 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class Application {
 
     private final String name;
     private final String version;
+    private final Map<String, String> properties = new HashMap<>();
 
     Application(String name, String version) {
         this.name = name;
@@ -26,5 +33,16 @@ public class Application {
 
     public String getVersion() {
         return version;
+    }
+
+    public Application property(String key, String value) {
+        this.properties.put(key, value);
+        return this;
+    }
+
+    public Collection<AbstractMap.SimpleEntry<String, Object>> getProperties() {
+        return properties.entrySet().stream()
+                .map((entry) -> new AbstractMap.SimpleEntry<String, Object>(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 }

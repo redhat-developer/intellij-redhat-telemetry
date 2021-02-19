@@ -19,9 +19,11 @@ import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentConfig
 
 public class TelemetryServiceFactory {
 
-    private final Environment.Builder builder = new Environment.Builder().application(
-            ApplicationNamesInfo.getInstance(),
-            ApplicationInfo.getInstance());
+    private final Environment.Builder builder = new Environment.Builder()
+            .application(new Application(
+                    ApplicationNamesInfo.getInstance().getFullProductName(),
+                    ApplicationInfo.getInstance().getFullVersion())
+                        .property("java_version", System.getProperty("java.version")));
 
     public TelemetryService create(ClassLoader classLoader) {
         Environment environment = builder.plugin(classLoader).build();

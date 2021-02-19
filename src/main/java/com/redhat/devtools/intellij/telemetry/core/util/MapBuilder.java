@@ -1,5 +1,7 @@
 package com.redhat.devtools.intellij.telemetry.core.util;
 
+import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +16,14 @@ public class MapBuilder {
 
     public MapBuilder pair(String key, Object value) {
         map.put(key, value);
+        return this;
+    }
+
+    public MapBuilder pairs(Collection<AbstractMap.SimpleEntry<String, Object>> entries) {
+        if (entries == null) {
+            return this;
+        }
+        entries.stream().forEach(entry -> map.put(entry.getKey(), entry.getValue()));
         return this;
     }
 
@@ -35,6 +45,14 @@ public class MapBuilder {
 
         public MapValueBuilder pair(String key, Object value) {
             map.put(key, value);
+            return this;
+        }
+
+        public MapValueBuilder pairs(Collection<AbstractMap.SimpleEntry<String, Object>> entries) {
+            if (entries == null) {
+                return this;
+            }
+            entries.stream().forEach(entry -> map.put(entry.getKey(), entry.getValue()));
             return this;
         }
 
