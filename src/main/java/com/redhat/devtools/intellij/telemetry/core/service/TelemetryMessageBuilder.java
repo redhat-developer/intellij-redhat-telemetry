@@ -30,27 +30,20 @@ import static com.redhat.devtools.intellij.telemetry.core.service.util.SanitizeU
 import static com.redhat.devtools.intellij.telemetry.core.service.util.SanitizeUtils.replaceEmail;
 import static com.redhat.devtools.intellij.telemetry.core.service.util.TimeUtils.toLocalTime;
 
-public class Telemetry {
+public class TelemetryMessageBuilder {
 
-    public static MessageBuilder builder(ClassLoader classLoader) {
-        return new MessageBuilder(new ServiceFacade(classLoader));
+    private final ServiceFacade service;
+
+    public TelemetryMessageBuilder(ClassLoader classLoader) {
+        this(new ServiceFacade(classLoader));
     }
 
-    private Telemetry() {
+    TelemetryMessageBuilder(ServiceFacade serviceFacade) {
+        this.service = serviceFacade;
     }
 
-    public static class MessageBuilder {
-
-        private final ServiceFacade service;
-
-        private MessageBuilder(ServiceFacade serviceFacade) {
-            this.service = serviceFacade;
-        }
-
-        public ActionMessage actionPerformed(String name) {
-            return new ActionMessage(ACTION, name, service);
-        }
-
+    public ActionMessage actionPerformed(String name) {
+        return new ActionMessage(ACTION, name, service);
     }
 
     public static class StartupMessage extends Message<StartupMessage> {
@@ -200,5 +193,4 @@ public class Telemetry {
             });
         }
     }
-
 }
