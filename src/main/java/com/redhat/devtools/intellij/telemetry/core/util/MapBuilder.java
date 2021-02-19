@@ -1,4 +1,4 @@
-package com.redhat.devtools.intellij.telemetry.core.service.util;
+package com.redhat.devtools.intellij.telemetry.core.util;
 
 import java.util.HashMap;
 import java.util.Map;

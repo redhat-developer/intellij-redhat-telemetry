@@ -1,7 +1,7 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.redhat.devtools.intellij.telemetry.core.service.util.Lazy;
+import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 
 import java.io.IOException;
 import java.io.Writer;

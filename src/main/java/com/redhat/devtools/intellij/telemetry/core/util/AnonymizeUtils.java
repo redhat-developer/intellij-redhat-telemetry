@@ -8,7 +8,7 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package com.redhat.devtools.intellij.telemetry.core.service.util;
+package com.redhat.devtools.intellij.telemetry.core.util;
 
 import java.util.regex.Pattern;
 

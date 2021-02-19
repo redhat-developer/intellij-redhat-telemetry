@@ -24,7 +24,7 @@
  * Based on work by Eugen Paraschiv for Baeldung.com at
  * https://github.com/eugenp/tutorials/blob/master/data-structures/src/main/java/com/baeldung/circularbuffer/CircularBuffer.java
  */
-package com.redhat.devtools.intellij.telemetry.core.service.util;
+package com.redhat.devtools.intellij.telemetry.core.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;

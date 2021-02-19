@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
-import com.redhat.devtools.intellij.telemetry.core.service.util.Lazy;
+import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 
 import java.util.Properties;
 

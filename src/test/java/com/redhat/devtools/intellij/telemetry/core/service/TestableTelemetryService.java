@@ -12,7 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
-import com.redhat.devtools.intellij.telemetry.core.service.util.Lazy;
+import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 
 public class TestableTelemetryService extends TelemetryService {
         public TestableTelemetryService(TelemetryConfiguration configuration, IMessageBroker broker) {

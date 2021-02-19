@@ -15,7 +15,7 @@ import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
-import com.redhat.devtools.intellij.telemetry.core.service.util.TimeUtils;
+import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
 
 import java.time.Duration;
 import java.time.LocalTime;
@@ -26,8 +26,8 @@ import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryServi
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.SHUTDOWN;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.STARTUP;
-import static com.redhat.devtools.intellij.telemetry.core.service.util.AnonymizeUtils.anonymize;
-import static com.redhat.devtools.intellij.telemetry.core.service.util.TimeUtils.toLocalTime;
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymize;
+import static com.redhat.devtools.intellij.telemetry.core.util.TimeUtils.toLocalTime;
 
 public class TelemetryMessageBuilder {
 
