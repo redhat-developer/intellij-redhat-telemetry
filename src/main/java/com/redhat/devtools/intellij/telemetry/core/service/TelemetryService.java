@@ -10,7 +10,9 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
@@ -20,7 +22,6 @@ import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TelemetryService implements ITelemetryService {
-
 
     public enum Type {
         USER, ACTION, STARTUP, SHUTDOWN
@@ -37,8 +38,22 @@ public class TelemetryService implements ITelemetryService {
     private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);
 
     public TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker) {
+        this(configuration, broker, ApplicationManager.getApplication().getMessageBus().connect());
+    }
+
+    public TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker, final MessageBusConnection connection) {
         this.configuration = configuration;
         this.broker = broker;
+        onConfigurationChanged(connection);
+    }
+
+    private void onConfigurationChanged(MessageBusConnection connection) {
+        connection.subscribe(TelemetryConfiguration.TelemetryConfigurationNotifier.CONFIGURATION_CHANGED, (String property, String value) -> {
+            if (TelemetryConfiguration.KEY_MODE.equals(property)
+                    && TelemetryConfiguration.Mode.toEnabledBoolean(value)) {
+                flushOnHold();
+            }
+        });
     }
 
     @Override

@@ -48,7 +48,6 @@ public class TelemetryNotifications {
                 .addAction(deny)
                 .setIcon(AllIcons.General.TodoQuestion)
                 .notify(null);
-
     }
 
     private static void enableTelemetry(boolean enabled, Notification notification) {

@@ -10,6 +10,10 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.util.messages.MessageBus;
+import com.intellij.util.messages.Topic;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -21,12 +25,19 @@ public class TelemetryConfiguration extends CompositeConfiguration {
 
     public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
-    private TelemetryConfiguration() {}
-
     public static final FileConfiguration GLOBAL_FILE = new FileConfiguration(Paths.get(
             System.getProperty("user.home"),
             ".redhat",
             "com.redhat.devtools.intellij.telemetry"));
+    private final TelemetryConfigurationNotifier notifier;
+
+    private TelemetryConfiguration() {
+        this(ApplicationManager.getApplication().getMessageBus());
+    }
+
+    public TelemetryConfiguration(final MessageBus messageBus) {
+        this.notifier = messageBus.syncPublisher(TelemetryConfigurationNotifier.CONFIGURATION_CHANGED);
+    }
 
     public void setMode(Mode mode) {
         put(KEY_MODE, mode.toString());
@@ -36,26 +47,12 @@ public class TelemetryConfiguration extends CompositeConfiguration {
         return Mode.safeValueOf(get(KEY_MODE));
     }
 
-    public void setEnabled(boolean enabled) {
-        setMode(toMode(enabled));
-    }
-
-    private Mode toMode(boolean enabled) {
-        if (enabled) {
-            return Mode.NORMAL;
-        } else {
-            return Mode.DISABLED;
-        }
-    }
-
     public boolean isEnabled() {
-        switch(getMode()) {
-            case NORMAL:
-            case DEBUG:
-                return true;
-            default:
-                return false;
-        }
+        return Mode.toEnabledBoolean(getMode());
+    }
+
+    public void setEnabled(boolean enabled) {
+        setMode(Mode.toEnabledMode(enabled));
     }
 
     public boolean isDebug() {
@@ -69,6 +66,7 @@ public class TelemetryConfiguration extends CompositeConfiguration {
     @Override
     public void put(String key, String value) {
         GLOBAL_FILE.properties.get().put(key, value);
+        notifier.configurationChanged(key, value);
     }
 
     public void save() throws IOException {
@@ -95,6 +93,35 @@ public class TelemetryConfiguration extends CompositeConfiguration {
                 return UNKNOWN;
             }
         }
+
+        public static Mode toEnabledMode(boolean enabled) {
+            if (enabled) {
+                return Mode.NORMAL;
+            } else {
+                return Mode.DISABLED;
+            }
+        }
+
+        public static boolean toEnabledBoolean(String value) {
+            return toEnabledBoolean(safeValueOf(value));
+        }
+
+        public static boolean toEnabledBoolean(Mode mode) {
+            switch(mode) {
+                case NORMAL:
+                case DEBUG:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    }
+
+    public static interface TelemetryConfigurationNotifier {
+        Topic<TelemetryConfigurationNotifier> CONFIGURATION_CHANGED =
+                Topic.create("Telemetry Configuration Changed", TelemetryConfigurationNotifier.class);
+
+        void configurationChanged(String property, String value);
     }
 
 }
