@@ -14,31 +14,33 @@ import java.util.regex.Pattern;
 
 public class AnonymizeUtils {
 
-    private static final String USER_NAME = System.getProperty("user.name");
-    private static final String HOME_DIR = System.getProperty("user.home");
-    private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
-    private static final String ANONYMOUS_USER_NAME = "$USER";
+    public static final String USER_NAME = System.getProperty("user.name");
+    public static final String ANONYMOUS_USER_NAME = "<USER>";
+    public static final String HOME_DIR = System.getProperty("user.home");
+    public static final String ANONYMOUS_HOMEDIR = "<HOMEDIR>";
+    public static final String TMP_DIR = System.getProperty("java.io.tmpdir");
+    public static final String ANONYMOUS_TMPDIR = "<TMPDIR>";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}",
             Pattern.CASE_INSENSITIVE);
-    private static final String ANONYMOUS_EMAIL = "$EMAIL";
+    public static final String ANONYMOUS_EMAIL = "<EMAIL>";
     private static final Pattern IP_PATTERN = Pattern.compile(
             "(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])");
-    private static final String ANONYMOUS_IP = "$IP";
+    public static final String ANONYMOUS_IP = "<IP>";
 
     public static String anonymize(String string) {
-        return replaceEmail(
-                replaceUserName(
-                        replaceIP(
-                                replaceHomedir(
-                                        replaceTmpdir(string)
+        return anonymizeEmail(
+                anonymizeUserName(
+                        anonymizeIP(
+                                anonymizeHomeDir(
+                                        anonymizeTmpDir(string)
                                 )
                         )
                 )
         );
     }
 
-    public static String replaceUserName(String string) {
+    public static String anonymizeUserName(String string) {
         if (string == null
                 || string.isEmpty()) {
             return string;
@@ -46,7 +48,7 @@ public class AnonymizeUtils {
         return string.replace(USER_NAME, ANONYMOUS_USER_NAME);
     }
 
-    public static String replaceEmail(String string) {
+    public static String anonymizeEmail(String string) {
         if (string == null
                 || string.isEmpty()) {
             return string;
@@ -54,23 +56,23 @@ public class AnonymizeUtils {
         return EMAIL_PATTERN.matcher(string).replaceAll(ANONYMOUS_EMAIL);
     }
 
-    public static String replaceHomedir(String string) {
+    public static String anonymizeHomeDir(String string) {
         if (string == null
                 || string.isEmpty()) {
             return string;
         }
-        return string.replace(HOME_DIR, "$HOMEDIR");
+        return string.replace(HOME_DIR, ANONYMOUS_HOMEDIR);
     }
 
-    public static String replaceTmpdir(String string) {
+    public static String anonymizeTmpDir(String string) {
         if (string == null
                 || string.isEmpty()) {
             return string;
         }
-        return string.replace(TMP_DIR, "$TMPDIR");
+        return string.replace(TMP_DIR, ANONYMOUS_TMPDIR);
     }
 
-    public static String replaceIP(String string) {
+    public static String anonymizeIP(String string) {
         if (string == null
                 || string.isEmpty()) {
             return string;

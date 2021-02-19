@@ -56,7 +56,7 @@ public class SegmentBrokerTest {
         this.analytics = createAnalytics();
         this.configuration = segmentConfiguration(false,"writeKey_value", "debugWriteKey_value");
         this.environment = environment(EXTENSION_NAME, EXTENSION_VERSION, APPLICATION_NAME, APPLICATION_VERSION);
-        this.broker = new TestableSegmentBroker(ANONYMOUS_ID, configuration, analytics);
+        this.broker = new TestableSegmentBroker(false, ANONYMOUS_ID, environment, configuration, analytics);
         this.event = new TelemetryEvent(ACTION, "Testing Telemetry");
     }
 

@@ -10,13 +10,14 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
+import com.redhat.devtools.intellij.telemetry.core.service.Environment;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 import com.segment.analytics.Analytics;
 
 public class TestableSegmentBroker extends SegmentBroker {
 
-    public TestableSegmentBroker(String anonymousId, ISegmentConfiguration configuration, Analytics analytics) {
-        super(anonymousId, configuration);
+    public TestableSegmentBroker(boolean isDebug, String anonymousId, Environment environment, ISegmentConfiguration configuration, Analytics analytics) {
+        super(isDebug, anonymousId, environment, configuration);
         this.analytics = new Lazy(() -> analytics);
     }
 }

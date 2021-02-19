@@ -49,9 +49,9 @@ public class TelemetryServiceIntegrationTest {
         this.blockingFlush = BlockingFlush.create();
         this.analytics = createAnalytics(blockingFlush, createClient());
         ISegmentConfiguration configuration = segmentConfiguration(false, SEGMENT_WRITE_KEY, "");
-        SegmentBroker broker = new TestableSegmentBroker(AnonymousId.INSTANCE.get(), configuration, analytics);
-        this.service = new TestableTelemetryService(TelemetryConfiguration.INSTANCE, broker);
         Environment environment = environment(APPLICATION_NAME, APPLICATION_VERSION, EXTENSION_NAME, EXTENSION_VERSION);
+        SegmentBroker broker = new TestableSegmentBroker(false, AnonymousId.INSTANCE.get(), environment, configuration, analytics);
+        this.service = new TestableTelemetryService(TelemetryConfiguration.INSTANCE, broker);
         this.event = new TelemetryEvent(ACTION, "Testing Telemetry");
     }
 
