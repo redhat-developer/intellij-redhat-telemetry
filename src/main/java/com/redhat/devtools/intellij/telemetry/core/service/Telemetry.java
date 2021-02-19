@@ -15,6 +15,7 @@ import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
+import com.redhat.devtools.intellij.telemetry.core.service.util.TimeUtils;
 
 import java.time.Duration;
 import java.time.LocalTime;
@@ -25,6 +26,8 @@ import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryServi
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.SHUTDOWN;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.STARTUP;
+import static com.redhat.devtools.intellij.telemetry.core.service.util.SanitizeUtils.replaceUserName;
+import static com.redhat.devtools.intellij.telemetry.core.service.util.SanitizeUtils.replaceEmail;
 import static com.redhat.devtools.intellij.telemetry.core.service.util.TimeUtils.toLocalTime;
 
 public class Telemetry {
@@ -90,7 +93,7 @@ public class Telemetry {
         }
 
         public ShutdownMessage sessionDuration(Duration duration) {
-            return property(PROP_SESSION_DURATION, toString(duration));
+            return property(PROP_SESSION_DURATION, TimeUtils.toString(duration));
         }
     }
 
@@ -112,7 +115,7 @@ public class Telemetry {
         }
 
         public ActionMessage duration(Duration duration) {
-            return property(PROP_DURATION, toString(duration));
+            return property(PROP_DURATION, TimeUtils.toString(duration));
         }
 
         public ActionMessage success() {
@@ -124,15 +127,20 @@ public class Telemetry {
         }
 
         public ActionMessage error(String message) {
-            return property(PROP_ERROR, message);
+            return property(PROP_ERROR, removeUserInfo(message));
+        }
+
+        private String removeUserInfo(String message) {
+            return replaceEmail(
+                    replaceUserName(message));
         }
 
         public ActionMessage error(Exception exception) {
-            return property(PROP_ERROR, exception.getMessage());
+            return error(exception.getMessage());
         }
     }
 
-    abstract static class Message<T extends Message<?>> {
+    private abstract static class Message<T extends Message<?>> {
 
         private final Type type;
         private final Map<String, String> properties = new HashMap<>();
@@ -150,12 +158,6 @@ public class Telemetry {
             return (T) this;
         }
 
-        protected String toString(Duration duration) {
-            return String.format("%02d:%02d:%02d",
-                    duration.toHours(),
-                    duration.toMinutes() % 60,
-                    duration.getSeconds() % 60);
-        }
 
         public void send() {
             service.send(new TelemetryEvent(type, name, properties));

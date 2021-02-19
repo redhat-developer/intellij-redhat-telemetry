@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service.util;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -23,5 +24,13 @@ public class TimeUtils {
         ZonedDateTime time = instant.atZone(ZoneId.systemDefault());
         return time.toLocalTime();
     }
+
+    public static String toString(Duration duration) {
+        return String.format("%02d:%02d:%02d",
+                duration.toHours(),
+                duration.toMinutes() % 60,
+                duration.getSeconds() % 60);
+    }
+
 
 }
