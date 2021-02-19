@@ -26,8 +26,7 @@ import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryServi
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.SHUTDOWN;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.STARTUP;
-import static com.redhat.devtools.intellij.telemetry.core.service.util.SanitizeUtils.replaceUserName;
-import static com.redhat.devtools.intellij.telemetry.core.service.util.SanitizeUtils.replaceEmail;
+import static com.redhat.devtools.intellij.telemetry.core.service.util.AnonymizeUtils.anonymize;
 import static com.redhat.devtools.intellij.telemetry.core.service.util.TimeUtils.toLocalTime;
 
 public class TelemetryMessageBuilder {
@@ -120,12 +119,7 @@ public class TelemetryMessageBuilder {
         }
 
         public ActionMessage error(String message) {
-            return property(PROP_ERROR, removeUserInfo(message));
-        }
-
-        private String removeUserInfo(String message) {
-            return replaceEmail(
-                    replaceUserName(message));
+            return property(PROP_ERROR, anonymize(message));
         }
 
         public ActionMessage error(Exception exception) {
