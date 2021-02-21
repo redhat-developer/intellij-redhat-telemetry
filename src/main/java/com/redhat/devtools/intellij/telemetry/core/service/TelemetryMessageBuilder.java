@@ -15,6 +15,7 @@ import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
+import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
 
 import java.time.Duration;
@@ -145,7 +146,6 @@ public class TelemetryMessageBuilder {
             return (T) this;
         }
 
-
         public void send() {
             service.send(new TelemetryEvent(type, name, properties));
         }
@@ -153,24 +153,22 @@ public class TelemetryMessageBuilder {
 
     private static final class ServiceFacade {
         private final ClassLoader classLoader;
-        private ITelemetryService service;
+        private Lazy<ITelemetryService> service = new Lazy<>(this::createService);
 
         private ServiceFacade(ClassLoader classLoader) {
             this.classLoader = classLoader;
         }
 
-        private ITelemetryService get() {
-            if (service == null) {
-                TelemetryServiceFactory factory = ServiceManager.getService(TelemetryServiceFactory.class);
-                this.service = factory.create(classLoader);
-                sendStartup();
-                hookShutdown();
-            }
-            return service;
+        public void send(TelemetryEvent event) {
+            service.get().send(event);
         }
 
-        private void send(TelemetryEvent event) {
-            get().send(event);
+        private ITelemetryService createService() {
+            TelemetryServiceFactory factory = ServiceManager.getService(TelemetryServiceFactory.class);
+            ITelemetryService service = factory.create(classLoader);
+            sendStartup();
+            hookShutdown();
+            return service;
         }
 
         private void sendStartup() {
