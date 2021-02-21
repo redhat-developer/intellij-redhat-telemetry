@@ -11,8 +11,8 @@
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.Topic;
+import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -29,15 +29,9 @@ public class TelemetryConfiguration extends CompositeConfiguration {
             System.getProperty("user.home"),
             ".redhat",
             "com.redhat.devtools.intellij.telemetry"));
-    private final TelemetryConfigurationNotifier notifier;
-
-    private TelemetryConfiguration() {
-        this(ApplicationManager.getApplication().getMessageBus());
-    }
-
-    public TelemetryConfiguration(final MessageBus messageBus) {
-        this.notifier = messageBus.syncPublisher(TelemetryConfigurationNotifier.CONFIGURATION_CHANGED);
-    }
+    private final Lazy<ConfigurationChangedListener> notifier = new Lazy<>(() ->
+            ApplicationManager.getApplication().getMessageBus()
+                    .syncPublisher(ConfigurationChangedListener.CONFIGURATION_CHANGED));
 
     public void setMode(Mode mode) {
         put(KEY_MODE, mode.toString());
@@ -48,11 +42,11 @@ public class TelemetryConfiguration extends CompositeConfiguration {
     }
 
     public boolean isEnabled() {
-        return Mode.toEnabledBoolean(getMode());
+        return getMode().isEnabled();
     }
 
     public void setEnabled(boolean enabled) {
-        setMode(Mode.toEnabledMode(enabled));
+        setMode(Mode.valueOf(enabled));
     }
 
     public boolean isDebug() {
@@ -60,13 +54,13 @@ public class TelemetryConfiguration extends CompositeConfiguration {
     }
 
     public boolean isConfigured() {
-        return getMode() != Mode.UNKNOWN;
+        return getMode().isConfigured();
     }
 
     @Override
     public void put(String key, String value) {
         GLOBAL_FILE.properties.get().put(key, value);
-        notifier.configurationChanged(key, value);
+        notifier.get().configurationChanged(key, value);
     }
 
     public void save() throws IOException {
@@ -81,7 +75,54 @@ public class TelemetryConfiguration extends CompositeConfiguration {
     }
 
     public enum Mode {
-        NORMAL, DEBUG, DISABLED, UNKNOWN;
+        NORMAL {
+            @Override
+            public boolean isEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean isConfigured() {
+                return true;
+            }
+        }
+        , DEBUG {
+            @Override
+            public boolean isEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean isConfigured() {
+                return true;
+            }
+        }, DISABLED {
+            @Override
+            public boolean isEnabled() {
+                return false;
+            }
+
+            @Override
+            public boolean isConfigured() {
+                return true;
+            }
+
+        }, UNKNOWN {
+            @Override
+            public boolean isEnabled() {
+                return false;
+            }
+
+            @Override
+            public boolean isConfigured() {
+                return false;
+            }
+
+        };
+
+        public abstract boolean isEnabled();
+
+        public abstract boolean isConfigured();
 
         public static Mode safeValueOf(String value) {
             try {
@@ -94,32 +135,18 @@ public class TelemetryConfiguration extends CompositeConfiguration {
             }
         }
 
-        public static Mode toEnabledMode(boolean enabled) {
+        public static Mode valueOf(boolean enabled) {
             if (enabled) {
                 return Mode.NORMAL;
             } else {
                 return Mode.DISABLED;
             }
         }
-
-        public static boolean toEnabledBoolean(String value) {
-            return toEnabledBoolean(safeValueOf(value));
-        }
-
-        public static boolean toEnabledBoolean(Mode mode) {
-            switch(mode) {
-                case NORMAL:
-                case DEBUG:
-                    return true;
-                default:
-                    return false;
-            }
-        }
     }
 
-    public static interface TelemetryConfigurationNotifier {
-        Topic<TelemetryConfigurationNotifier> CONFIGURATION_CHANGED =
-                Topic.create("Telemetry Configuration Changed", TelemetryConfigurationNotifier.class);
+    public interface ConfigurationChangedListener {
+        Topic<ConfigurationChangedListener> CONFIGURATION_CHANGED =
+                Topic.create("Telemetry Configuration Changed", ConfigurationChangedListener.class);
 
         void configurationChanged(String property, String value);
     }

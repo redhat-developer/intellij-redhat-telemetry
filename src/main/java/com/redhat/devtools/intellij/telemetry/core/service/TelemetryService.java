@@ -21,6 +21,8 @@ import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.*;
+
 public class TelemetryService implements ITelemetryService {
 
     public enum Type {
@@ -48,9 +50,9 @@ public class TelemetryService implements ITelemetryService {
     }
 
     private void onConfigurationChanged(MessageBusConnection connection) {
-        connection.subscribe(TelemetryConfiguration.TelemetryConfigurationNotifier.CONFIGURATION_CHANGED, (String property, String value) -> {
-            if (TelemetryConfiguration.KEY_MODE.equals(property)
-                    && TelemetryConfiguration.Mode.toEnabledBoolean(value)) {
+        connection.subscribe(ConfigurationChangedListener.CONFIGURATION_CHANGED, (String key, String value) -> {
+            if (KEY_MODE.equals(key)
+                    && Mode.safeValueOf(value).isEnabled()) {
                 flushOnHold();
             }
         });
