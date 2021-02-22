@@ -96,11 +96,16 @@ public class TelemetryMessageBuilder {
         private static final String PROP_ERROR = "error";
         private static final String PROP_RESULT = "result";
 
-        private final LocalTime startTime;
+        private LocalTime startTime;
 
         private ActionMessage(Type type, String name, ServiceFacade service) {
             super(type, name, service);
-            this.startTime = LocalTime.now();
+            started(LocalTime.now());
+        }
+
+        public ActionMessage started(LocalTime startTime) {
+            this.startTime = startTime;
+            return this;
         }
 
         public ActionMessage finished() {
