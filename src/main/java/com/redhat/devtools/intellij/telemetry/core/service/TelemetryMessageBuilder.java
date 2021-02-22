@@ -15,14 +15,12 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
-import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
 
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
@@ -43,7 +41,7 @@ public class TelemetryMessageBuilder {
         this.service = serviceFacade;
     }
 
-    public ActionMessage actionPerformed(String name) {
+    public ActionMessage action(String name) {
         return new ActionMessage(ACTION, name, service);
     }
 
@@ -110,7 +108,10 @@ public class TelemetryMessageBuilder {
         }
 
         public ActionMessage finished() {
-            return duration(Duration.between(startTime, LocalTime.now()));
+            if (!hasProperty(PROP_DURATION)) {
+                duration(Duration.between(startTime, LocalTime.now()));
+            }
+            return this;
         }
 
         public ActionMessage duration(Duration duration) {
@@ -118,19 +119,25 @@ public class TelemetryMessageBuilder {
         }
 
         public ActionMessage success() {
-            return success("success");
+            return result("success");
         }
 
-        public ActionMessage success(String message) {
+        public ActionMessage result(String message) {
             return property(PROP_RESULT, message);
+        }
+
+        public ActionMessage error(Exception exception) {
+            return error(exception.getMessage());
         }
 
         public ActionMessage error(String message) {
             return property(PROP_ERROR, anonymize(message));
         }
 
-        public ActionMessage error(Exception exception) {
-            return error(exception.getMessage());
+        @Override
+        public void send() {
+            finished();
+            super.send();
         }
     }
 
@@ -150,6 +157,10 @@ public class TelemetryMessageBuilder {
         public T property(String key, String value) {
             properties.put(key, value);
             return (T) this;
+        }
+
+        protected boolean hasProperty(String key) {
+            return properties.containsKey(key);
         }
 
         public void send() {
