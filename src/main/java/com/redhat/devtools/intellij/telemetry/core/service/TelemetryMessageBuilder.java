@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
@@ -154,26 +155,29 @@ public class TelemetryMessageBuilder {
         public void send() {
             service.send(new TelemetryEvent(type, name, properties));
         }
+
     }
 
     private static final class ServiceFacade {
         private final ClassLoader classLoader;
-        private Lazy<ITelemetryService> service = new Lazy<>(this::createService);
+        private ITelemetryService service = null;
 
         private ServiceFacade(final ClassLoader classLoader) {
             this.classLoader = classLoader;
         }
 
         public void send(final TelemetryEvent event) {
-            service.get().send(event);
+            if (service == null) {
+                this.service = createService(classLoader);
+                sendStartup();
+                onShutdown();
+            }
+            service.send(event);
         }
 
-        private ITelemetryService createService() {
+        private ITelemetryService createService(ClassLoader classLoader) {
             TelemetryServiceFactory factory = ServiceManager.getService(TelemetryServiceFactory.class);
-            ITelemetryService service = factory.create(classLoader);
-            sendStartup();
-            onShutdown();
-            return service;
+            return factory.create(classLoader);
         }
 
         private void sendStartup() {
