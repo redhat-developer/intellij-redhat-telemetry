@@ -34,7 +34,7 @@ public class TelemetryNotifications {
 
     public static void queryUserConsent() {
         Notification notification = QUERY_USER_CONSENT.createNotification("Enable Telemetry",
-                "Help Red Hat improve its extensions by allowing them to collect usage data. " +
+                "Help Red Hat improve its extensions by allowing them to collect anonymous usage data. " +
                         "Read our <a href=\"https://developers.redhat.com/article/tool-data-collection\">privacy statement</a> " +
                         "and learn how to <a href=\"\">opt out</a>.",
                 NotificationType.INFORMATION,
