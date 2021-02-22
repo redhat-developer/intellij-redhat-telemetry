@@ -11,9 +11,9 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.ide.AppLifecycleListener;
-import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
@@ -155,11 +155,11 @@ public class TelemetryMessageBuilder {
         private final ClassLoader classLoader;
         private Lazy<ITelemetryService> service = new Lazy<>(this::createService);
 
-        private ServiceFacade(ClassLoader classLoader) {
+        private ServiceFacade(final ClassLoader classLoader) {
             this.classLoader = classLoader;
         }
 
-        public void send(TelemetryEvent event) {
+        public void send(final TelemetryEvent event) {
             service.get().send(event);
         }
 
@@ -167,7 +167,7 @@ public class TelemetryMessageBuilder {
             TelemetryServiceFactory factory = ServiceManager.getService(TelemetryServiceFactory.class);
             ITelemetryService service = factory.create(classLoader);
             sendStartup();
-            hookShutdown();
+            onShutdown();
             return service;
         }
 
@@ -175,9 +175,12 @@ public class TelemetryMessageBuilder {
             new StartupMessage(this).send();
         }
 
-        private void hookShutdown() {
-            Application application = ApplicationManager.getApplication();
-            application.getMessageBus().connect().subscribe(AppLifecycleListener.TOPIC, new AppLifecycleListener() {
+        private void onShutdown() {
+            onShutdown(ApplicationManager.getApplication().getMessageBus().connect());
+        }
+
+        private void onShutdown(MessageBusConnection connection) {
+            connection.subscribe(AppLifecycleListener.TOPIC, new AppLifecycleListener() {
                 @Override
                 public void appWillBeClosed(boolean isRestart) {
                     new ShutdownMessage(ServiceFacade.this).send();
