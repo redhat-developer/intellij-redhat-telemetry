@@ -11,7 +11,6 @@ intellij {
 
 patchPluginXml {
     sinceBuild sinceIdeaBuild
-    group 'com.redhat.devtools.intellij'
     version projectVersion
 }
 
@@ -68,5 +67,7 @@ repositories {
     mavenLocal()
     maven { url 'https://repository.jboss.org' }
 }
+
+group 'com.redhat.devtools.intellij'
 
 
