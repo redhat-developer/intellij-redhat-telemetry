@@ -51,6 +51,7 @@ public class SegmentBroker implements IMessageBroker {
     public static final String PROP_APP_VERSION = "app_version";
 
     private static final int FLUSH_INTERVAL = 10000;
+    public static final int FLUSH_QUEUE_SIZE = 1;
 
     enum Type {
         IDENTIFY {
@@ -185,7 +186,7 @@ public class SegmentBroker implements IMessageBroker {
         }
         LOGGER.debug("Creating Segment Analytics instance using " + writeKey + " writeKey.");
         return Analytics.builder(writeKey)
-                .flushQueueSize(1)
+                .flushQueueSize(FLUSH_QUEUE_SIZE)
                 .flushInterval(FLUSH_INTERVAL, TimeUnit.MILLISECONDS)
                 .build();
     }
