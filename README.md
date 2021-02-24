@@ -15,7 +15,7 @@ telemetry collection program:
 Whether you accept or deny the request, this pop up will not show again.
 
 You can also opt-in later, by enabling it in the preferences at Tools > Red Hat Telemetry.
-![Opt-in preferences](optin-preferences.png)
+![Opt-in preferences](images/optin-preferences.png)
 
 This will enable all telemetry events from Red Hat plugins going forward.
 
