@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.redhat.devtools.intellij.telemetry</id>
     <name>Telemetry by Red Hat</name>
-    <vendor email="developers@redhat.com" url="http://www.redhat.com">Red-Hat</vendor>
+    <vendor email="developers@redhat.com" url="https://www.redhat.com">Red-Hat</vendor>
     <description>
         <![CDATA[
         <p>A plugin that provides Telemetry APIs to be used by Red Hat IDEA plugins so that they can report user interactions.
