@@ -21,7 +21,7 @@ import java.util.List;
 
 public class TelemetryConfiguration extends CompositeConfiguration {
 
-    public static final String KEY_MODE = "mode";
+    public static final String KEY_MODE = "com.redhat.devtools.intellij.telemetry.mode";
 
     public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
