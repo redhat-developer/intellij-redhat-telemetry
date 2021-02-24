@@ -13,7 +13,7 @@ runIdeForUiTests {
 
 intellij {
     version ideaVersion //for a full list of Jetbrains IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    pluginName 'com.redhat.devtools.intellij.telemetry'
+    pluginName 'Telemetry by Red Hat'
     updateSinceUntilBuild false
 }
 
