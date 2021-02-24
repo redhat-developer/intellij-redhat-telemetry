@@ -3,6 +3,14 @@ plugins {
     id "idea"
 }
 
+runIde {
+    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
+}
+
+runIdeForUiTests {
+    systemProperties['com.redhat.devtools.intellij.telemetry.mode'] = 'debug'
+}
+
 intellij {
     version ideaVersion //for a full list of Jetbrains IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     pluginName 'com.redhat.devtools.intellij.telemetry'
