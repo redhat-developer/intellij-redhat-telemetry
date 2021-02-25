@@ -17,9 +17,19 @@ import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
+import com.intellij.notification.impl.NotificationsManagerImpl;
+import com.intellij.openapi.actionSystem.ActionGroup;
+import com.intellij.openapi.actionSystem.ActionGroupUtil;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.ui.BalloonImpl;
+import com.intellij.ui.components.labels.LinkLabel;
+import com.intellij.ui.components.labels.LinkListener;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -43,9 +53,12 @@ public class TelemetryNotifications {
                 e -> enableTelemetry(true, notification));
         DumbAwareAction deny = NotificationAction.create("Deny",
                 e -> enableTelemetry(false, notification));
+        DumbAwareAction later = NotificationAction.create("Later",
+                e -> notification.expire());
         notification
                 .addAction(accept)
                 .addAction(deny)
+                .addAction(later)
                 .setIcon(AllIcons.General.TodoQuestion)
                 .notify(null);
     }
@@ -61,5 +74,4 @@ public class TelemetryNotifications {
             notification.expire();
         }
     }
-
 }
