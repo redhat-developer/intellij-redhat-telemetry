@@ -12,8 +12,10 @@ package com.redhat.devtools.intellij.telemetry.ui.preferences;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.options.SearchableConfigurable;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JComponent;
@@ -22,7 +24,10 @@ import java.io.IOException;
 /**
  * Controller for telemetry settings.
  */
-public class TelemetryConfigurable implements Configurable {
+public class TelemetryConfigurable implements SearchableConfigurable {
+
+    /* plugin.xml > applicationConfigurable > id */
+    public static final String ID = "tools.preferences.redhat.telemetry";
 
     private static final Logger LOGGER = Logger.getInstance(TelemetryConfigurable.class);
 
@@ -74,4 +79,9 @@ public class TelemetryConfigurable implements Configurable {
         component = null;
     }
 
+    @NotNull
+    @Override
+    public String getId() {
+        return ID;
+    }
 }

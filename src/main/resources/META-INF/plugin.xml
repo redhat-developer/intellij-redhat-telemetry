@@ -14,7 +14,7 @@
         <applicationConfigurable
                 parentId="tools"
                 instance="com.redhat.devtools.intellij.telemetry.ui.preferences.TelemetryConfigurable"
-                id="com.redhat.devtools.intellij.telemetry.ui.preferences.TelemetryConfigurable"
+                id="tools.preferences.redhat.telemetry"
                 displayName="Red Hat Telemetry"/>
         <applicationService
                 serviceImplementation="com.redhat.devtools.intellij.telemetry.core.service.TelemetryServiceFactory"/>
