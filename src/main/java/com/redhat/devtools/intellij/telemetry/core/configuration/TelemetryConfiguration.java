@@ -129,7 +129,7 @@ public class TelemetryConfiguration extends CompositeConfiguration {
                 if (value == null) {
                     return UNKNOWN;
                 }
-                return Mode.valueOf(value);
+                return Mode.valueOf(value.toUpperCase());
             } catch (IllegalArgumentException e) {
                 return UNKNOWN;
             }
