@@ -27,6 +27,8 @@ public class AnonymizeUtils {
     private static final Pattern IP_PATTERN = Pattern.compile(
             "(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])");
     public static final String ANONYMOUS_IP = "<IP>";
+    public static final String ANONYMOUS_RESOURCENAME = "<RESOURCENAME>";
+    public static final String ANONYMOUS_NAMESPACE = "<NAMESPACE>";
 
     public static String anonymize(String string) {
         return anonymizeEmail(
@@ -38,6 +40,20 @@ public class AnonymizeUtils {
                         )
                 )
         );
+    }
+
+    public static String anonymizeResource(String name, String namespace, String string) {
+        if (string == null
+                || string.isEmpty()) {
+            return string;
+        }
+        if (name != null) {
+            string = string.replace(name, ANONYMOUS_RESOURCENAME);
+        }
+        if (namespace != null) {
+            string = string.replace(namespace, ANONYMOUS_NAMESPACE);
+        }
+        return string;
     }
 
     public static String anonymizeUserName(String string) {
