@@ -51,7 +51,7 @@ public class SegmentBroker implements IMessageBroker {
     public static final String PROP_APP_VERSION = "app_version";
 
     private static final int FLUSH_INTERVAL = 10000;
-    public static final int FLUSH_QUEUE_SIZE = 1;
+    public static final int FLUSH_QUEUE_SIZE = 10;
 
     enum Type {
         IDENTIFY {
