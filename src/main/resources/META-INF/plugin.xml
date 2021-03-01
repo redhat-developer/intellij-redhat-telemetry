@@ -8,7 +8,9 @@
         Those allow us to identify problems and improve our products.</p>
         ]]>
     </description>
+    <idea-version since-build="193.5233.102" />
 
+    <depends>com.intellij.modules.lang</depends>
     <extensions defaultExtensionNs="com.intellij">
         <!-- <applicationService serviceImplementation="com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState"/> -->
         <applicationConfigurable
