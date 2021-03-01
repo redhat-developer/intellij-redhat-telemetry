@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.diagnostic.Logger;
@@ -10,17 +20,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-public class AnonymousId {
+public class UserId {
 
-    private static final Logger LOGGER = Logger.getInstance(AnonymousId.class);
+    private static final Logger LOGGER = Logger.getInstance(UserId.class);
 
-    public static final AnonymousId INSTANCE = new AnonymousId();
+    public static final UserId INSTANCE = new UserId();
     private static final Path REDHAT_DIRECTORY = Paths.get(System.getProperty("user.home"), ".redhat");
     private static final Path UUID_FILE = REDHAT_DIRECTORY.resolve("anonymousId");
 
     private final Lazy<String> uuid = new Lazy<>(() -> loadOrCreate(UUID_FILE));
 
-    private AnonymousId() {}
+    private UserId() {}
 
     public String get() {
         return uuid.get();

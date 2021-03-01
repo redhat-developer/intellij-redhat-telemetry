@@ -87,12 +87,12 @@ public class SegmentBroker implements IMessageBroker {
         }
     }
 
-    private final String anonymousId;
+    private final String userId;
     private final Environment environment;
     protected Lazy<Analytics> analytics;
 
-    public SegmentBroker(boolean isDebug, String anonymousId, Environment environment, ISegmentConfiguration configuration) {
-        this.anonymousId = anonymousId;
+    public SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration) {
+        this.userId = userId;
         this.environment = environment;
         this.analytics = new Lazy<>(() -> createAnalytics(getWriteKey(isDebug, configuration)));
     }
@@ -116,7 +116,7 @@ public class SegmentBroker implements IMessageBroker {
 
     private MessageBuilder toMessage(IdentifyMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
         return builder
-                .anonymousId(anonymousId)
+                .userId(userId)
                 .traits(addTraitsEnvironment(event.getProperties()))
                 .context(context);
     }
@@ -132,7 +132,7 @@ public class SegmentBroker implements IMessageBroker {
 
     private MessageBuilder toMessage(TrackMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
         return builder
-                .anonymousId(anonymousId)
+                .userId(userId)
                 .properties(addIdentifyEnvironment(event.getProperties()))
                 .context(context);
     }
@@ -150,7 +150,7 @@ public class SegmentBroker implements IMessageBroker {
 
     private MessageBuilder toMessage(PageMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
         return builder
-                .anonymousId(anonymousId)
+                .userId(userId)
                 .properties(event.getProperties())
                 .context(context);
     }

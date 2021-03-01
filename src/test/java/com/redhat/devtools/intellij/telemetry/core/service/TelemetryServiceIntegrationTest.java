@@ -67,7 +67,7 @@ public class TelemetryServiceIntegrationTest {
                 PLATFORM_VERSION);
         SegmentBroker broker = new TestableSegmentBroker(
                 false,
-                AnonymousId.INSTANCE.get(),
+                UserId.INSTANCE.get(),
                 environment, configuration,
                 analytics);
         this.service = new TelemetryService(

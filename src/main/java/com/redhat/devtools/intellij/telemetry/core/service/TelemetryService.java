@@ -10,7 +10,6 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
@@ -69,7 +68,7 @@ public class TelemetryService implements ITelemetryService {
         if (userInfoSent.compareAndSet(false, true)) {
             doSend(new TelemetryEvent(
                     Type.USER,
-                    "Anonymous ID: " + AnonymousId.INSTANCE.get()));
+                    "Anonymous ID: " + UserId.INSTANCE.get()));
         }
     }
 

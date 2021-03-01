@@ -46,7 +46,7 @@ public class SegmentBrokerTest {
     private static final String PLATFORM_NAME = "smurfOS";
     private static final String PLATFORM_DISTRIBUTION = "red hats";
     private static final String PLATFORM_VERSION = "0.1.0";
-    private static final String ANONYMOUS_ID = "42";
+    private static final String USER_ID = "42";
 
     private Analytics analytics;
     private Environment environment;
@@ -66,7 +66,7 @@ public class SegmentBrokerTest {
                 PLATFORM_NAME,
                 PLATFORM_DISTRIBUTION,
                 PLATFORM_VERSION);
-        this.broker = new TestableSegmentBroker(false, ANONYMOUS_ID, environment, configuration, analytics);
+        this.broker = new TestableSegmentBroker(false, USER_ID, environment, configuration, analytics);
         this.event = new TelemetryEvent(ACTION, "Testing Telemetry");
     }
 
@@ -80,7 +80,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_enqueue_track_message_with_anonymousId() {
+    public void send_should_enqueue_track_message_with_userId() {
         // given
         ArgumentCaptor<MessageBuilder<?,?>> builder = ArgumentCaptor.forClass(MessageBuilder.class);
         // when
@@ -88,13 +88,13 @@ public class SegmentBrokerTest {
         // then
         verify(analytics).enqueue(builder.capture());
         Message message = builder.getValue().build();
-        assertThat(message.anonymousId()).isEqualTo(ANONYMOUS_ID);
+        assertThat(message.userId()).isEqualTo(USER_ID);
     }
 
     @Test
     public void send_should_NOT_enqueue_if_no_analytics() {
         // given
-        IMessageBroker broker = new SegmentBroker(false, ANONYMOUS_ID, environment, configuration);
+        IMessageBroker broker = new SegmentBroker(false, USER_ID, environment, configuration);
         // when
         broker.send(event);
         // then

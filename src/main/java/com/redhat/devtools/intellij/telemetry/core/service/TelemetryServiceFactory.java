@@ -36,7 +36,7 @@ public class TelemetryServiceFactory {
         SegmentConfiguration brokerConfiguration = new SegmentConfiguration(classLoader);
         return new SegmentBroker(
                 isDebug,
-                AnonymousId.INSTANCE.get(),
+                UserId.INSTANCE.get(),
                 environment,
                 brokerConfiguration);
     }
