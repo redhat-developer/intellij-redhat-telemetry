@@ -42,7 +42,17 @@ public class TelemetryNotifications {
             NotificationDisplayType.STICKY_BALLOON,
             true);
 
-    public static void queryUserConsent() {
+    private final NotificationGroup group;
+
+    public TelemetryNotifications() {
+        this(QUERY_USER_CONSENT);
+    }
+
+    public TelemetryNotifications(NotificationGroup group) {
+        this.group = group;
+    }
+
+    public void queryUserConsent() {
         Notification notification = QUERY_USER_CONSENT.createNotification("Enable Telemetry",
                 "Help Red Hat improve its extensions by allowing them to collect anonymous usage data. " +
                         "Read our <a href=\"https://developers.redhat.com/article/tool-data-collection\">privacy statement</a> " +

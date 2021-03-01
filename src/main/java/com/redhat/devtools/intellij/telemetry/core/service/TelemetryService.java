@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
@@ -33,6 +34,7 @@ public class TelemetryService implements ITelemetryService {
 
     private static final int BUFFER_SIZE = 35;
 
+    private final TelemetryNotifications notifications;
     private final TelemetryConfiguration configuration;
     protected final IMessageBroker broker;
     private final AtomicBoolean userInfoSent = new AtomicBoolean(false);
@@ -40,12 +42,13 @@ public class TelemetryService implements ITelemetryService {
     private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);
 
     public TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker) {
-        this(configuration, broker, ApplicationManager.getApplication().getMessageBus().connect());
+        this(configuration, broker, ApplicationManager.getApplication().getMessageBus().connect(), new TelemetryNotifications());
     }
 
-    public TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker, final MessageBusConnection connection) {
+    TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker, final MessageBusConnection connection, final TelemetryNotifications notifications) {
         this.configuration = configuration;
         this.broker = broker;
+        this.notifications = notifications;
         onConfigurationChanged(connection);
     }
 
@@ -68,7 +71,7 @@ public class TelemetryService implements ITelemetryService {
     private void queryUserConsent() {
         if (!isConfigured()
             && userQueried.compareAndSet(false, true)) {
-            TelemetryNotifications.queryUserConsent();
+            notifications.queryUserConsent();
         }
     }
 

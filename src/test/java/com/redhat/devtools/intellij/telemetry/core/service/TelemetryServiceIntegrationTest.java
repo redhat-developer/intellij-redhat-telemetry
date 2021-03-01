@@ -10,16 +10,19 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
+import com.intellij.util.messages.MessageBusConnection;
 import com.jakewharton.retrofit.Ok3Client;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.TestableSegmentBroker;
+import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
 import com.redhat.devtools.intellij.telemetry.util.BlockingFlush;
 import com.redhat.devtools.intellij.telemetry.util.StdOutLogging;
 import com.segment.analytics.Analytics;
 import okhttp3.OkHttpClient;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +33,9 @@ import java.util.concurrent.TimeUnit;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.segmentConfiguration;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
+import static org.mockito.Mockito.mock;
 
+@Ignore("For manual testing purposes only")
 public class TelemetryServiceIntegrationTest {
 
     private static final String EXTENSION_NAME = "com.redhat.devtools.intellij.telemetry";
@@ -50,8 +55,15 @@ public class TelemetryServiceIntegrationTest {
         this.analytics = createAnalytics(blockingFlush, createClient());
         ISegmentConfiguration configuration = segmentConfiguration(false, SEGMENT_WRITE_KEY, "");
         Environment environment = environment(APPLICATION_NAME, APPLICATION_VERSION, EXTENSION_NAME, EXTENSION_VERSION);
-        SegmentBroker broker = new TestableSegmentBroker(false, AnonymousId.INSTANCE.get(), environment, configuration, analytics);
-        this.service = new TestableTelemetryService(TelemetryConfiguration.INSTANCE, broker);
+        SegmentBroker broker = new TestableSegmentBroker(
+                false,
+                AnonymousId.INSTANCE.get(),
+                environment, configuration,
+                analytics);
+        this.service = new TelemetryService(
+                TelemetryConfiguration.INSTANCE,
+                broker, mock(MessageBusConnection.class),
+                mock(TelemetryNotifications.class));
         this.event = new TelemetryEvent(ACTION, "Testing Telemetry");
     }
 
@@ -59,13 +71,6 @@ public class TelemetryServiceIntegrationTest {
     public void after() {
         shutdownAnalytics();
     }
-
-    private void shutdownAnalytics() {
-        analytics.flush();
-        blockingFlush.block();
-        analytics.shutdown();
-    }
-
 
     @Test
     public void should_send_track_event() {
@@ -90,6 +95,12 @@ public class TelemetryServiceIntegrationTest {
                         .readTimeout(5, TimeUnit.SECONDS)
                         .writeTimeout(5, TimeUnit.SECONDS)
                         .build());
+    }
+
+    private void shutdownAnalytics() {
+        analytics.flush();
+        blockingFlush.block();
+        analytics.shutdown();
     }
 
 }
