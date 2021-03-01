@@ -14,9 +14,13 @@ public class Fakes {
             String extensionName,
             String extensionVersion,
             String applicationName,
-            String applicationVersion) {
+            String applicationVersion,
+            String platform_name,
+            String platform_distribution,
+            String platform_version) {
         return new Environment.Builder()
                 .application(new Application(applicationName, applicationVersion))
+                .platform(new Platform(platform_name, platform_distribution, platform_version))
                 .plugin(new Application(extensionName, extensionVersion))
                 .build();
     }

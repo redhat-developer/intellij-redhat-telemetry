@@ -42,6 +42,9 @@ public class TelemetryServiceIntegrationTest {
     private static final String EXTENSION_VERSION = "0.0.1";
     private static final String APPLICATION_VERSION = "1.0.0";
     private static final String APPLICATION_NAME = TelemetryServiceIntegrationTest.class.getSimpleName();
+    private static final String PLATFORM_NAME = "smurfOS";
+    private static final String PLATFORM_DISTRIBUTION = "red hats";
+    private static final String PLATFORM_VERSION = "0.1.0";
     public static final String SEGMENT_WRITE_KEY = "HYuMCHlIpTvukCKZA42OubI1cvGIAap6";
 
     private BlockingFlush blockingFlush;
@@ -54,7 +57,14 @@ public class TelemetryServiceIntegrationTest {
         this.blockingFlush = BlockingFlush.create();
         this.analytics = createAnalytics(blockingFlush, createClient());
         ISegmentConfiguration configuration = segmentConfiguration(false, SEGMENT_WRITE_KEY, "");
-        Environment environment = environment(APPLICATION_NAME, APPLICATION_VERSION, EXTENSION_NAME, EXTENSION_VERSION);
+        Environment environment = environment(
+                APPLICATION_NAME,
+                APPLICATION_VERSION,
+                EXTENSION_NAME,
+                EXTENSION_VERSION,
+                PLATFORM_NAME,
+                PLATFORM_DISTRIBUTION,
+                PLATFORM_VERSION);
         SegmentBroker broker = new TestableSegmentBroker(
                 false,
                 AnonymousId.INSTANCE.get(),

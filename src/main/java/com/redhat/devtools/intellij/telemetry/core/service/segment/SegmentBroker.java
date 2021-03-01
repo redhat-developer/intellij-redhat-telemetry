@@ -31,6 +31,7 @@ public class SegmentBroker implements IMessageBroker {
     private static final Logger LOGGER = Logger.getInstance(SegmentBroker.class);
 
     public static final String PROP_NAME = "name";
+    public static final String PROP_DISTRIBUTION = "distribution";
     public static final String PROP_VERSION = "version";
     public static final String PROP_APP = "app";
     public static final String PROP_IP = "ip";
@@ -39,6 +40,7 @@ public class SegmentBroker implements IMessageBroker {
     public static final String PROP_LOCATION = "location";
     public static final String PROP_OS = "os";
     public static final String PROP_OS_NAME = "os_name";
+    public static final String PROP_OS_DISTRIBUTION = "os_distribution";
     public static final String PROP_OS_VERSION = "os_version";
     public static final String PROP_TIMEZONE = "timezone";
 
@@ -122,6 +124,7 @@ public class SegmentBroker implements IMessageBroker {
     private Map<String, ?> addTraitsEnvironment(Map<String, String> properties) {
         properties.put(PROP_LOCALE, environment.getLocale());
         properties.put(PROP_OS_NAME, environment.getPlatform().getName());
+        properties.put(PROP_OS_DISTRIBUTION, environment.getPlatform().getDistribution());
         properties.put(PROP_OS_VERSION, environment.getPlatform().getVersion());
         properties.put(PROP_TIMEZONE, environment.getTimezone());
         return properties;

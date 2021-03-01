@@ -26,10 +26,10 @@ import java.util.Map;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.segmentConfiguration;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
-import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP_NAME;
-import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP_VERSION;
-import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_EXTENSION_NAME;
-import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_EXTENSION_VERSION;
+import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP;
+import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_NAME;
+import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_OS;
+import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_VERSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
@@ -39,10 +39,13 @@ import static org.mockito.Mockito.verify;
 
 public class SegmentBrokerTest {
 
-    private static final String EXTENSION_NAME = "com.redhat.devtools.intellij.telemetry";
+    private static final String EXTENSION_NAME = "Telemetry by Red Hat";
     private static final String EXTENSION_VERSION = "extension-0.0.1";
     private static final String APPLICATION_NAME = SegmentBrokerTest.class.getSimpleName();
     private static final String APPLICATION_VERSION = "application-1.0.0";
+    private static final String PLATFORM_NAME = "smurfOS";
+    private static final String PLATFORM_DISTRIBUTION = "red hats";
+    private static final String PLATFORM_VERSION = "0.1.0";
     private static final String ANONYMOUS_ID = "42";
 
     private Analytics analytics;
@@ -55,7 +58,14 @@ public class SegmentBrokerTest {
     public void before() {
         this.analytics = createAnalytics();
         this.configuration = segmentConfiguration(false,"writeKey_value", "debugWriteKey_value");
-        this.environment = environment(EXTENSION_NAME, EXTENSION_VERSION, APPLICATION_NAME, APPLICATION_VERSION);
+        this.environment = environment(
+                EXTENSION_NAME,
+                EXTENSION_VERSION,
+                APPLICATION_NAME,
+                APPLICATION_VERSION,
+                PLATFORM_NAME,
+                PLATFORM_DISTRIBUTION,
+                PLATFORM_VERSION);
         this.broker = new TestableSegmentBroker(false, ANONYMOUS_ID, environment, configuration, analytics);
         this.event = new TelemetryEvent(ACTION, "Testing Telemetry");
     }
@@ -100,10 +110,14 @@ public class SegmentBrokerTest {
         // then
         verify(analytics).enqueue(builder.capture());
         Map<String, ?> context = builder.getValue().build().context();
-        assertThat(context.get(PROP_EXTENSION_NAME)).isEqualTo(EXTENSION_NAME);
-        assertThat(context.get(PROP_EXTENSION_VERSION)).isEqualTo(EXTENSION_VERSION);
-        assertThat(context.get(PROP_APP_NAME)).isEqualTo(APPLICATION_NAME);
-        assertThat(context.get(PROP_APP_VERSION)).isEqualTo(APPLICATION_VERSION);
+        assertThat(context).containsKey(PROP_APP);
+        Map<String, String> appProperties = (Map<String, String>) context.get(PROP_APP);
+        assertThat(appProperties.get(PROP_NAME)).isEqualTo(APPLICATION_NAME);
+        assertThat(appProperties.get(PROP_VERSION)).isEqualTo(APPLICATION_VERSION);
+        assertThat(context).containsKey(PROP_OS);
+        Map<String, String> osProperties = (Map<String, String>) context.get(PROP_OS);
+        assertThat(osProperties.get(PROP_NAME)).isEqualTo(PLATFORM_NAME);
+        assertThat(osProperties.get(PROP_VERSION)).isEqualTo(PLATFORM_VERSION);
     }
 
     @Test
