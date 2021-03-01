@@ -25,7 +25,7 @@ import java.util.Map;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.segmentConfiguration;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP_NAME;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP_VERSION;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_EXTENSION_NAME;

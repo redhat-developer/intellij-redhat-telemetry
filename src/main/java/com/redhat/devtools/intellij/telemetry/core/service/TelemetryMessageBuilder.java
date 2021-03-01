@@ -22,10 +22,10 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.SHUTDOWN;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.STARTUP;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.SHUTDOWN;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.STARTUP;
 import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymize;
 import static com.redhat.devtools.intellij.telemetry.core.util.TimeUtils.toLocalTime;
 

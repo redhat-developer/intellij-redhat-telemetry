@@ -15,7 +15,6 @@ import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.service.Application;
 import com.redhat.devtools.intellij.telemetry.core.service.Environment;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 import com.redhat.devtools.intellij.telemetry.core.util.MapBuilder;
 import com.segment.analytics.Analytics;
@@ -53,7 +52,7 @@ public class SegmentBroker implements IMessageBroker {
     private static final int FLUSH_INTERVAL = 10000;
     public static final int FLUSH_QUEUE_SIZE = 10;
 
-    enum Type {
+    enum SegmentType {
         IDENTIFY {
             public MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker) {
                 return broker.toMessage(IdentifyMessage.builder(), event, context);
@@ -73,8 +72,8 @@ public class SegmentBroker implements IMessageBroker {
 
         public abstract MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker);
 
-        public static Type valueOf(TelemetryService.Type serviceType) {
-            switch (serviceType) {
+        public static SegmentType valueOf(TelemetryEvent.Type eventType) {
+            switch (eventType) {
                 case USER:
                     return IDENTIFY;
                 case ACTION:
@@ -104,8 +103,8 @@ public class SegmentBroker implements IMessageBroker {
                 return;
             }
             Map<String, Object> context = createContext(environment);
-            Type type = Type.valueOf(event.getType());
-            MessageBuilder builder = type.toMessage(event, context, this);
+            SegmentType segmentType = SegmentType.valueOf(event.getType());
+            MessageBuilder builder = segmentType.toMessage(event, context, this);
             LOGGER.debug("Sending message " + builder.type() + " to segment.");
             analytics.get().enqueue(builder);
         } catch (IllegalArgumentException e) {

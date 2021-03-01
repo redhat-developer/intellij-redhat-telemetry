@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.segmentConfiguration;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type.ACTION;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
 import static org.mockito.Mockito.mock;
 
 @Ignore("For manual testing purposes only")

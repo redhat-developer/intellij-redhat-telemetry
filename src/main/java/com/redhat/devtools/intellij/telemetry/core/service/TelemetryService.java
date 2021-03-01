@@ -23,12 +23,9 @@ import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.*;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.*;
 
 public class TelemetryService implements ITelemetryService {
-
-    public enum Type {
-        USER, ACTION, STARTUP, SHUTDOWN
-    }
 
     private static final Logger LOGGER = Logger.getInstance(TelemetryService.class);
 
@@ -68,19 +65,18 @@ public class TelemetryService implements ITelemetryService {
         queryUserConsent();
     }
 
-    private void queryUserConsent() {
-        if (!isConfigured()
-            && userQueried.compareAndSet(false, true)) {
-            notifications.queryUserConsent();
-        }
-    }
-
     private void sendUserInfo() {
-        if (!userInfoSent.get()) {
+        if (userInfoSent.compareAndSet(false, true)) {
             doSend(new TelemetryEvent(
                     Type.USER,
                     "Anonymous ID: " + AnonymousId.INSTANCE.get()));
-            userInfoSent.set(true);
+        }
+    }
+
+    private void queryUserConsent() {
+        if (!isConfigured()
+                && userQueried.compareAndSet(false, true)) {
+            notifications.queryUserConsent();
         }
     }
 

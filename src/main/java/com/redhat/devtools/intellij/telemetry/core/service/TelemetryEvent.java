@@ -13,9 +13,11 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryService.Type;
-
 public class TelemetryEvent {
+
+    public enum Type {
+        USER, ACTION, STARTUP, SHUTDOWN
+    }
 
     private final Type type;
     private final String name;

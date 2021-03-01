@@ -21,10 +21,12 @@ public class Fakes {
                 .build();
     }
 
-    public static TelemetryConfiguration telemetryConfiguration(boolean enabled) {
+    public static TelemetryConfiguration telemetryConfiguration(boolean enabled, boolean configured) {
         TelemetryConfiguration configuration = mock(TelemetryConfiguration.class);
         doReturn(enabled)
                 .when(configuration).isEnabled();
+        doReturn(configured)
+                .when(configuration).isConfigured();
         return configuration;
     }
 
