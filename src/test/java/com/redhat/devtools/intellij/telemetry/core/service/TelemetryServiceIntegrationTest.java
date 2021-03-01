@@ -16,7 +16,6 @@ import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
-import com.redhat.devtools.intellij.telemetry.core.service.segment.TestableSegmentBroker;
 import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
 import com.redhat.devtools.intellij.telemetry.util.BlockingFlush;
 import com.redhat.devtools.intellij.telemetry.util.StdOutLogging;
@@ -45,6 +44,8 @@ public class TelemetryServiceIntegrationTest {
     private static final String PLATFORM_NAME = "smurfOS";
     private static final String PLATFORM_DISTRIBUTION = "red hats";
     private static final String PLATFORM_VERSION = "0.1.0";
+    private static final String LOCALE = "de_CH";
+    private static final String TIMEZONE = "Europe/Bern";
     public static final String SEGMENT_WRITE_KEY = "HYuMCHlIpTvukCKZA42OubI1cvGIAap6";
 
     private BlockingFlush blockingFlush;
@@ -56,7 +57,7 @@ public class TelemetryServiceIntegrationTest {
     public void before() {
         this.blockingFlush = BlockingFlush.create();
         this.analytics = createAnalytics(blockingFlush, createClient());
-        ISegmentConfiguration configuration = segmentConfiguration(false, SEGMENT_WRITE_KEY, "");
+        ISegmentConfiguration configuration = segmentConfiguration(SEGMENT_WRITE_KEY, "");
         Environment environment = environment(
                 APPLICATION_NAME,
                 APPLICATION_VERSION,
@@ -64,12 +65,14 @@ public class TelemetryServiceIntegrationTest {
                 EXTENSION_VERSION,
                 PLATFORM_NAME,
                 PLATFORM_DISTRIBUTION,
-                PLATFORM_VERSION);
-        SegmentBroker broker = new TestableSegmentBroker(
+                PLATFORM_VERSION,
+                LOCALE,
+                TIMEZONE);
+        SegmentBroker broker = new SegmentBroker(
                 false,
                 UserId.INSTANCE.get(),
                 environment, configuration,
-                analytics);
+                key -> analytics);
         this.service = new TelemetryService(
                 TelemetryConfiguration.INSTANCE,
                 broker, mock(MessageBusConnection.class),

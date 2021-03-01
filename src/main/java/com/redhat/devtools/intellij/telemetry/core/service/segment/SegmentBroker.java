@@ -25,13 +25,13 @@ import com.segment.analytics.messages.TrackMessage;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public class SegmentBroker implements IMessageBroker {
 
     private static final Logger LOGGER = Logger.getInstance(SegmentBroker.class);
 
     public static final String PROP_NAME = "name";
-    public static final String PROP_DISTRIBUTION = "distribution";
     public static final String PROP_VERSION = "version";
     public static final String PROP_APP = "app";
     public static final String PROP_IP = "ip";
@@ -50,9 +50,6 @@ public class SegmentBroker implements IMessageBroker {
     public static final String PROP_EXTENSION_VERSION = "extension_version";
     public static final String PROP_APP_NAME = "app_name";
     public static final String PROP_APP_VERSION = "app_version";
-
-    private static final int FLUSH_INTERVAL = 10000;
-    public static final int FLUSH_QUEUE_SIZE = 10;
 
     enum SegmentType {
         IDENTIFY {
@@ -89,12 +86,16 @@ public class SegmentBroker implements IMessageBroker {
 
     private final String userId;
     private final Environment environment;
-    protected Lazy<Analytics> analytics;
+    private Lazy<Analytics> analytics;
 
     public SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration) {
+        this(isDebug, userId, environment, configuration, new AnalyticsFactory());
+    }
+
+    public SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration, Function<String, Analytics> analyticsFactory) {
         this.userId = userId;
         this.environment = environment;
-        this.analytics = new Lazy<>(() -> createAnalytics(getWriteKey(isDebug, configuration)));
+        this.analytics = new Lazy<>(() -> analyticsFactory.apply(getWriteKey(isDebug, configuration)));
     }
 
     @Override
@@ -117,11 +118,11 @@ public class SegmentBroker implements IMessageBroker {
     private MessageBuilder toMessage(IdentifyMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
         return builder
                 .userId(userId)
-                .traits(addTraitsEnvironment(event.getProperties()))
+                .traits(addIdentifyTraits(event.getProperties()))
                 .context(context);
     }
 
-    private Map<String, ?> addTraitsEnvironment(Map<String, String> properties) {
+    private Map<String, ?> addIdentifyTraits(Map<String, String> properties) {
         properties.put(PROP_LOCALE, environment.getLocale());
         properties.put(PROP_OS_NAME, environment.getPlatform().getName());
         properties.put(PROP_OS_DISTRIBUTION, environment.getPlatform().getDistribution());
@@ -133,11 +134,11 @@ public class SegmentBroker implements IMessageBroker {
     private MessageBuilder toMessage(TrackMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
         return builder
                 .userId(userId)
-                .properties(addIdentifyEnvironment(event.getProperties()))
+                .properties(addTrackProperties(event.getProperties()))
                 .context(context);
     }
 
-    private Map<String, ?> addIdentifyEnvironment(Map<String, String> properties) {
+    private Map<String, ?> addTrackProperties(Map<String, String> properties) {
         Application application = environment.getApplication();
         properties.put(PROP_APP_NAME, application.getName());
         properties.put(PROP_APP_VERSION, application.getVersion());
@@ -180,20 +181,8 @@ public class SegmentBroker implements IMessageBroker {
         analytics.get().shutdown();
     }
 
-    private Analytics createAnalytics(String writeKey) {
 
-        if (writeKey == null) {
-            LOGGER.warn("Could not create Segment Analytics instance, missing writeKey.");
-            return null;
-        }
-        LOGGER.debug("Creating Segment Analytics instance using " + writeKey + " writeKey.");
-        return Analytics.builder(writeKey)
-                .flushQueueSize(FLUSH_QUEUE_SIZE)
-                .flushInterval(FLUSH_INTERVAL, TimeUnit.MILLISECONDS)
-                .build();
-    }
-
-    public String getWriteKey(boolean isDebug, ISegmentConfiguration configuration) {
+    private String getWriteKey(boolean isDebug, ISegmentConfiguration configuration) {
         if (isDebug) {
             return configuration.getSegmentDebugKey();
         } else {
@@ -201,4 +190,22 @@ public class SegmentBroker implements IMessageBroker {
         }
     }
 
+    private static class AnalyticsFactory implements Function<String, Analytics> {
+
+        private static final int FLUSH_INTERVAL = 10000;
+        private static final int FLUSH_QUEUE_SIZE = 10;
+
+        @Override
+        public Analytics apply(String writeKey) {
+            if (writeKey == null) {
+                LOGGER.warn("Could not create Segment Analytics instance, missing writeKey.");
+                return null;
+            }
+            LOGGER.debug("Creating Segment Analytics instance using " + writeKey + " writeKey.");
+            return Analytics.builder(writeKey)
+                    .flushQueueSize(FLUSH_QUEUE_SIZE)
+                    .flushInterval(FLUSH_INTERVAL, TimeUnit.MILLISECONDS)
+                    .build();
+        }
+    }
 }

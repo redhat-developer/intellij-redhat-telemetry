@@ -17,9 +17,13 @@ public class Fakes {
             String applicationVersion,
             String platform_name,
             String platform_distribution,
-            String platform_version) {
+            String platform_version,
+            String locale,
+            String timezone) {
         return new Environment.Builder()
                 .application(new Application(applicationName, applicationVersion))
+                .locale(locale)
+                .timezone(timezone)
                 .platform(new Platform(platform_name, platform_distribution, platform_version))
                 .plugin(new Application(extensionName, extensionVersion))
                 .build();
@@ -34,16 +38,12 @@ public class Fakes {
         return configuration;
     }
 
-    public static ISegmentConfiguration segmentConfiguration(boolean debug, String writeKey, String debugWriteKey) {
+    public static ISegmentConfiguration segmentConfiguration(String normalWriteKey, String debugWriteKey) {
         ISegmentConfiguration configuration = mock(ISegmentConfiguration.class);
         when(configuration.getSegmentNormalKey())
-                .thenAnswer((InvocationOnMock invocation) -> {
-                        if (debug) {
-                            return debugWriteKey;
-                        } else {
-                            return writeKey;
-                        }
-                });
+                .thenReturn(normalWriteKey);
+        when(configuration.getSegmentDebugKey())
+                .thenReturn(debugWriteKey);
         return configuration;
     }
 }
