@@ -122,12 +122,12 @@ public class SegmentBroker implements IMessageBroker {
                 .context(context);
     }
 
-    private Map<String, ?> addIdentifyTraits(Map<String, String> properties) {
-        properties.put(PROP_LOCALE, environment.getLocale());
-        properties.put(PROP_OS_NAME, environment.getPlatform().getName());
-        properties.put(PROP_OS_DISTRIBUTION, environment.getPlatform().getDistribution());
-        properties.put(PROP_OS_VERSION, environment.getPlatform().getVersion());
-        properties.put(PROP_TIMEZONE, environment.getTimezone());
+    private Map<String, ?> addIdentifyTraits(final Map<String, String> properties) {
+        putIfNotNull(PROP_LOCALE, environment.getLocale(), properties);
+        putIfNotNull(PROP_OS_NAME, environment.getPlatform().getName(), properties);
+        putIfNotNull(PROP_OS_DISTRIBUTION, environment.getPlatform().getDistribution(), properties);
+        putIfNotNull(PROP_OS_VERSION, environment.getPlatform().getVersion(), properties);
+        putIfNotNull(PROP_TIMEZONE, environment.getTimezone(), properties);
         return properties;
     }
 
@@ -138,14 +138,14 @@ public class SegmentBroker implements IMessageBroker {
                 .context(context);
     }
 
-    private Map<String, ?> addTrackProperties(Map<String, String> properties) {
+    private Map<String, ?> addTrackProperties(final Map<String, String> properties) {
         Application application = environment.getApplication();
-        properties.put(PROP_APP_NAME, application.getName());
-        properties.put(PROP_APP_VERSION, application.getVersion());
+        putIfNotNull(PROP_APP_NAME, application.getName(), properties);
+        putIfNotNull(PROP_APP_VERSION, application.getVersion(), properties);
         application.getProperties().forEach(
-                appProperty -> properties.put(appProperty.getKey(), String.valueOf(appProperty.getValue())));
-        properties.put(PROP_EXTENSION_NAME, environment.getPlugin().getName());
-        properties.put(PROP_EXTENSION_VERSION, environment.getPlugin().getVersion());
+                appProperty -> putIfNotNull(appProperty.getKey(), String.valueOf(appProperty.getValue()), properties));
+        putIfNotNull(PROP_EXTENSION_NAME, environment.getPlugin().getName(), properties);
+        putIfNotNull(PROP_EXTENSION_VERSION, environment.getPlugin().getVersion(), properties);
         return properties;
     }
 
@@ -154,6 +154,15 @@ public class SegmentBroker implements IMessageBroker {
                 .userId(userId)
                 .properties(event.getProperties())
                 .context(context);
+    }
+
+    private void putIfNotNull(String key, String value, Map<String, String> properties) {
+        if (key == null
+                || value == null
+                || properties == null) {
+            return;
+        }
+        properties.put(key, value);
     }
 
     private Map<String, Object> createContext(Environment environment) {
