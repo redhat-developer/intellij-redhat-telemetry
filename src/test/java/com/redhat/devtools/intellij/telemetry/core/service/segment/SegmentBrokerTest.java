@@ -225,6 +225,40 @@ public class SegmentBrokerTest {
     }
 
     @Test
+    public void send_should_NOT_add_NULL_properties_to_identify_message() {
+        // given
+        ArgumentCaptor<IdentifyMessage.Builder> builder = ArgumentCaptor.forClass(IdentifyMessage.Builder.class);
+        Environment environment = environment(
+                null,
+                EXTENSION_VERSION,
+                null,
+                APPLICATION_VERSION,
+                null,
+                PLATFORM_DISTRIBUTION,
+                null,
+                LOCALE, // system setting used if null
+                TIMEZONE); // system setting used if null
+        SegmentBroker broker = new SegmentBroker(false, USER_ID, environment, configuration, key -> analytics);
+
+        // when
+        broker.send(userEvent);
+        // then
+        verify(analytics).enqueue(builder.capture());
+        Map<String, ?> traits = builder.getValue().build().traits();
+        assertThat(traits.get(PROP_LOCALE)).isNotNull();
+        assertThat(traits.get(PROP_TIMEZONE)).isNotNull();
+        assertThat(traits.get(PROP_OS_NAME)).isNull();
+        assertThat(traits.get(PROP_OS_DISTRIBUTION)).isNotNull();
+        assertThat(traits.get(PROP_OS_VERSION)).isNull();
+        assertContext(
+                null, // app name
+                APPLICATION_VERSION,
+                null, // platform name
+                null, // platform version
+                builder.getValue().build().context());
+    }
+
+    @Test
     public void send_should_enqueue_track_message_with_properties() {
         // given
         ArgumentCaptor<TrackMessage.Builder> builder = ArgumentCaptor.forClass(TrackMessage.Builder.class);
@@ -240,6 +274,39 @@ public class SegmentBrokerTest {
     }
 
     @Test
+    public void send_should_NOT_add_NULL_properties_to_track_message() {
+        // given
+        ArgumentCaptor<TrackMessage.Builder> builder = ArgumentCaptor.forClass(TrackMessage.Builder.class);
+        Environment environment = environment(
+                null,
+                EXTENSION_VERSION,
+                null,
+                APPLICATION_VERSION,
+                null,
+                PLATFORM_DISTRIBUTION,
+                null,
+                LOCALE, // system setting used if null
+                TIMEZONE); // system setting used if null
+        SegmentBroker broker = new SegmentBroker(false, USER_ID, environment, configuration, key -> analytics);
+
+        // when
+        broker.send(actionEvent);
+        // then
+        verify(analytics).enqueue(builder.capture());
+        Map<String, ?> properties = builder.getValue().build().properties();
+        assertThat(properties.get(PROP_EXTENSION_NAME)).isNull();;
+        assertThat(properties.get(PROP_EXTENSION_VERSION)).isNotNull();;
+        assertThat(properties.get(PROP_APP_NAME)).isNull();
+        assertThat(properties.get(PROP_APP_VERSION)).isNotNull();
+        assertContext(
+                null, // app name
+                APPLICATION_VERSION,
+                null, // platform name
+                null, // platform version
+                builder.getValue().build().context());
+    }
+
+    @Test
     public void dispose_should_flush_and_shutdown_analytics() {
         // given
         // when
@@ -247,6 +314,16 @@ public class SegmentBrokerTest {
         // then
         verify(analytics).flush();
         verify(analytics).shutdown();
+    }
+
+    private void assertContext(String appName, String appVersion, String osName, String osVersion, Map<String, ?> context) {
+        Map<String, ?> appProperties = (Map<String, ?>) context.get(PROP_APP);
+        assertThat(appProperties.get(PROP_NAME)).isEqualTo(appName);
+        assertThat(appProperties.get(PROP_VERSION)).isEqualTo(appVersion);
+
+        Map<String, ?> osProperties = (Map<String, ?>) context.get(PROP_OS);
+        assertThat(osProperties.get(PROP_NAME)).isEqualTo(osName);
+        assertThat(osProperties.get(PROP_VERSION)).isEqualTo(osVersion);
     }
 
     private Analytics createAnalytics() {
