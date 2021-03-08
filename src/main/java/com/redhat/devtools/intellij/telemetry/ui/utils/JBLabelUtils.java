@@ -22,7 +22,7 @@ public class JBLabelUtils {
      *
      * @param text the text to convert to Html
      * @param maxLineLength the maximum number of characters in a line
-     * @param the component to retrieve the font metrics from
+     * @param component the component to retrieve the font metrics from
      *
      * @returns the text
      */
@@ -34,7 +34,7 @@ public class JBLabelUtils {
                 "a:active {color:#" + ColorUtil.toHex(JBUI.CurrentTheme.Link.linkPressedColor()) + ";}\n" +
                 "</style>\n</head>";
         int width = component.getFontMetrics(component.getFont()).stringWidth(text.substring(0, maxLineLength));
-        return String.format("<html>%s<body><div width=%d>%s</div></body></html>", css, width, text);
+        return "<html>" + css + "<body><div width=" + width + ">" + text + "</div></body></html>";
     }
 
 }
