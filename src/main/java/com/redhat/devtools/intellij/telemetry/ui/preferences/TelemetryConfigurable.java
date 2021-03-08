@@ -11,7 +11,6 @@
 package com.redhat.devtools.intellij.telemetry.ui.preferences;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import org.jetbrains.annotations.Nls;

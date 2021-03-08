@@ -17,19 +17,9 @@ import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
-import com.intellij.notification.impl.NotificationsManagerImpl;
-import com.intellij.openapi.actionSystem.ActionGroup;
-import com.intellij.openapi.actionSystem.ActionGroupUtil;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAwareAction;
-import com.intellij.ui.BalloonImpl;
-import com.intellij.ui.components.labels.LinkLabel;
-import com.intellij.ui.components.labels.LinkListener;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -48,22 +38,22 @@ public class TelemetryNotifications {
         this(QUERY_USER_CONSENT);
     }
 
-    public TelemetryNotifications(NotificationGroup group) {
+    TelemetryNotifications(NotificationGroup group) {
         this.group = group;
     }
 
     public void queryUserConsent() {
-        Notification notification = QUERY_USER_CONSENT.createNotification("Enable Telemetry",
+        Notification notification = group.createNotification("Enable Telemetry",
                 "Help Red Hat improve its extensions by allowing them to collect anonymous usage data. " +
                         "Read our <a href=\"https://developers.redhat.com/article/tool-data-collection\">privacy statement</a> " +
                         "and learn how to <a href=\"\">opt out</a>.",
                 NotificationType.INFORMATION,
                 new NotificationListener.UrlOpeningListener(false));
-        DumbAwareAction accept = NotificationAction.create("Accept",
+        DumbAwareAction accept = DumbAwareAction.create("Accept",
                 e -> enableTelemetry(true, notification));
-        DumbAwareAction deny = NotificationAction.create("Deny",
+        DumbAwareAction deny = DumbAwareAction.create("Deny",
                 e -> enableTelemetry(false, notification));
-        DumbAwareAction later = NotificationAction.create("Later",
+        DumbAwareAction later = DumbAwareAction.create("Later",
                 e -> notification.expire());
         notification
                 .addAction(accept)

@@ -17,6 +17,9 @@ import javax.swing.JLabel;
 
 public class JBLabelUtils {
 
+    private JBLabelUtils() {
+    }
+
     /**
      * Turns the given text to html that a JBLabel can display (with links).
      *

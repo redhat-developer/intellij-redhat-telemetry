@@ -30,6 +30,9 @@ public class AnonymizeUtils {
     public static final String ANONYMOUS_RESOURCENAME = "<RESOURCENAME>";
     public static final String ANONYMOUS_NAMESPACE = "<NAMESPACE>";
 
+    private AnonymizeUtils() {
+    }
+
     public static String anonymize(String string) {
         return anonymizeEmail(
                 anonymizeUserName(

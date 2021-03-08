@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
 import java.util.List;
+import java.util.Objects;
 
 public abstract class CompositeConfiguration implements IConfiguration {
 
@@ -23,7 +24,7 @@ public abstract class CompositeConfiguration implements IConfiguration {
         }
         return configurations.stream()
                 .map(configuration -> configuration.get(key))
-                .filter(value -> value != null)
+                .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
     }

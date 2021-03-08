@@ -22,7 +22,7 @@ import javax.swing.JPanel;
  */
 public class TelemetryComponent {
 
-    private static final String dataDescription =
+    private static final String DESCRIPTION =
             "Help Red Hat improve its products by sending anonymous data about features and plugins used, "
                     + "hardware and software configuration.<br/>"
                     + "<br/>"
@@ -34,7 +34,7 @@ public class TelemetryComponent {
 
     public TelemetryComponent() {
         this.panel = FormBuilder.createFormBuilder()
-                .addComponent(createCommentedPanel(enabled, dataDescription), 1)
+                .addComponent(createCommentedPanel(enabled, DESCRIPTION), 1)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
     }

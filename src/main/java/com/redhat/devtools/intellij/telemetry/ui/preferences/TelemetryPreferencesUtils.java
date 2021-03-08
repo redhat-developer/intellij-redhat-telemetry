@@ -34,8 +34,10 @@ public class TelemetryPreferencesUtils {
         JLabel component = new JBLabel("") {
             @Override
             protected HyperlinkListener createHyperlinkListener() {
-                return (event) -> {
-                    if (HyperlinkEvent.EventType.ACTIVATED == event.getEventType()) openTelemetryPreferences(panel);
+                return event -> {
+                    if (HyperlinkEvent.EventType.ACTIVATED == event.getEventType()) {
+                        openTelemetryPreferences(panel);
+                    }
                 };
             }
         }

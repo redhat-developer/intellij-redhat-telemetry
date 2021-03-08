@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class UserId {
 
@@ -48,8 +49,8 @@ public class UserId {
 
     private String load(Path uuidFile) {
         String uuid = null;
-        try {
-            uuid = Files.lines(uuidFile)
+        try(Stream<String> lines = Files.lines(uuidFile)) {
+            uuid = lines
                     .findAny()
                     .map(String::trim)
                     .orElse(null);

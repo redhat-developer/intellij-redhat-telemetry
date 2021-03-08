@@ -19,6 +19,8 @@ import java.util.Date;
 
 public class TimeUtils {
 
+    private TimeUtils() {}
+
     public static LocalTime toLocalTime(long millis) {
         Instant instant = new Date(millis).toInstant();
         ZonedDateTime time = instant.atZone(ZoneId.systemDefault());

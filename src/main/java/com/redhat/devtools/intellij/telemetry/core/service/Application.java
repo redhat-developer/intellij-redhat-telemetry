@@ -42,7 +42,7 @@ public class Application {
 
     public Collection<AbstractMap.SimpleEntry<String, Object>> getProperties() {
         return properties.entrySet().stream()
-                .map((entry) -> new AbstractMap.SimpleEntry<String, Object>(entry.getKey(), entry.getValue()))
+                .map(entry -> new AbstractMap.SimpleEntry<String, Object>(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 }
