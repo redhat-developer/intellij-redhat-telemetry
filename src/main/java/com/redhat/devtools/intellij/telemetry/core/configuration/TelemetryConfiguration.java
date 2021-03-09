@@ -25,13 +25,27 @@ public class TelemetryConfiguration extends CompositeConfiguration {
 
     public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
-    public static final FileConfiguration GLOBAL_FILE = new FileConfiguration(Paths.get(
-            System.getProperty("user.home"),
-            ".redhat",
-            "com.redhat.devtools.intellij.telemetry"));
-    private final Lazy<ConfigurationChangedListener> notifier = new Lazy<>(() ->
-            ApplicationManager.getApplication().getMessageBus()
-                    .syncPublisher(ConfigurationChangedListener.CONFIGURATION_CHANGED));
+    private static final FileConfiguration FILE = new FileConfiguration(Paths.get(
+            System.getProperty("user.home"), ".redhat", "com.redhat.devtools.intellij.telemetry"));
+    private static final List<IConfiguration> CONFIGURATIONS = Arrays.asList(
+            new SystemProperties(),
+            FILE);
+    private static final Lazy<ConfigurationChangedListener> NOTIFIER = new Lazy<>(() -> ApplicationManager.getApplication().getMessageBus()
+            .syncPublisher(ConfigurationChangedListener.CONFIGURATION_CHANGED));
+
+    private final FileConfiguration file;
+    private final List<IConfiguration> configurations;
+    private final Lazy<ConfigurationChangedListener> notifier;
+
+    private TelemetryConfiguration() {
+        this(FILE, CONFIGURATIONS, NOTIFIER);
+    }
+
+    protected TelemetryConfiguration(FileConfiguration file, List<IConfiguration> configurations, Lazy<ConfigurationChangedListener> notifier) {
+        this.file = file;
+        this.configurations = configurations;
+        this.notifier = notifier;
+    }
 
     public void setMode(Mode mode) {
         put(KEY_MODE, mode.toString());
@@ -59,19 +73,17 @@ public class TelemetryConfiguration extends CompositeConfiguration {
 
     @Override
     public void put(String key, String value) {
-        GLOBAL_FILE.properties.get().put(key, value);
+        file.put(key, value);
         notifier.get().configurationChanged(key, value);
     }
 
     public void save() throws IOException {
-        GLOBAL_FILE.save();
+        file.save();
     }
 
     @Override
     protected List<IConfiguration> getConfigurations() {
-        return Arrays.asList(
-                new SystemProperties(),
-                GLOBAL_FILE);
+        return configurations;
     }
 
     public enum Mode {
@@ -106,7 +118,6 @@ public class TelemetryConfiguration extends CompositeConfiguration {
             public boolean isConfigured() {
                 return true;
             }
-
         }, UNKNOWN {
             @Override
             public boolean isEnabled() {
@@ -117,7 +128,6 @@ public class TelemetryConfiguration extends CompositeConfiguration {
             public boolean isConfigured() {
                 return false;
             }
-
         };
 
         public abstract boolean isEnabled();
