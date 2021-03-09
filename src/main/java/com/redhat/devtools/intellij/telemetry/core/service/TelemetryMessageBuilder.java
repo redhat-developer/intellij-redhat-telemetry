@@ -42,10 +42,10 @@ public class TelemetryMessageBuilder {
     }
 
     public ActionMessage action(String name) {
-        return new ActionMessage(ACTION, name, service);
+        return new ActionMessage(name, service);
     }
 
-    public static class StartupMessage extends Message<StartupMessage> {
+    static class StartupMessage extends Message<StartupMessage> {
 
         private final LocalTime time;
 
@@ -63,7 +63,7 @@ public class TelemetryMessageBuilder {
         }
     }
 
-    public static class ShutdownMessage extends Message<ShutdownMessage> {
+    static class ShutdownMessage extends Message<ShutdownMessage> {
 
         private static final String PROP_SESSION_DURATION = "session_duration";
 
@@ -75,17 +75,21 @@ public class TelemetryMessageBuilder {
             this(startupTime, LocalTime.now(), service);
         }
 
-        private ShutdownMessage(LocalTime startupTime, LocalTime shutdownTime, ServiceFacade service) {
+        ShutdownMessage(LocalTime startupTime, LocalTime shutdownTime, ServiceFacade service) {
             super(SHUTDOWN, "shutdown", service);
             sessionDuration(startupTime, shutdownTime);
         }
 
-        public ShutdownMessage sessionDuration(LocalTime startupTime, LocalTime shutdownTime) {
+        private ShutdownMessage sessionDuration(LocalTime startupTime, LocalTime shutdownTime) {
             return sessionDuration(Duration.between(startupTime, shutdownTime));
         }
 
-        public ShutdownMessage sessionDuration(Duration duration) {
+        private ShutdownMessage sessionDuration(Duration duration) {
             return property(PROP_SESSION_DURATION, TimeUtils.toString(duration));
+        }
+
+        String getSessionDuration() {
+            return getProperty(PROP_SESSION_DURATION);
         }
     }
 
@@ -95,22 +99,27 @@ public class TelemetryMessageBuilder {
         private static final String PROP_ERROR = "error";
         private static final String PROP_RESULT = "result";
 
+        public static final String RESULT_SUCCESS = "success";
+
         private LocalTime startTime;
 
-        private ActionMessage(Type type, String name, ServiceFacade service) {
-            super(type, name, service);
+        private ActionMessage(String name, ServiceFacade service) {
+            super(ACTION, name, service);
             started(LocalTime.now());
         }
 
-        public ActionMessage started(LocalTime startTime) {
-            this.startTime = startTime;
+        public ActionMessage started(LocalTime start) {
+            this.startTime = start;
             return this;
         }
 
         public ActionMessage finished() {
-            if (!hasProperty(PROP_DURATION)) {
-                duration(Duration.between(startTime, LocalTime.now()));
-            }
+            finished(LocalTime.now());
+            return this;
+        }
+
+        public ActionMessage finished(LocalTime finished) {
+            duration(Duration.between(startTime, finished));
             return this;
         }
 
@@ -118,12 +127,20 @@ public class TelemetryMessageBuilder {
             return property(PROP_DURATION, TimeUtils.toString(duration));
         }
 
+        String getDuration() {
+            return getProperty(PROP_DURATION);
+        }
+
         public ActionMessage success() {
-            return result("success");
+            return result(RESULT_SUCCESS);
         }
 
         public ActionMessage result(String message) {
             return property(PROP_RESULT, message);
+        }
+
+        String getResult() {
+            return getProperty(PROP_RESULT);
         }
 
         public ActionMessage error(Exception exception) {
@@ -132,6 +149,10 @@ public class TelemetryMessageBuilder {
 
         public ActionMessage error(String message) {
             return property(PROP_ERROR, anonymize(message));
+        }
+
+        String getError() {
+            return getProperty(PROP_ERROR);
         }
 
         @Override
@@ -154,9 +175,21 @@ public class TelemetryMessageBuilder {
             this.service = service;
         }
 
+        String getName() {
+            return name;
+        }
+
+        Type getType() {
+            return type;
+        }
+
         public T property(String key, String value) {
             properties.put(key, value);
             return (T) this;
+        }
+
+        String getProperty(String key) {
+            return properties.get(key);
         }
 
         protected boolean hasProperty(String key) {
@@ -169,11 +202,11 @@ public class TelemetryMessageBuilder {
 
     }
 
-    private static final class ServiceFacade {
+    static class ServiceFacade {
         private final ClassLoader classLoader;
         private ITelemetryService service = null;
 
-        private ServiceFacade(final ClassLoader classLoader) {
+        protected ServiceFacade(final ClassLoader classLoader) {
             this.classLoader = classLoader;
         }
 
@@ -186,7 +219,7 @@ public class TelemetryMessageBuilder {
             service.send(event);
         }
 
-        private ITelemetryService createService(ClassLoader classLoader) {
+        protected ITelemetryService createService(ClassLoader classLoader) {
             TelemetryServiceFactory factory = ServiceManager.getService(TelemetryServiceFactory.class);
             return factory.create(classLoader);
         }
@@ -196,16 +229,22 @@ public class TelemetryMessageBuilder {
         }
 
         private void onShutdown() {
-            onShutdown(ApplicationManager.getApplication().getMessageBus().connect());
-        }
-
-        private void onShutdown(MessageBusConnection connection) {
+            MessageBusConnection connection = createMessageBusConnection();
             connection.subscribe(AppLifecycleListener.TOPIC, new AppLifecycleListener() {
                 @Override
                 public void appWillBeClosed(boolean isRestart) {
-                    new ShutdownMessage(ServiceFacade.this).send();
+                    sendShutdown();
                 }
             });
         }
+
+        protected void sendShutdown() {
+            new ShutdownMessage(ServiceFacade.this).send();
+        }
+
+        protected MessageBusConnection createMessageBusConnection() {
+            return ApplicationManager.getApplication().getMessageBus().connect();
+        }
+
     }
 }
