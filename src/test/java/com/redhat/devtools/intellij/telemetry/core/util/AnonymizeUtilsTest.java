@@ -110,4 +110,23 @@ public class AnonymizeUtilsTest {
         assertThat(anonymized).contains(bogusIP);
         assertThat(anonymized).doesNotContain(AnonymizeUtils.ANONYMOUS_IP);
     }
+
+    @Test
+    public void anonymizeResource_should_anonymize_resource_and_namespace() {
+        // given
+        String resource = "smurf village";
+        String namespace = "blue county";
+        String withResourceAndNamespace = resource + " is located in " + namespace;
+        assertThat(withResourceAndNamespace).contains(resource).contains(namespace);
+        // when
+        String anonymized = AnonymizeUtils.anonymizeResource(resource, namespace, withResourceAndNamespace);
+        // then
+        assertThat(anonymized)
+                .doesNotContain(resource)
+                .doesNotContain(namespace);
+        assertThat(anonymized)
+                .contains(AnonymizeUtils.ANONYMOUS_RESOURCENAME)
+                .contains(AnonymizeUtils.ANONYMOUS_NAMESPACE);
+    }
+
 }
