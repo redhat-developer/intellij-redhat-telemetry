@@ -25,7 +25,7 @@ public class TelemetryConfiguration extends CompositeConfiguration {
 
     public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
-    private static final FileConfiguration FILE = new FileConfiguration(Paths.get(
+    private static final SaveableFileConfiguration FILE = new SaveableFileConfiguration(Paths.get(
             System.getProperty("user.home"), ".redhat", "com.redhat.devtools.intellij.telemetry"));
     private static final List<IConfiguration> CONFIGURATIONS = Arrays.asList(
             new SystemProperties(),
@@ -33,7 +33,7 @@ public class TelemetryConfiguration extends CompositeConfiguration {
     private static final Lazy<ConfigurationChangedListener> NOTIFIER = new Lazy<>(() -> ApplicationManager.getApplication().getMessageBus()
             .syncPublisher(ConfigurationChangedListener.CONFIGURATION_CHANGED));
 
-    private final FileConfiguration file;
+    private final SaveableFileConfiguration file;
     private final List<IConfiguration> configurations;
     private final Lazy<ConfigurationChangedListener> notifier;
 
@@ -41,7 +41,7 @@ public class TelemetryConfiguration extends CompositeConfiguration {
         this(FILE, CONFIGURATIONS, NOTIFIER);
     }
 
-    protected TelemetryConfiguration(FileConfiguration file, List<IConfiguration> configurations, Lazy<ConfigurationChangedListener> notifier) {
+    protected TelemetryConfiguration(SaveableFileConfiguration file, List<IConfiguration> configurations, Lazy<ConfigurationChangedListener> notifier) {
         this.file = file;
         this.configurations = configurations;
         this.notifier = notifier;

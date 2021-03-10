@@ -2,7 +2,6 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
-import org.mockito.invocation.InvocationOnMock;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -40,9 +39,9 @@ public class Fakes {
 
     public static ISegmentConfiguration segmentConfiguration(String normalWriteKey, String debugWriteKey) {
         ISegmentConfiguration configuration = mock(ISegmentConfiguration.class);
-        when(configuration.getSegmentNormalKey())
+        when(configuration.getNormalWriteKey())
                 .thenReturn(normalWriteKey);
-        when(configuration.getSegmentDebugKey())
+        when(configuration.getDebugWriteKey())
                 .thenReturn(debugWriteKey);
         return configuration;
     }

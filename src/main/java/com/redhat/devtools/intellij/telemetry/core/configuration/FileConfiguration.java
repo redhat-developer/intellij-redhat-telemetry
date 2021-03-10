@@ -12,67 +12,44 @@ package com.redhat.devtools.intellij.telemetry.core.configuration;
 
 import com.intellij.openapi.diagnostic.Logger;
 
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Writer;
 import java.nio.file.Path;
-import java.time.LocalDate;
 import java.util.Properties;
 
 public class FileConfiguration extends AbstractConfiguration {
 
     private static final Logger LOGGER = Logger.getInstance(FileConfiguration.class);
 
-    private final Path file;
+    protected final Path path;
 
-    public FileConfiguration(Path file) {
-        this.file = file;
+    public FileConfiguration(Path path) {
+        this.path = path;
     }
 
     @Override
     protected Properties loadProperties() {
         Properties properties = new Properties();
-        if (file == null) {
-            return properties;
-        }
-
-        try (InputStream in = createFileInputStream(file)) {
+        try (InputStream in = createInputStream(path)) {
             if (in != null) {
                 properties.load(in);
             }
         } catch (IOException e) {
-            LOGGER.warn("Could not load properties file " + file);
+            LOGGER.warn("Could not load properties file " + (path == null? "" : path.toAbsolutePath()));
         }
         return properties;
     }
 
-    protected InputStream createFileInputStream(Path path) throws IOException {
+    protected InputStream createInputStream(Path path) throws IOException {
         if (path == null) {
             return null;
         }
-        ensureExists(path);
-        return new FileInputStream(path.toFile());
-    }
-
-    private boolean ensureExists(Path file) throws IOException {
-        if (file == null) {
-            return false;
+        File file = path.toFile();
+        if (!file.exists()) {
+            return null;
         }
-        if (file.toFile().exists()) {
-            return true;
-        }
-        return file.toFile().createNewFile();
-    }
-
-
-    public void save() throws IOException {
-        if (file == null) {
-            return;
-        }
-        try (Writer writer = new FileWriter(file.toFile())) {
-            properties.get().store(writer, "updated " + LocalDate.now());
-        }
+        return new FileInputStream(file);
     }
 }

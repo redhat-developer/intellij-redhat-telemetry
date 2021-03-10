@@ -28,7 +28,10 @@ public class ClasspathConfiguration extends FileConfiguration {
 	}
 
 	@Override
-	protected InputStream createFileInputStream(Path path) throws FileNotFoundException {
+	protected InputStream createInputStream(Path path) throws FileNotFoundException {
+		if (path == null) {
+			return null;
+		}
 		return classloader.getResourceAsStream(path.toString());
 	}
 }
