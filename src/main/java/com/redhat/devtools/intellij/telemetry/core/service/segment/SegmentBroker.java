@@ -193,9 +193,9 @@ public class SegmentBroker implements IMessageBroker {
 
     private String getWriteKey(boolean isDebug, ISegmentConfiguration configuration) {
         if (isDebug) {
-            return configuration.getSegmentDebugKey();
+            return configuration.getDebugWriteKey();
         } else {
-            return configuration.getSegmentNormalKey();
+            return configuration.getNormalWriteKey();
         }
     }
 

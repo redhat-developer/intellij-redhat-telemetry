@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verify;
 
 public class TelemetryConfigurationTest {
 
-    private FileConfiguration file = configuration(new Properties(), FileConfiguration.class);
+    private SaveableFileConfiguration file = configuration(new Properties(), SaveableFileConfiguration.class);
     private IConfiguration defaults = mock(IConfiguration.class);
     private IConfiguration overrides = mock(IConfiguration.class);
     private List<IConfiguration> configurations = Arrays.asList(overrides, file, defaults);

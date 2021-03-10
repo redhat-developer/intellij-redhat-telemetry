@@ -18,7 +18,7 @@ public abstract class CompositeConfiguration implements IConfiguration {
     @Override
     public String get(final String key) {
         List<IConfiguration> configurations = getConfigurations();
-        if (getConfigurations() == null
+        if (configurations == null
                 || configurations.isEmpty()) {
             return null;
         }

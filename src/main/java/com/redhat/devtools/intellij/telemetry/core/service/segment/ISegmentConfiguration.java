@@ -11,6 +11,6 @@
 package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
 public interface ISegmentConfiguration {
-    String getSegmentNormalKey();
-    String getSegmentDebugKey();
+    String getNormalWriteKey();
+    String getDebugWriteKey();
 }

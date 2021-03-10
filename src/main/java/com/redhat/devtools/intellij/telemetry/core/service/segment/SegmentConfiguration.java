@@ -24,8 +24,8 @@ public class SegmentConfiguration extends CompositeConfiguration implements ISeg
     public static final String KEY_SEGMENT_WRITE = "writeKey";
     public static final String KEY_SEGMENT_DEBUG_WRITE = "debugWriteKey";
 
-    private static final String SEGMENT_PROPERTIES = "/segment.properties";
-    private static final String SEGMENT_DEFAULTS_PROPERTIES = "/segment-defaults.properties";
+    private static final String SEGMENT_PROPERTIES = "segment.properties";
+    private static final String SEGMENT_DEFAULTS_PROPERTIES = "segment-defaults.properties";
 
     private final ClasspathConfiguration consumerClasspathConfiguration;
 
@@ -42,7 +42,6 @@ public class SegmentConfiguration extends CompositeConfiguration implements ISeg
         consumerClasspathConfiguration.put(key, value);
     }
 
-
     @Override
     public List<IConfiguration> getConfigurations() {
         return Arrays.asList(
@@ -54,12 +53,12 @@ public class SegmentConfiguration extends CompositeConfiguration implements ISeg
     }
 
     @Override
-    public String getSegmentNormalKey() {
+    public String getNormalWriteKey() {
         return get(KEY_SEGMENT_WRITE);
     }
 
     @Override
-    public String getSegmentDebugKey() {
+    public String getDebugWriteKey() {
         return get(KEY_SEGMENT_DEBUG_WRITE);
     }
 }
