@@ -18,6 +18,7 @@ import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,18 +48,18 @@ public class TelemetryMessageBuilder {
 
     static class StartupMessage extends Message<StartupMessage> {
 
-        private final LocalTime time;
+        private final LocalDateTime time;
 
         private StartupMessage(ServiceFacade service) {
-            this(LocalTime.now(), service);
+            this(LocalDateTime.now(), service);
         }
 
-        private StartupMessage(LocalTime time, ServiceFacade service) {
+        private StartupMessage(LocalDateTime time, ServiceFacade service) {
             super(STARTUP, "startup", service);
             this.time = time;
         }
 
-        public LocalTime getTime() {
+        public LocalDateTime getTime() {
             return time;
         }
     }
@@ -71,17 +72,17 @@ public class TelemetryMessageBuilder {
             this(toLocalTime(ApplicationManager.getApplication().getStartTime()), service);
         }
 
-        private ShutdownMessage(LocalTime startupTime, ServiceFacade service) {
-            this(startupTime, LocalTime.now(), service);
+        private ShutdownMessage(LocalDateTime startup, ServiceFacade service) {
+            this(startup, LocalDateTime.now(), service);
         }
 
-        ShutdownMessage(LocalTime startupTime, LocalTime shutdownTime, ServiceFacade service) {
+        ShutdownMessage(LocalDateTime startup, LocalDateTime shutdown, ServiceFacade service) {
             super(SHUTDOWN, "shutdown", service);
-            sessionDuration(startupTime, shutdownTime);
+            sessionDuration(startup, shutdown);
         }
 
-        private ShutdownMessage sessionDuration(LocalTime startupTime, LocalTime shutdownTime) {
-            return sessionDuration(Duration.between(startupTime, shutdownTime));
+        private ShutdownMessage sessionDuration(LocalDateTime startup, LocalDateTime shutdown) {
+            return sessionDuration(Duration.between(startup, shutdown));
         }
 
         private ShutdownMessage sessionDuration(Duration duration) {
@@ -101,25 +102,25 @@ public class TelemetryMessageBuilder {
 
         public static final String RESULT_SUCCESS = "success";
 
-        private LocalTime startTime;
+        private LocalDateTime start;
 
         private ActionMessage(String name, ServiceFacade service) {
             super(ACTION, name, service);
-            started(LocalTime.now());
+            started(LocalDateTime.now());
         }
 
-        public ActionMessage started(LocalTime start) {
-            this.startTime = start;
+        public ActionMessage started(LocalDateTime start) {
+            this.start = start;
             return this;
         }
 
         public ActionMessage finished() {
-            finished(LocalTime.now());
+            finished(LocalDateTime.now());
             return this;
         }
 
-        public ActionMessage finished(LocalTime finished) {
-            duration(Duration.between(startTime, finished));
+        public ActionMessage finished(LocalDateTime finished) {
+            duration(Duration.between(start, finished));
             return this;
         }
 

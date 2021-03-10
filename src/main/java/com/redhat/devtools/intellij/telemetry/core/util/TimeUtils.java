@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.util;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -21,7 +22,7 @@ import java.util.regex.Pattern;
 
 public class TimeUtils {
 
-    private static final Pattern HH_MM_SS_DURATION = Pattern.compile("([\\d]{2}):([\\d]{2}):([\\d]{2})");
+    private static final Pattern HH_MM_SS_DURATION = Pattern.compile("([\\d]+):([\\d]{2}):([\\d]{2})");
 
     private TimeUtils() {}
 
@@ -31,10 +32,10 @@ public class TimeUtils {
      * @param millis
      * @return
      */
-    public static LocalTime toLocalTime(long millis) {
+    public static LocalDateTime toLocalTime(long millis) {
         Instant instant = new Date(millis).toInstant();
         ZonedDateTime time = instant.atZone(ZoneId.systemDefault());
-        return time.toLocalTime();
+        return time.toLocalDateTime();
     }
 
     /**

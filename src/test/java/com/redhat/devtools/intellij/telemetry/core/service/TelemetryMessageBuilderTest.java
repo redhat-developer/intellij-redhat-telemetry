@@ -19,7 +19,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.STARTUP;
@@ -103,8 +106,8 @@ public class TelemetryMessageBuilderTest {
         TelemetryEvent event = eventArgument.getValue();
         assertThat(event.getType()).isEqualTo(ACTION);
         assertThat(event.getName()).isEqualTo(name);
-        assertThat(event.getProperties().get(key1)).isEqualTo(value1);
-        assertThat(event.getProperties().get(key2)).isEqualTo(value2);
+        assertThat(event.getProperties()).containsEntry(key1, value1);
+        assertThat(event.getProperties()).containsEntry(key2,value2);
     }
 
     @Test
@@ -136,17 +139,33 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void finished_should_set_duration_btw_given_start_and_finished() {
+    public void finished_should_set_duration_btw_given_start_and_finished_when_stop_is_new_day() {
         // given
-        ActionMessage message = builder.action("inspector gadget");
-        LocalTime now = LocalTime.now();
+        ActionMessage message = builder.action("inspector gadget hits the button");
+        LocalDateTime started = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 0));
+        message.started(started);
         int hours = 2;
-        message.started(now);
-        // when
-        message.finished(now.plusHours(hours));
+        LocalDateTime stopped = started.plusHours(hours);
+        // when local time is crossing into new day
+        message.finished(stopped);
         // then
         assertThat(TimeUtils.toDuration(message.getDuration()))
                 .isEqualTo(Duration.ofHours(hours));
+    }
+
+    @Test
+    public void finished_should_set_duration_btw_given_start_and_finished_when_finished_is_in_new_year() {
+        // given
+        ActionMessage message = builder.action("the daltons break out");
+        LocalDateTime started = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 0));
+        message.started(started);
+        Duration duration = Duration.of(2, ChronoUnit.HOURS).plusDays(356 + 30);
+        LocalDateTime stopped = started.plus(duration);
+        // when local time is next year
+        message.finished(stopped);
+        // then
+        assertThat(TimeUtils.toDuration(message.getDuration()))
+                .isEqualTo(duration);
     }
 
     @Test
@@ -282,8 +301,8 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void shutdownMessage_should_report_session_duration() {
         // given
-        LocalTime startup = LocalTime.of(2, 1);
-        LocalTime shutdown = LocalTime.of(4, 2);
+        LocalDateTime startup = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 1));
+        LocalDateTime shutdown = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(4, 2));
         Duration duration = Duration.between(startup, shutdown);
         // when
         ShutdownMessage message = new ShutdownMessage(startup, shutdown, serviceFacadeMock);
