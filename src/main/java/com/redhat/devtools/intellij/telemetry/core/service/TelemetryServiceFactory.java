@@ -27,7 +27,7 @@ public class TelemetryServiceFactory {
 
     public TelemetryService create(ClassLoader classLoader) {
         Environment environment = builder.plugin(classLoader).build();
-        TelemetryConfiguration configuration = TelemetryConfiguration.INSTANCE;
+        TelemetryConfiguration configuration = TelemetryConfiguration.getInstance();
         IMessageBroker broker = createSegmentBroker(configuration.isDebug(), classLoader, environment);
         return new TelemetryService(configuration, broker);
     }

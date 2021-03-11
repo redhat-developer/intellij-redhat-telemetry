@@ -31,7 +31,7 @@ public class TelemetryConfigurable implements SearchableConfigurable {
     private static final Logger LOGGER = Logger.getInstance(TelemetryConfigurable.class);
 
     private TelemetryComponent component;
-    private final TelemetryConfiguration configuration = TelemetryConfiguration.INSTANCE;
+    private final TelemetryConfiguration configuration = TelemetryConfiguration.getInstance();
 
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override

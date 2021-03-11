@@ -64,7 +64,7 @@ public class TelemetryNotifications {
     }
 
     private static void enableTelemetry(boolean enabled, Notification notification) {
-        TelemetryConfiguration configuration = TelemetryConfiguration.INSTANCE;
+        TelemetryConfiguration configuration = TelemetryConfiguration.getInstance();
         configuration.setEnabled(enabled);
         try {
             configuration.save();
