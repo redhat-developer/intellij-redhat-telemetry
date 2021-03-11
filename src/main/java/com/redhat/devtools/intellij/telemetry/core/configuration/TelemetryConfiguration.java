@@ -12,7 +12,6 @@ package com.redhat.devtools.intellij.telemetry.core.configuration;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.util.messages.Topic;
-import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -23,28 +22,19 @@ public class TelemetryConfiguration extends CompositeConfiguration {
 
     public static final String KEY_MODE = "com.redhat.devtools.intellij.telemetry.mode";
 
-    public static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
-
     private static final SaveableFileConfiguration FILE = new SaveableFileConfiguration(Paths.get(
-            System.getProperty("user.home"), ".redhat", "com.redhat.devtools.intellij.telemetry"));
-    private static final List<IConfiguration> CONFIGURATIONS = Arrays.asList(
-            new SystemProperties(),
-            FILE);
-    private static final Lazy<ConfigurationChangedListener> NOTIFIER = new Lazy<>(() -> ApplicationManager.getApplication().getMessageBus()
-            .syncPublisher(ConfigurationChangedListener.CONFIGURATION_CHANGED));
+            System.getProperty("user.home"),
+            ".redhat",
+            "com.redhat.devtools.intellij.telemetry"));
 
-    private final SaveableFileConfiguration file;
-    private final List<IConfiguration> configurations;
-    private final Lazy<ConfigurationChangedListener> notifier;
+    private static TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
-    private TelemetryConfiguration() {
-        this(FILE, CONFIGURATIONS, NOTIFIER);
+    public static TelemetryConfiguration getInstance() {
+        return INSTANCE;
     }
 
-    protected TelemetryConfiguration(SaveableFileConfiguration file, List<IConfiguration> configurations, Lazy<ConfigurationChangedListener> notifier) {
-        this.file = file;
-        this.configurations = configurations;
-        this.notifier = notifier;
+    // for testing purposes
+    protected TelemetryConfiguration() {
     }
 
     public void setMode(Mode mode) {
@@ -73,17 +63,28 @@ public class TelemetryConfiguration extends CompositeConfiguration {
 
     @Override
     public void put(String key, String value) {
-        file.put(key, value);
-        notifier.get().configurationChanged(key, value);
+        getSaveableFile().put(key, value);
+        getNotifier().configurationChanged(key, value);
     }
 
-    public void save() throws IOException {
-        file.save();
+    protected ConfigurationChangedListener getNotifier() {
+        return ApplicationManager.getApplication().getMessageBus()
+                .syncPublisher(ConfigurationChangedListener.CONFIGURATION_CHANGED);
     }
 
     @Override
     protected List<IConfiguration> getConfigurations() {
-        return configurations;
+        return Arrays.asList(
+                new SystemProperties(),
+                getSaveableFile());
+    }
+
+    public void save() throws IOException {
+        getSaveableFile().save();
+    }
+
+    protected SaveableFileConfiguration getSaveableFile() {
+        return FILE;
     }
 
     public enum Mode {

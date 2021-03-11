@@ -74,7 +74,7 @@ public class TelemetryServiceIntegrationTest {
                 environment, configuration,
                 key -> analytics);
         this.service = new TelemetryService(
-                TelemetryConfiguration.INSTANCE,
+                TelemetryConfiguration.getInstance(),
                 broker, mock(MessageBusConnection.class),
                 mock(TelemetryNotifications.class));
         this.event = new TelemetryEvent(ACTION, "Testing Telemetry");

@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
-import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -18,9 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.*;
 import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.ConfigurationChangedListener;
 import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.KEY_MODE;
+import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.Mode;
 import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.Mode.DISABLED;
 import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.Mode.NORMAL;
 import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.Mode.DEBUG;
@@ -31,18 +31,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-public class TelemetryConfigurationTest {
+class TelemetryConfigurationTest {
 
     private SaveableFileConfiguration file = configuration(new Properties(), SaveableFileConfiguration.class);
     private IConfiguration defaults = mock(IConfiguration.class);
     private IConfiguration overrides = mock(IConfiguration.class);
     private List<IConfiguration> configurations = Arrays.asList(overrides, file, defaults);
     private ConfigurationChangedListener listener = mock(ConfigurationChangedListener.class);
-    private Lazy<ConfigurationChangedListener> notifier = new Lazy<>(() -> listener);
-    private TelemetryConfiguration config = new TelemetryConfiguration(file, configurations, notifier);
+    private TelemetryConfiguration config = new TestableTelemetryConfiguration(file, configurations, listener);
 
     @Test
-    public void get_should_return_overridden_value() {
+    void get_should_return_overridden_value() {
         // given
         doReturnValues(KEY_MODE,
                 DEBUG.toString(), NORMAL.toString(), UNKNOWN.toString());
@@ -53,7 +52,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void get_should_return_file_value_if_no_overridden_value_exists() {
+    void get_should_return_file_value_if_no_overridden_value_exists() {
         // given
         doReturnValues(KEY_MODE,
                 null, NORMAL.toString(), null);
@@ -64,7 +63,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void get_should_return_default_value_if_no_values_exist() {
+    void get_should_return_default_value_if_no_values_exist() {
         // given
         doReturnValues(KEY_MODE,
                 null, null, DEBUG.toString());
@@ -75,7 +74,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void put_should_put_to_file() {
+    void put_should_put_to_file() {
         // given
         String value = "red pill";
         // when
@@ -87,7 +86,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void put_should_notify() {
+    void put_should_notify() {
         // given
         String value = "red pill";
         // when
@@ -97,7 +96,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void save_should_save_file() throws IOException {
+    void save_should_save_file() throws IOException {
         // given
         // when
         config.save();
@@ -106,7 +105,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void getMode_should_return_UNKNOWN_for_unknown_value() {
+    void getMode_should_return_UNKNOWN_for_unknown_value() {
         // given
         doReturnValues(KEY_MODE,
                 null, "bogus", null);
@@ -117,7 +116,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void getMode_should_return_UNKNOWN_for_null_value() {
+    void getMode_should_return_UNKNOWN_for_null_value() {
         // given
         doReturnValues(KEY_MODE,
                 null, null, null);
@@ -128,7 +127,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void getMode_should_return_DEBUG_for_debug_value() {
+    void getMode_should_return_DEBUG_for_debug_value() {
         // given
         doReturnValues(KEY_MODE,
                 null, "debug", null);
@@ -139,7 +138,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void getMode_should_return_NORMAL_for_normal_value() {
+    void getMode_should_return_NORMAL_for_normal_value() {
         // given
         doReturnValues(KEY_MODE,
                 null, "normal", null);
@@ -150,7 +149,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void getMode_should_NOT_be_case_sensitive() {
+    void getMode_should_NOT_be_case_sensitive() {
         // given
         doReturnValues(KEY_MODE,
                 null, "dEbUg", null);
@@ -161,7 +160,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void isEnabled_should_return_true_for_normal_mode() {
+    void isEnabled_should_return_true_for_normal_mode() {
         // given
         doReturnValues(KEY_MODE,
                 null, "normal", null);
@@ -172,7 +171,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void setEnabled_true_should_set_normal_mode() {
+    void setEnabled_true_should_set_normal_mode() {
         // given
         // when
         config.setEnabled(true);
@@ -181,7 +180,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void setEnabled_false_should_set_disabled_mode() {
+    void setEnabled_false_should_set_disabled_mode() {
         // given
         // when
         config.setEnabled(false);
@@ -190,7 +189,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void isEnabled_should_return_true_for_debug_mode() {
+    void isEnabled_should_return_true_for_debug_mode() {
         // given
         doReturnValues(KEY_MODE,
                 null, "debug", null);
@@ -201,7 +200,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void isEnabled_should_return_false_for_disabled_mode() {
+    void isEnabled_should_return_false_for_disabled_mode() {
         // given
         doReturnValues(KEY_MODE,
                 null, "disabled", null);
@@ -212,7 +211,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void isEnabled_should_return_false_for_unknown_mode() {
+    void isEnabled_should_return_false_for_unknown_mode() {
         // given
         doReturnValues(KEY_MODE,
                 null, "bogus", null);
@@ -223,7 +222,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void isConfigured_should_return_true_for_normal_mode() {
+    void isConfigured_should_return_true_for_normal_mode() {
         // given
         doReturnValues(KEY_MODE,
                 null, "normal", null);
@@ -234,7 +233,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void isConfigured_should_return_true_for_debug_mode() {
+    void isConfigured_should_return_true_for_debug_mode() {
         // given
         doReturnValues(KEY_MODE,
                 null, "debug", null);
@@ -245,7 +244,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void isConfigured_should_return_true_for_disabled_mode() {
+    void isConfigured_should_return_true_for_disabled_mode() {
         // given
         doReturnValues(KEY_MODE,
                 null, "disabled", null);
@@ -256,7 +255,7 @@ public class TelemetryConfigurationTest {
     }
 
     @Test
-    public void isConfigured_should_return_false_for_unknown_mode() {
+    void isConfigured_should_return_false_for_unknown_mode() {
         // given
         doReturnValues(KEY_MODE,
                 null, "bogus", null);
@@ -281,6 +280,34 @@ public class TelemetryConfigurationTest {
         doReturn(defaultsValue)
                 .when(defaults).get(key);
 
+    }
+
+    private class TestableTelemetryConfiguration extends TelemetryConfiguration {
+
+        private final List<IConfiguration> configurations;
+        private final ConfigurationChangedListener listener;
+        private final SaveableFileConfiguration saveableFile;
+
+        public TestableTelemetryConfiguration(SaveableFileConfiguration saveableFile, List<IConfiguration> configurations, ConfigurationChangedListener listener) {
+            this.saveableFile = saveableFile;
+            this.configurations = configurations;
+            this.listener = listener;
+        }
+
+        @Override
+        protected List<IConfiguration> getConfigurations() {
+            return configurations;
+        }
+
+        @Override
+        protected ConfigurationChangedListener getNotifier() {
+            return listener;
+        }
+
+        @Override
+        protected SaveableFileConfiguration getSaveableFile() {
+            return saveableFile;
+        }
     }
 
 }
