@@ -109,6 +109,10 @@ public class TelemetryMessageBuilder {
             started(LocalDateTime.now());
         }
 
+        public ActionMessage started() {
+            return started(LocalDateTime.now());
+        }
+
         public ActionMessage started(LocalDateTime start) {
             this.start = start;
             return this;
@@ -158,8 +162,22 @@ public class TelemetryMessageBuilder {
 
         @Override
         public void send() {
-            finished();
+            ensureFinished();
+            ensureResultOrError();
             super.send();
+        }
+
+        private void ensureFinished() {
+            if (!hasProperty(PROP_DURATION)) {
+                finished();
+            }
+        }
+
+        private void ensureResultOrError() {
+            if (!hasProperty(PROP_ERROR)
+                    && !hasProperty(PROP_RESULT)) {
+                success();
+            }
         }
     }
 
