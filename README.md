@@ -1,4 +1,11 @@
 # Red Hat Telemetry
+[plugin-repo]: https://plugins.jetbrains.com/plugin/16209-telemetry-by-red-hat
+[plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/16209-telemetry-by-red-hat.svg
+[plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/16209-telemetry-by-red-hat.svg
+
+[![Build status](https://github.com/redhat-developer/intellij-redhat-telemetry/workflows/Java%20CI%20with%20Gradle/badge.svg)](https://github.com/redhat-developer/intellij-redhat-telemetry/actions?query=workflow%3A%22Java+CI+with+Gradle%22)
+[![JetBrains plugins][plugin-version-svg]][plugin-repo]
+[![JetBrains plugins][plugin-downloads-svg]][plugin-repo]
 
 This library provides Telemetry APIs specifically meant to be used by IDEA plugins developped by Red Hat.
 ## Telemetry reporting
