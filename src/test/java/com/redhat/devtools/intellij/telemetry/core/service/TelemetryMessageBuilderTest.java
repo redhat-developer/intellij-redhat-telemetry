@@ -111,6 +111,66 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
+    public void send_should_set_duration() throws InterruptedException {
+        // given
+        ActionMessage message = builder.action("jolly jumper");
+        // when
+        message.send();
+        // then dont override existing duration
+        assertThat(TimeUtils.toDuration(message.getDuration()))
+                .isNotNull();
+    }
+
+    @Test
+    public void send_should_NOT_set_duration_if_already_exists() throws InterruptedException {
+        // given
+        ActionMessage message = builder.action("jolly jumper");
+        Duration existing = Duration.ofDays(7);
+        message.duration(existing);
+        // when
+        message.send();
+        // then dont override existing duration
+        assertThat(TimeUtils.toDuration(message.getDuration()))
+                .isEqualTo(existing);
+    }
+
+    @Test
+    public void send_should_set_result() throws InterruptedException {
+        // given
+        ActionMessage message = builder.action("jolly jumper");
+        // when
+        message.send();
+        // then
+        assertThat(message.getResult())
+                .isNotNull();
+    }
+
+    @Test
+    public void send_should_NOT_set_result_if_error_exists() throws InterruptedException {
+        // given
+        ActionMessage message = builder.action("jolly jumper");
+        message.error("lost luky luke");
+        // when
+        message.send();
+        // then
+        assertThat(message.getResult())
+                .isNull();
+    }
+
+    @Test
+    public void send_should_NOT_set_result_if_result_exists() throws InterruptedException {
+        // given
+        ActionMessage message = builder.action("jolly jumper");
+        String result = "spits like a cowboy";
+        message.result(result);
+        // when
+        message.send();
+        // then dont override existing result
+        assertThat(message.getResult())
+                .isEqualTo(result);
+    }
+
+    @Test
     public void send_should_send_to_same_facade_instance() {
         // given
         ActionMessage message1 = builder.action("gargamel");
@@ -122,7 +182,6 @@ public class TelemetryMessageBuilderTest {
         message3.send();
         // then
         verify(serviceFacadeMock, times(3)).send(any(TelemetryEvent.class));
-
     }
 
     @Test
