@@ -47,19 +47,8 @@ public class TelemetryMessageBuilder {
 
     static class StartupMessageBuilder extends MessageBuilder<StartupMessageBuilder> {
 
-        private final LocalDateTime time;
-
         private StartupMessageBuilder(ServiceFacade service) {
-            this(LocalDateTime.now(), service);
-        }
-
-        private StartupMessageBuilder(LocalDateTime time, ServiceFacade service) {
             super(STARTUP, "startup", service);
-            this.time = time;
-        }
-
-        public LocalDateTime getTime() {
-            return time;
         }
     }
 
@@ -101,19 +90,19 @@ public class TelemetryMessageBuilder {
 
         public static final String RESULT_SUCCESS = "success";
 
-        private LocalDateTime start;
+        private LocalDateTime started;
 
         private ActionMessageBuilder(String name, ServiceFacade service) {
             super(ACTION, name, service);
-            started(LocalDateTime.now());
+            started();
         }
 
         public ActionMessageBuilder started() {
             return started(LocalDateTime.now());
         }
 
-        public ActionMessageBuilder started(LocalDateTime start) {
-            this.start = start;
+        public ActionMessageBuilder started(LocalDateTime started) {
+            this.started = started;
             return this;
         }
 
@@ -123,7 +112,7 @@ public class TelemetryMessageBuilder {
         }
 
         public ActionMessageBuilder finished(LocalDateTime finished) {
-            duration(Duration.between(start, finished));
+            duration(Duration.between(started, finished));
             return this;
         }
 
@@ -239,8 +228,7 @@ public class TelemetryMessageBuilder {
 
         protected void clear() {
             this.properties.clear();
-        };
-
+        }
     }
 
     static class ServiceFacade {
