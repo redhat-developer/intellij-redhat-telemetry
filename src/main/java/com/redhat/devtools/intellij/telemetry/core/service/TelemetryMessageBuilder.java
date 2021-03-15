@@ -170,7 +170,6 @@ public class TelemetryMessageBuilder {
             return super.send();
         }
 
-
         private void ensureFinished() {
             if (!hasProperty(PROP_DURATION)) {
                 finished();
@@ -226,12 +225,7 @@ public class TelemetryMessageBuilder {
         public TelemetryEvent send() {
             TelemetryEvent event = new TelemetryEvent(type, name, new HashMap<>(properties));
             service.send(event);
-            clear();
             return event;
-        }
-
-        protected void clear() {
-            properties.clear();
         }
     }
 

@@ -172,18 +172,6 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void send_should_clear_all_properties() {
-        // given
-        ActionMessageBuilder message = builder.action("gargamel")
-                .property("voice", "croak")
-                .property("smells", "bad");
-        // when
-        message.send();
-        // then
-        assertThat(message.properties()).isEmpty();
-    }
-
-    @Test
     public void send_should_send_to_same_facade_instance() {
         // given
         ActionMessageBuilder message1 = builder.action("gargamel");
