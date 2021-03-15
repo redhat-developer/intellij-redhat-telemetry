@@ -143,6 +143,9 @@ public class TelemetryMessageBuilder {
         }
 
         public ActionMessageBuilder error(Exception exception) {
+            if (exception == null) {
+                return this;
+            }
             return error(exception.getMessage());
         }
 
@@ -166,6 +169,7 @@ public class TelemetryMessageBuilder {
             ensureResultOrError();
             return super.send();
         }
+
 
         private void ensureFinished() {
             if (!hasProperty(PROP_DURATION)) {
@@ -227,7 +231,7 @@ public class TelemetryMessageBuilder {
         }
 
         protected void clear() {
-            this.properties.clear();
+            properties.clear();
         }
     }
 

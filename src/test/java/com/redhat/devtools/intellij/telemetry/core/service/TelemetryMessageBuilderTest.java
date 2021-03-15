@@ -277,6 +277,17 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
+    public void error_should_NOT_NPE_for_given_null_exception() {
+        // given
+        ActionMessageBuilder message = builder.action("the simpsons");
+        // when
+        message.error((Exception) null);
+        // then
+        assertThat(message.getError())
+                .isNull();
+    }
+
+    @Test
     public void error_should_clear_result() {
         // given
         ActionMessageBuilder message = builder.action("the simpsons")
