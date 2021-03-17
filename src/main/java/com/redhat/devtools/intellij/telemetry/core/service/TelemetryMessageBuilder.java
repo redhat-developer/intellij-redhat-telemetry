@@ -19,7 +19,6 @@ import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,19 +47,8 @@ public class TelemetryMessageBuilder {
 
     static class StartupMessage extends Message<StartupMessage> {
 
-        private final LocalDateTime time;
-
         private StartupMessage(ServiceFacade service) {
-            this(LocalDateTime.now(), service);
-        }
-
-        private StartupMessage(LocalDateTime time, ServiceFacade service) {
             super(STARTUP, "startup", service);
-            this.time = time;
-        }
-
-        public LocalDateTime getTime() {
-            return time;
         }
     }
 
@@ -96,25 +84,25 @@ public class TelemetryMessageBuilder {
 
     public static class ActionMessage extends Message<ActionMessage> {
 
-        private static final String PROP_DURATION = "duration";
-        private static final String PROP_ERROR = "error";
-        private static final String PROP_RESULT = "result";
+        static final String PROP_DURATION = "duration";
+        static final String PROP_ERROR = "error";
+        static final String PROP_RESULT = "result";
 
         public static final String RESULT_SUCCESS = "success";
 
-        private LocalDateTime start;
+        private LocalDateTime started;
 
         private ActionMessage(String name, ServiceFacade service) {
             super(ACTION, name, service);
-            started(LocalDateTime.now());
+            started();
         }
 
         public ActionMessage started() {
             return started(LocalDateTime.now());
         }
 
-        public ActionMessage started(LocalDateTime start) {
-            this.start = start;
+        public ActionMessage started(LocalDateTime started) {
+            this.started = started;
             return this;
         }
 
@@ -124,7 +112,7 @@ public class TelemetryMessageBuilder {
         }
 
         public ActionMessage finished(LocalDateTime finished) {
-            duration(Duration.between(start, finished));
+            duration(Duration.between(started, finished));
             return this;
         }
 
@@ -140,8 +128,14 @@ public class TelemetryMessageBuilder {
             return result(RESULT_SUCCESS);
         }
 
-        public ActionMessage result(String message) {
-            return property(PROP_RESULT, message);
+        public ActionMessage result(String result) {
+            property(PROP_RESULT, result);
+            return clearError();
+        }
+
+        protected ActionMessage clearResult() {
+            properties().remove(PROP_RESULT);
+            return this;
         }
 
         String getResult() {
@@ -149,11 +143,20 @@ public class TelemetryMessageBuilder {
         }
 
         public ActionMessage error(Exception exception) {
+            if (exception == null) {
+                return this;
+            }
             return error(exception.getMessage());
         }
 
         public ActionMessage error(String message) {
-            return property(PROP_ERROR, anonymize(message));
+            property(PROP_ERROR, anonymize(message));
+            return clearResult();
+        }
+
+        protected ActionMessage clearError() {
+            properties().remove(PROP_ERROR);
+            return this;
         }
 
         String getError() {
@@ -161,10 +164,10 @@ public class TelemetryMessageBuilder {
         }
 
         @Override
-        public void send() {
+        public TelemetryEvent send() {
             ensureFinished();
             ensureResultOrError();
-            super.send();
+            return super.send();
         }
 
         private void ensureFinished() {
@@ -211,14 +214,19 @@ public class TelemetryMessageBuilder {
             return properties.get(key);
         }
 
+        Map<String, String> properties() {
+            return properties;
+        }
+
         protected boolean hasProperty(String key) {
             return properties.containsKey(key);
         }
 
-        public void send() {
-            service.send(new TelemetryEvent(type, name, properties));
+        public TelemetryEvent send() {
+            TelemetryEvent event = new TelemetryEvent(type, name, new HashMap<>(properties));
+            service.send(event);
+            return event;
         }
-
     }
 
     static class ServiceFacade {

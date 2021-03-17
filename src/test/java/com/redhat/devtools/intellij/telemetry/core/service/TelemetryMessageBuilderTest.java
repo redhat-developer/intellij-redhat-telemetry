@@ -26,6 +26,8 @@ import java.time.temporal.ChronoUnit;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.STARTUP;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage.PROP_DURATION;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage.PROP_RESULT;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ShutdownMessage;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ServiceFacade;
@@ -115,9 +117,9 @@ public class TelemetryMessageBuilderTest {
         // given
         ActionMessage message = builder.action("jolly jumper");
         // when
-        message.send();
+        TelemetryEvent event = message.send();
         // then dont override existing duration
-        assertThat(TimeUtils.toDuration(message.getDuration()))
+        assertThat(TimeUtils.toDuration(event.getProperties().get(PROP_DURATION)))
                 .isNotNull();
     }
 
@@ -128,9 +130,9 @@ public class TelemetryMessageBuilderTest {
         Duration existing = Duration.ofDays(7);
         message.duration(existing);
         // when
-        message.send();
+        TelemetryEvent event = message.send();
         // then dont override existing duration
-        assertThat(TimeUtils.toDuration(message.getDuration()))
+        assertThat(TimeUtils.toDuration(event.getProperties().get(PROP_DURATION)))
                 .isEqualTo(existing);
     }
 
@@ -139,9 +141,9 @@ public class TelemetryMessageBuilderTest {
         // given
         ActionMessage message = builder.action("jolly jumper");
         // when
-        message.send();
+        TelemetryEvent event = message.send();
         // then
-        assertThat(message.getResult())
+        assertThat(event.getProperties().get(PROP_RESULT))
                 .isNotNull();
     }
 
@@ -151,9 +153,9 @@ public class TelemetryMessageBuilderTest {
         ActionMessage message = builder.action("jolly jumper");
         message.error("lost luky luke");
         // when
-        message.send();
+        TelemetryEvent event = message.send();
         // then
-        assertThat(message.getResult())
+        assertThat(event.getProperties().get(PROP_RESULT))
                 .isNull();
     }
 
@@ -164,9 +166,9 @@ public class TelemetryMessageBuilderTest {
         String result = "spits like a cowboy";
         message.result(result);
         // when
-        message.send();
+        TelemetryEvent event = message.send();
         // then dont override existing result
-        assertThat(message.getResult())
+        assertThat(event.getProperties().get(PROP_RESULT))
                 .isEqualTo(result);
     }
 
@@ -240,6 +242,18 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
+    public void result_should_clear_error() {
+        // given
+        ActionMessage message = builder.action("flinstones")
+                .error("went bowling");
+        // when
+        message.result("crushed stones");
+        // then
+        assertThat(message.getError())
+                .isNull();
+    }
+
+    @Test
     public void error_should_set_error_property() {
         // given
         ActionMessage message = builder.action("the simpsons");
@@ -249,6 +263,29 @@ public class TelemetryMessageBuilderTest {
         // then
         assertThat(message.getError())
                 .isEqualTo(error);
+    }
+
+    @Test
+    public void error_should_NOT_NPE_for_given_null_exception() {
+        // given
+        ActionMessage message = builder.action("the simpsons");
+        // when
+        message.error((Exception) null);
+        // then
+        assertThat(message.getError())
+                .isNull();
+    }
+
+    @Test
+    public void error_should_clear_result() {
+        // given
+        ActionMessage message = builder.action("the simpsons")
+                .result("went skateboarding");
+        // when
+        message.error("nuclear plant emergency");
+        // then
+        assertThat(message.getResult())
+                .isNull();
     }
 
     @Test
