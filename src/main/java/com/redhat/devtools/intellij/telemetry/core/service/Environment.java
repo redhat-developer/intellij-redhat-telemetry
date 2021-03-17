@@ -17,6 +17,7 @@ import com.intellij.openapi.application.ApplicationNamesInfo;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class Environment {
     private final Application plugin;
@@ -144,7 +145,7 @@ public class Environment {
                  * Segment won't report countries for incoming requests.
                  * We thus currently dont have any better solution than use the country in the Locale.
                  */
-                country(Locale.getDefault().getDisplayCountry());
+                country(Country.getInstance().get(TimeZone.getDefault()));
             }
         }
 
