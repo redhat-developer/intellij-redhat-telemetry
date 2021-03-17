@@ -26,7 +26,8 @@ import java.time.temporal.ChronoUnit;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.STARTUP;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage.*;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage.PROP_DURATION;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage.PROP_RESULT;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ShutdownMessage;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ServiceFacade;
