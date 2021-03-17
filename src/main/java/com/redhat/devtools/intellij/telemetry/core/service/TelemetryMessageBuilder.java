@@ -41,39 +41,39 @@ public class TelemetryMessageBuilder {
         this.service = serviceFacade;
     }
 
-    public ActionMessageBuilder action(String name) {
-        return new ActionMessageBuilder(name, service);
+    public ActionMessage action(String name) {
+        return new ActionMessage(name, service);
     }
 
-    static class StartupMessageBuilder extends MessageBuilder<StartupMessageBuilder> {
+    static class StartupMessage extends Message<StartupMessage> {
 
-        private StartupMessageBuilder(ServiceFacade service) {
+        private StartupMessage(ServiceFacade service) {
             super(STARTUP, "startup", service);
         }
     }
 
-    static class ShutdownMessageBuilder extends MessageBuilder<ShutdownMessageBuilder> {
+    static class ShutdownMessage extends Message<ShutdownMessage> {
 
         private static final String PROP_SESSION_DURATION = "session_duration";
 
-        private ShutdownMessageBuilder(ServiceFacade service) {
+        private ShutdownMessage(ServiceFacade service) {
             this(toLocalTime(ApplicationManager.getApplication().getStartTime()), service);
         }
 
-        private ShutdownMessageBuilder(LocalDateTime startup, ServiceFacade service) {
+        private ShutdownMessage(LocalDateTime startup, ServiceFacade service) {
             this(startup, LocalDateTime.now(), service);
         }
 
-        ShutdownMessageBuilder(LocalDateTime startup, LocalDateTime shutdown, ServiceFacade service) {
+        ShutdownMessage(LocalDateTime startup, LocalDateTime shutdown, ServiceFacade service) {
             super(SHUTDOWN, "shutdown", service);
             sessionDuration(startup, shutdown);
         }
 
-        private ShutdownMessageBuilder sessionDuration(LocalDateTime startup, LocalDateTime shutdown) {
+        private ShutdownMessage sessionDuration(LocalDateTime startup, LocalDateTime shutdown) {
             return sessionDuration(Duration.between(startup, shutdown));
         }
 
-        private ShutdownMessageBuilder sessionDuration(Duration duration) {
+        private ShutdownMessage sessionDuration(Duration duration) {
             return property(PROP_SESSION_DURATION, TimeUtils.toString(duration));
         }
 
@@ -82,7 +82,7 @@ public class TelemetryMessageBuilder {
         }
     }
 
-    public static class ActionMessageBuilder extends MessageBuilder<ActionMessageBuilder> {
+    public static class ActionMessage extends Message<ActionMessage> {
 
         static final String PROP_DURATION = "duration";
         static final String PROP_ERROR = "error";
@@ -92,31 +92,31 @@ public class TelemetryMessageBuilder {
 
         private LocalDateTime started;
 
-        private ActionMessageBuilder(String name, ServiceFacade service) {
+        private ActionMessage(String name, ServiceFacade service) {
             super(ACTION, name, service);
             started();
         }
 
-        public ActionMessageBuilder started() {
+        public ActionMessage started() {
             return started(LocalDateTime.now());
         }
 
-        public ActionMessageBuilder started(LocalDateTime started) {
+        public ActionMessage started(LocalDateTime started) {
             this.started = started;
             return this;
         }
 
-        public ActionMessageBuilder finished() {
+        public ActionMessage finished() {
             finished(LocalDateTime.now());
             return this;
         }
 
-        public ActionMessageBuilder finished(LocalDateTime finished) {
+        public ActionMessage finished(LocalDateTime finished) {
             duration(Duration.between(started, finished));
             return this;
         }
 
-        public ActionMessageBuilder duration(Duration duration) {
+        public ActionMessage duration(Duration duration) {
             return property(PROP_DURATION, TimeUtils.toString(duration));
         }
 
@@ -124,16 +124,16 @@ public class TelemetryMessageBuilder {
             return getProperty(PROP_DURATION);
         }
 
-        public ActionMessageBuilder success() {
+        public ActionMessage success() {
             return result(RESULT_SUCCESS);
         }
 
-        public ActionMessageBuilder result(String result) {
+        public ActionMessage result(String result) {
             property(PROP_RESULT, result);
             return clearError();
         }
 
-        protected ActionMessageBuilder clearResult() {
+        protected ActionMessage clearResult() {
             properties().remove(PROP_RESULT);
             return this;
         }
@@ -142,19 +142,19 @@ public class TelemetryMessageBuilder {
             return getProperty(PROP_RESULT);
         }
 
-        public ActionMessageBuilder error(Exception exception) {
+        public ActionMessage error(Exception exception) {
             if (exception == null) {
                 return this;
             }
             return error(exception.getMessage());
         }
 
-        public ActionMessageBuilder error(String message) {
+        public ActionMessage error(String message) {
             property(PROP_ERROR, anonymize(message));
             return clearResult();
         }
 
-        protected ActionMessageBuilder clearError() {
+        protected ActionMessage clearError() {
             properties().remove(PROP_ERROR);
             return this;
         }
@@ -184,14 +184,14 @@ public class TelemetryMessageBuilder {
         }
     }
 
-    private abstract static class MessageBuilder<T extends MessageBuilder<?>> {
+    private abstract static class Message<T extends Message<?>> {
 
         private final Type type;
         private final Map<String, String> properties = new HashMap<>();
         private final String name;
         private final ServiceFacade service;
 
-        private MessageBuilder(Type type, String name, ServiceFacade service) {
+        private Message(Type type, String name, ServiceFacade service) {
             this.name = name;
             this.type = type;
             this.service = service;
@@ -252,7 +252,7 @@ public class TelemetryMessageBuilder {
         }
 
         private void sendStartup() {
-            new StartupMessageBuilder(this).send();
+            new StartupMessage(this).send();
         }
 
         private void onShutdown() {
@@ -266,7 +266,7 @@ public class TelemetryMessageBuilder {
         }
 
         protected void sendShutdown() {
-            new ShutdownMessageBuilder(ServiceFacade.this).send();
+            new ShutdownMessage(ServiceFacade.this).send();
         }
 
         protected MessageBusConnection createMessageBusConnection() {

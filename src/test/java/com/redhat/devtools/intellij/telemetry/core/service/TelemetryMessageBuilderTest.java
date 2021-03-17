@@ -26,9 +26,9 @@ import java.time.temporal.ChronoUnit;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.STARTUP;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessageBuilder.*;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ShutdownMessageBuilder;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessageBuilder;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage.*;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ShutdownMessage;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ServiceFacade;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,7 +52,7 @@ public class TelemetryMessageBuilderTest {
     public void action_should_create_message_with_action_type() {
         // given
         // when
-        ActionMessageBuilder message = builder.action("azrael");
+        ActionMessage message = builder.action("azrael");
         // then
         assertThat(message.getType()).isEqualTo(ACTION);
     }
@@ -62,7 +62,7 @@ public class TelemetryMessageBuilderTest {
         // given
         String name = "papa smurf";
         // when
-        ActionMessageBuilder message = builder.action(name);
+        ActionMessage message = builder.action(name);
         // then
         assertThat(message.getName()).isEqualTo(name);
     }
@@ -73,7 +73,7 @@ public class TelemetryMessageBuilderTest {
         String key = "likes";
         String value = "papa smurf";
         // when
-        ActionMessageBuilder message = builder.action("smurfette").property(key, value);
+        ActionMessage message = builder.action("smurfette").property(key, value);
         // then
         assertThat(message.getProperty(key)).isEqualTo(value);
     }
@@ -81,7 +81,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void send_should_send_message_via_service_facade() {
         // given
-        ActionMessageBuilder message = builder.action("gargamel");
+        ActionMessage message = builder.action("gargamel");
         // when
         message.send();
         // then
@@ -96,7 +96,7 @@ public class TelemetryMessageBuilderTest {
         String value1 = "smurfette";
         String key2 = "the smallest";
         String value2 = "baby smurf";
-        ActionMessageBuilder message = builder.action(name)
+        ActionMessage message = builder.action(name)
                 .property(key1, value1)
                 .property(key2, value2);
         ArgumentCaptor<TelemetryEvent> eventArgument = ArgumentCaptor.forClass(TelemetryEvent.class);
@@ -114,7 +114,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void send_should_set_duration() throws InterruptedException {
         // given
-        ActionMessageBuilder message = builder.action("jolly jumper");
+        ActionMessage message = builder.action("jolly jumper");
         // when
         TelemetryEvent event = message.send();
         // then dont override existing duration
@@ -125,7 +125,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void send_should_NOT_set_duration_if_already_exists() throws InterruptedException {
         // given
-        ActionMessageBuilder message = builder.action("jolly jumper");
+        ActionMessage message = builder.action("jolly jumper");
         Duration existing = Duration.ofDays(7);
         message.duration(existing);
         // when
@@ -138,7 +138,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void send_should_set_result() throws InterruptedException {
         // given
-        ActionMessageBuilder message = builder.action("jolly jumper");
+        ActionMessage message = builder.action("jolly jumper");
         // when
         TelemetryEvent event = message.send();
         // then
@@ -149,7 +149,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void send_should_NOT_set_result_if_error_exists() throws InterruptedException {
         // given
-        ActionMessageBuilder message = builder.action("jolly jumper");
+        ActionMessage message = builder.action("jolly jumper");
         message.error("lost luky luke");
         // when
         TelemetryEvent event = message.send();
@@ -161,7 +161,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void send_should_NOT_set_result_if_result_exists() throws InterruptedException {
         // given
-        ActionMessageBuilder message = builder.action("jolly jumper");
+        ActionMessage message = builder.action("jolly jumper");
         String result = "spits like a cowboy";
         message.result(result);
         // when
@@ -174,9 +174,9 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void send_should_send_to_same_facade_instance() {
         // given
-        ActionMessageBuilder message1 = builder.action("gargamel");
-        ActionMessageBuilder message2 = builder.action("azrael");
-        ActionMessageBuilder message3 = builder.action("papa smurf");
+        ActionMessage message1 = builder.action("gargamel");
+        ActionMessage message2 = builder.action("azrael");
+        ActionMessage message3 = builder.action("papa smurf");
         // when
         message1.send();
         message2.send();
@@ -188,7 +188,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void finished_should_set_duration() throws InterruptedException {
         // given
-        ActionMessageBuilder message = builder.action("inspector gadget");
+        ActionMessage message = builder.action("inspector gadget");
         final long delay = 1 * 1000;
         Thread.sleep(delay);
         // when
@@ -201,7 +201,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void finished_should_set_duration_btw_given_start_and_finished_when_stop_is_new_day() {
         // given
-        ActionMessageBuilder message = builder.action("inspector gadget hits the button");
+        ActionMessage message = builder.action("inspector gadget hits the button");
         LocalDateTime started = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 0));
         message.started(started);
         int hours = 2;
@@ -216,7 +216,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void finished_should_set_duration_btw_given_start_and_finished_when_finished_is_in_new_year() {
         // given
-        ActionMessageBuilder message = builder.action("the daltons break out");
+        ActionMessage message = builder.action("the daltons break out");
         LocalDateTime started = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 0));
         message.started(started);
         Duration duration = Duration.of(2, ChronoUnit.HOURS).plusDays(356 + 30);
@@ -231,7 +231,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void result_should_set_result_property() {
         // given
-        ActionMessageBuilder message = builder.action("flinstones");
+        ActionMessage message = builder.action("flinstones");
         String result = "crushed stones";
         // when
         message.result(result);
@@ -243,7 +243,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void result_should_clear_error() {
         // given
-        ActionMessageBuilder message = builder.action("flinstones")
+        ActionMessage message = builder.action("flinstones")
                 .error("went bowling");
         // when
         message.result("crushed stones");
@@ -255,7 +255,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void error_should_set_error_property() {
         // given
-        ActionMessageBuilder message = builder.action("the simpsons");
+        ActionMessage message = builder.action("the simpsons");
         String error = "nuclear plant emergency";
         // when
         message.error(error);
@@ -267,7 +267,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void error_should_NOT_NPE_for_given_null_exception() {
         // given
-        ActionMessageBuilder message = builder.action("the simpsons");
+        ActionMessage message = builder.action("the simpsons");
         // when
         message.error((Exception) null);
         // then
@@ -278,7 +278,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void error_should_clear_result() {
         // given
-        ActionMessageBuilder message = builder.action("the simpsons")
+        ActionMessage message = builder.action("the simpsons")
                 .result("went skateboarding");
         // when
         message.error("nuclear plant emergency");
@@ -290,7 +290,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void error_should_anonymize_email() {
         // given
-        ActionMessageBuilder message = builder.action("the simpsons");
+        ActionMessage message = builder.action("the simpsons");
         String email = "bart@simpsons.com";
         // when
         message.error(email + " caused a nuclear plant emergency");
@@ -302,7 +302,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void error_should_anonymize_username() {
         // given
-        ActionMessageBuilder message = builder.action("the simpsons");
+        ActionMessage message = builder.action("the simpsons");
         // when
         String username = AnonymizeUtils.USER_NAME;
         message.error(username + " caused a nuclear plant emergency");
@@ -314,7 +314,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void error_should_anonymize_homedir() {
         // given
-        ActionMessageBuilder message = builder.action("the smurfs");
+        ActionMessage message = builder.action("the smurfs");
         // when
         String homedir = AnonymizeUtils.HOME_DIR;
         message.error(homedir + " is their village");
@@ -326,7 +326,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void error_should_anonymize_tmpdir() {
         // given
-        ActionMessageBuilder message = builder.action("the smurfs");
+        ActionMessage message = builder.action("the smurfs");
         // when
         String junkyard = AnonymizeUtils.HOME_DIR;
         message.error("there's no " + junkyard + " in the smurf village");
@@ -338,7 +338,7 @@ public class TelemetryMessageBuilderTest {
     @Test
     public void error_should_anonymize_IP_address() {
         // given
-        ActionMessageBuilder message = builder.action("the smurfs");
+        ActionMessage message = builder.action("the smurfs");
         // when
         String IP = "192.168.1.42";
         message.error("the smurf village must be kept secret, that's why their IP " + IP + " is anonymized");
@@ -400,7 +400,7 @@ public class TelemetryMessageBuilderTest {
         LocalDateTime shutdown = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(4, 2));
         Duration duration = Duration.between(startup, shutdown);
         // when
-        ShutdownMessageBuilder message = new ShutdownMessageBuilder(startup, shutdown, serviceFacadeMock);
+        ShutdownMessage message = new ShutdownMessage(startup, shutdown, serviceFacadeMock);
         // then
         assertThat(message.getSessionDuration()).isEqualTo(TimeUtils.toString(duration));
     }
