@@ -8,6 +8,15 @@
         Those allow us to identify problems and improve our products.</p>
         ]]>
     </description>
+
+    <change-notes><![CDATA[
+    <p><b>0.0.1</b></p>
+    <ul>
+      <li>Initial release</li>
+    </ul>
+  ]]>
+    </change-notes>
+
     <idea-version since-build="193.5233.102" />
 
     <depends>com.intellij.modules.lang</depends>
