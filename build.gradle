@@ -77,5 +77,5 @@ repositories {
 }
 
 group 'com.redhat.devtools.intellij'
-
+version projectVersion
 
