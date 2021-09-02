@@ -31,7 +31,6 @@ public class Country {
     private static final Logger LOGGER = Logger.getInstance(Country.class);
 
     private static final String TIMEZONES = "/timezones.json";
-    private static final String COUNTRIES = "/countries.json";
     private static final String KEY_COUNTRY = "c";
     private static final String KEY_ALTERNATIVE = "a";
 
@@ -41,8 +40,7 @@ public class Country {
         return INSTANCE;
     }
 
-    private Lazy<Map<String, Map<String, String>>> timezones = new Lazy<>(() -> deserialize(TIMEZONES));
-    private Lazy<Map<String, String>> countries = new Lazy<>(() -> deserialize(COUNTRIES));
+    private final Lazy<Map<String, Map<String, String>>> timezones = new Lazy<>(() -> deserialize(TIMEZONES));
 
     protected Country() {
         // for testing purposes
@@ -55,24 +53,20 @@ public class Country {
         return get(timeZone.getID());
     }
 
-    private String get(String timezoneId) {
+    public String get(String timezoneId) {
         Map<String, String> timezone = timezones.get().get(timezoneId);
         if (timezone == null) {
-            return timezoneId;
+            return null;
         }
         String abbreviation = timezone.get(KEY_COUNTRY);
-        if (abbreviation == null) {
-            String alternative = timezone.get(KEY_ALTERNATIVE);
-            if (alternative == null) {
-                return timezoneId;
-            }
-            return get(alternative);
+        if (abbreviation != null) {
+            return abbreviation;
         }
-        return getDisplayName(abbreviation);
-    }
-
-    private String getDisplayName(String abbreviation) {
-        return countries.get().get(abbreviation);
+        String alternative = timezone.get(KEY_ALTERNATIVE);
+        if (alternative == null) {
+            return null;
+        }
+        return get(alternative);
     }
 
     private <V> Map<String, V> deserialize(String file) {

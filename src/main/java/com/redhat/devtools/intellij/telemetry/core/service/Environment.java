@@ -20,6 +20,9 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class Environment {
+
+    public static final String UNKNOWN_COUNTRY = "ZZ";
+
     private final Application plugin;
     private final Application application;
     private final Platform platform;
@@ -118,7 +121,7 @@ public class Environment {
 
         private void ensureTimezone() {
             if (timezone == null) {
-                timezone(System.getProperty("user.timezone", ""));
+                timezone(TimeZone.getDefault().getID());
             }
         }
 
@@ -145,7 +148,12 @@ public class Environment {
                  * Segment won't report countries for incoming requests.
                  * We thus currently dont have any better solution than use the country in the Locale.
                  */
-                country(Country.getInstance().get(TimeZone.getDefault()));
+                ensureTimezone();
+                String country = Country.getInstance().get(timezone);
+                if (country == null) {
+                    country = UNKNOWN_COUNTRY;
+                }
+                country(country);
             }
         }
 
@@ -179,7 +187,6 @@ public class Environment {
                 ensurePlatform();
                 ensureCountry();
                 ensureLocale();
-                ensurePlatform();
                 ensureTimezone();
                 return new Environment(plugin, application, platform, timezone, locale, country);
             }
