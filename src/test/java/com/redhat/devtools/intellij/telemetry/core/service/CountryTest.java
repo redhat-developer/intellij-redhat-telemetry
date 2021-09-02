@@ -24,14 +24,14 @@ class CountryTest {
         // when
         String country = Country.getInstance().get(TimeZone.getTimeZone("Europe/Zurich"));
         // then
-        assertThat(country).isEqualTo("Switzerland");
+        assertThat(country).isEqualTo("CH");
     }
 
     @Test
     void get_should_return_null_for_null_timezoneId() {
         // given
         // when
-        String country = Country.getInstance().get(null);
+        String country = Country.getInstance().get((String) null);
         // then
         assertThat(country).isEqualTo(null);
     }
@@ -44,7 +44,7 @@ class CountryTest {
         timeZone.setID("Aldreean/Organa Major");
         String country = Country.getInstance().get(timeZone);
         // then
-        assertThat(country).isEqualTo("Aldreean/Organa Major");
+        assertThat(country).isNull();
     }
 
     @Test
@@ -53,16 +53,16 @@ class CountryTest {
         // when "America/Argentina/ComodRivadavia" -> "a: America/Argentina/Catamarca" -> "c: AR" -> "Argentina"
         String country = Country.getInstance().get(TimeZone.getTimeZone("America/Argentina/ComodRivadavia"));
         // then
-        assertThat(country).isEqualTo("Argentina");
+        assertThat(country).isEqualTo("AR");
     }
 
     @Test
-    void get_should_return_timezoneId_for_timezoneId_without_country_nor_alternative() {
+    void get_should_return_null_for_timezoneId_without_country_nor_alternative() {
         // given
         // when
         String country = Country.getInstance().get(TimeZone.getTimeZone("CET"));
         // then
-        assertThat(country).isEqualTo("CET");
+        assertThat(country).isNull();
     }
 
 }
