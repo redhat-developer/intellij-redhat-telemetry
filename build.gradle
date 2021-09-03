@@ -1,5 +1,5 @@
 plugins {
-    id "org.jetbrains.intellij"
+    id "org.jetbrains.intellij" version "${intellijPluginVersion}"
     id "idea"
 }
 
