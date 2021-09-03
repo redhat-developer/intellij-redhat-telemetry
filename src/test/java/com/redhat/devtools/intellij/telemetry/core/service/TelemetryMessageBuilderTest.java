@@ -80,6 +80,28 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
+    public void property_should_ignore_property_with_null_key() {
+        // given
+        ActionMessage message = builder.action("smurfette");
+        int beforeAdding = message.properties().size();
+        // when
+        message.property(null, "papa smurf");
+        // then
+        assertThat(message.properties().size()).isEqualTo(beforeAdding);
+    }
+
+    @Test
+    public void property_should_ignore_property_with_null_value() {
+        // given
+        ActionMessage message = builder.action("smurfette");
+        int beforeAdding = message.properties().size();
+        // when
+        message.property("likes", null);
+        // then
+        assertThat(message.properties().size()).isEqualTo(beforeAdding);
+    }
+
+    @Test
     public void send_should_send_message_via_service_facade() {
         // given
         ActionMessage message = builder.action("gargamel");
