@@ -13,6 +13,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 import com.intellij.ide.AppLifecycleListener;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
@@ -30,6 +31,8 @@ import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.an
 import static com.redhat.devtools.intellij.telemetry.core.util.TimeUtils.toLocalTime;
 
 public class TelemetryMessageBuilder {
+
+    private static final Logger LOGGER = Logger.getInstance(TelemetryMessageBuilder.class);
 
     private final ServiceFacade service;
 
@@ -206,7 +209,12 @@ public class TelemetryMessageBuilder {
         }
 
         public T property(String key, String value) {
-            properties.put(key, value);
+            if (key == null
+                    || value == null) {
+                LOGGER.warn("Ignored property with key: " + key + " value: " + value);
+            } else {
+                properties.put(key, value);
+            }
             return (T) this;
         }
 
