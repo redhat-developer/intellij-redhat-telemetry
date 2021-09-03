@@ -1,5 +1,5 @@
 plugins {
-    id "org.jetbrains.intellij"
+    id "org.jetbrains.intellij" version "${intellijPluginVersion}"
     id "idea"
 }
 
@@ -12,19 +12,19 @@ runIdeForUiTests {
 }
 
 intellij {
-    version ideaVersion //for a full list of Jetbrains IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    pluginName 'Telemetry by Red Hat'
-    updateSinceUntilBuild false
+    version = ideaVersion //for a full list of Jetbrains IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    pluginName = 'Telemetry by Red Hat'
+    updateSinceUntilBuild = false
 }
 
 patchPluginXml {
-    sinceBuild sinceIdeaBuild
-    version projectVersion
+    sinceBuild = sinceIdeaBuild
+    version = projectVersion
 }
 
 publishPlugin {
-    token    jetBrainsToken
-    channels jetBrainsChannel
+    token = jetBrainsToken
+    channels = [jetBrainsChannel]
 }
 
 dependencies {
@@ -63,11 +63,6 @@ configurations {
 
 java {
     withSourcesJar()
-}
-
-publishPlugin {
-    token    jetBrainsToken
-    channels jetBrainsChannel
 }
 
 repositories {
