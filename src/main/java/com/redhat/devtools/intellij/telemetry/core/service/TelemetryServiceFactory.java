@@ -12,12 +12,13 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationNamesInfo;
+import com.intellij.openapi.project.DumbAware;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentConfiguration;
 
-public class TelemetryServiceFactory {
+public class TelemetryServiceFactory implements DumbAware {
 
     private final Environment.Builder builder = new Environment.Builder()
             .application(new Application(
