@@ -12,7 +12,6 @@ package com.redhat.devtools.intellij.telemetry.ui;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationListener;
@@ -20,6 +19,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
+import com.redhat.devtools.intellij.telemetry.ui.utils.NotificationGroupFactory;
 
 import java.io.IOException;
 
@@ -27,7 +27,7 @@ public class TelemetryNotifications {
 
     private static final Logger LOGGER = Logger.getInstance(TelemetryNotifications.class);
 
-    private static final NotificationGroup QUERY_USER_CONSENT = new NotificationGroup(
+    private static final NotificationGroup QUERY_USER_CONSENT = NotificationGroupFactory.create(
             "Enable Telemetry",
             NotificationDisplayType.STICKY_BALLOON,
             true);
@@ -43,12 +43,13 @@ public class TelemetryNotifications {
     }
 
     public void queryUserConsent() {
-        Notification notification = group.createNotification("Enable Telemetry",
+        Notification notification = group.createNotification(
                 "Help Red Hat improve its extensions by allowing them to collect anonymous usage data. " +
-                        "Read our <a href=\"https://developers.redhat.com/article/tool-data-collection\">privacy statement</a> " +
-                        "and learn how to <a href=\"\">opt out</a>.",
-                NotificationType.INFORMATION,
-                new NotificationListener.UrlOpeningListener(false));
+                "Read our <a href=\"https://developers.redhat.com/article/tool-data-collection\">privacy statement</a> " +
+                "and learn how to <a href=\"\">opt out</a>.",
+        NotificationType.INFORMATION);
+        notification.setTitle("Enable Telemetry");
+        notification.setListener(new NotificationListener.UrlOpeningListener(false));
         DumbAwareAction accept = DumbAwareAction.create("Accept",
                 e -> enableTelemetry(true, notification));
         DumbAwareAction deny = DumbAwareAction.create("Deny",
