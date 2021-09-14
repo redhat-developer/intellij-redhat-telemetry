@@ -12,6 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.ide.AppLifecycleListener;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ComponentManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
@@ -255,7 +256,7 @@ public class TelemetryMessageBuilder {
         }
 
         protected ITelemetryService createService(ClassLoader classLoader) {
-            TelemetryServiceFactory factory = ServiceManager.getService(TelemetryServiceFactory.class);
+            TelemetryServiceFactory factory = ApplicationManager.getApplication().getService(TelemetryServiceFactory.class);
             return factory.create(classLoader);
         }
 
