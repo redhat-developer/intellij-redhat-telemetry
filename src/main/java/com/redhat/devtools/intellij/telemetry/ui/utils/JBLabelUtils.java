@@ -10,12 +10,19 @@
  ******************************************************************************/
  package com.redhat.devtools.intellij.telemetry.ui.utils;
 
+import com.intellij.openapi.application.ApplicationInfo;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.ui.ColorUtil;
-import com.intellij.util.ui.JBUI;
 
 import javax.swing.JLabel;
+import java.awt.Color;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class JBLabelUtils {
+
+    private static final Logger LOGGER = Logger.getInstance(JBLabelUtils.class);
 
     private JBLabelUtils() {
     }
@@ -31,13 +38,49 @@ public class JBLabelUtils {
      */
     public static String toStyledHtml(String text, int maxLineLength, JLabel component) {
         String css = "<head><style type=\"text/css\">\n" +
-                "a, a:link {color:#" + ColorUtil.toHex(JBUI.CurrentTheme.Link.linkColor()) + ";}\n" +
-                "a:visited {color:#" + ColorUtil.toHex(JBUI.CurrentTheme.Link.linkVisitedColor()) + ";}\n" +
-                "a:hover {color:#" + ColorUtil.toHex(JBUI.CurrentTheme.Link.linkHoverColor()) + ";}\n" +
-                "a:active {color:#" + ColorUtil.toHex(JBUI.CurrentTheme.Link.linkPressedColor()) + ";}\n" +
+                "a, a:link {color:#" + toHex(getColor(
+                        "com.intellij.util.ui.JBUI$CurrentTheme$Link", "linkColor",
+                        "com.intellij.util.ui.JBUI$CurrentTheme$Link$Foreground", "ENABLED")) + ";}\n" +
+                "a:visited {color:#" + toHex(getColor(
+                        "com.intellij.util.ui.JBUI$CurrentTheme$Link", "linkVisitedColor",
+                        "com.intellij.util.ui.JBUI$CurrentTheme$Link$Foreground", "VISITED")) + ";}\n" +
+                "a:hover {color:#" + toHex(getColor(
+                "com.intellij.util.ui.JBUI$CurrentTheme$Link", "linkHoverColor",
+                "com.intellij.util.ui.JBUI$CurrentTheme$Link$Foreground", "HOVERED")) + ";}\n" +
+                "a:active {color:#" + toHex(getColor(
+                        "com.intellij.util.ui.JBUI$CurrentTheme$Link", "linkPressedColor",
+                        "com.intellij.util.ui.JBUI$CurrentTheme$Link$Foreground", "PRESSED")) + ";}\n" +
                 "</style>\n</head>";
         int width = component.getFontMetrics(component.getFont()).stringWidth(text.substring(0, maxLineLength));
         return "<html>" + css + "<body><div width=" + width + ">" + text + "</div></body></html>";
+    }
+
+    private static Color getColor(String methodClass, String method, String fieldClass, String field) {
+        try {
+            // < IC-2022.1
+            Class clazz = Class.forName(methodClass);
+            Method colorMethod = clazz.getMethod(method);
+            return (Color) colorMethod.invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException | ClassCastException e) {
+            // >= IC-2022.1
+            try {
+                Class clazz = Class.forName(fieldClass);
+                Field colorField = clazz.getDeclaredField(field);
+                return (Color) colorField.get(null);
+            } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException | ClassCastException ex) {
+                LOGGER.warn("Could not retrieve link colors from "
+                        + methodClass + "/" + method + " or " + fieldClass + "/" + field
+                        + "on IC-" + ApplicationInfo.getInstance().getBuild().asStringWithoutProductCode(), ex);
+            }
+            return null;
+        }
+    }
+
+    private static String toHex(Color color) {
+        if (color == null) {
+            return "";
+        }
+        return ColorUtil.toHex(color);
     }
 
 }
