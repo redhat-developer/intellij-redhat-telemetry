@@ -22,6 +22,10 @@ patchPluginXml {
     version = projectVersion
 }
 
+runPluginVerifier {
+    ideVersions = [ideaVersion]
+}
+
 publishPlugin {
     token = jetBrainsToken
     channels = [jetBrainsChannel]
