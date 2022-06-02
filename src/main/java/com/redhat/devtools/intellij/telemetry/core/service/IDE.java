@@ -20,7 +20,7 @@ public class IDE extends Application {
     public static final class Factory {
         public IDE create() {
             return new IDE(
-                    ApplicationNamesInfo.getInstance().getFullProductName(),
+                    ApplicationNamesInfo.getInstance().getFullProductNameWithEdition(),
                     ApplicationInfo.getInstance().getFullVersion());
         }
     }
