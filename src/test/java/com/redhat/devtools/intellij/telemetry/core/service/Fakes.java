@@ -20,11 +20,11 @@ public class Fakes {
             String locale,
             String timezone) {
         return new Environment.Builder()
-                .application(new Application(applicationName, applicationVersion))
+                .ide(new IDE(applicationName, applicationVersion))
                 .locale(locale)
                 .timezone(timezone)
                 .platform(new Platform(platform_name, platform_distribution, platform_version))
-                .plugin(new Application(extensionName, extensionVersion))
+                .plugin(new Plugin.Factory().create(extensionName, extensionVersion))
                 .build();
     }
 
