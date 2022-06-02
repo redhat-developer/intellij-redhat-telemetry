@@ -12,8 +12,6 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
-import com.intellij.openapi.application.ApplicationInfo;
-import com.intellij.openapi.application.ApplicationNamesInfo;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -83,23 +81,21 @@ public class Environment {
 
     public static class Builder {
 
-        private Application application;
-        private Application plugin;
+        private IDE ide;
+        private Plugin plugin;
         private Platform platform;
         private String timezone;
         private String locale;
         private String country;
 
-        public Builder application(Application application) {
-            this.application = application;
+        public Builder ide(IDE ide) {
+            this.ide = ide;
             return this;
         }
 
-        private void ensureApplication() {
-            if (application == null) {
-                application(new Application(
-                        ApplicationNamesInfo.getInstance().getFullProductName(),
-                        ApplicationInfo.getInstance().getFullVersion()));
+        private void ensureIDE() {
+            if (ide == null) {
+                ide(new IDE.Factory().create());
             }
         }
 
@@ -158,37 +154,22 @@ public class Environment {
         }
 
         public Buildable plugin(ClassLoader classLoader) {
-            return plugin(createPlugin(classLoader));
+            return plugin(new Plugin.Factory().create(classLoader));
         }
 
-        public Buildable plugin(Application plugin) {
+        public Buildable plugin(Plugin plugin) {
             this.plugin = plugin;
             return new Buildable();
         }
 
-        private Application createPlugin(ClassLoader classLoader) {
-            IdeaPluginDescriptor descriptor = getPluginDescriptor(classLoader);
-            if (descriptor == null) {
-                return null;
-            }
-            return new Application(descriptor.getName(), descriptor.getVersion());
-        }
-
-        private IdeaPluginDescriptor getPluginDescriptor(ClassLoader classLoader) {
-            return Arrays.stream(PluginManagerCore.getPlugins())
-                    .filter(descriptor -> classLoader.equals(descriptor.getPluginClassLoader()))
-                    .findFirst()
-                    .orElse(null);
-        }
-
         class Buildable {
             public Environment build() {
-                ensureApplication();
+                ensureIDE();
                 ensurePlatform();
                 ensureCountry();
                 ensureLocale();
                 ensureTimezone();
-                return new Environment(plugin, application, platform, timezone, locale, country);
+                return new Environment(plugin, ide, platform, timezone, locale, country);
             }
         }
     }

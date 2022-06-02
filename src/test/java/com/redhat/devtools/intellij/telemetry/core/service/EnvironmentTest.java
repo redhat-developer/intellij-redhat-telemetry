@@ -20,7 +20,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class EnvironmentTest {
 
-    private final Application application = Mockito.mock(Application.class);
+    private final IDE ide = Mockito.mock(IDE.class);
+    private final Plugin plugin = Mockito.mock(Plugin.class);
     private final Environment.Builder envBuilder = new Environment.Builder();
 
     @Test
@@ -28,8 +29,8 @@ public class EnvironmentTest {
         // given
         String userTimezone = System.getProperty("user.timezone", "");
         Environment env = envBuilder
-                .application(application)
-                .plugin(application)
+                .ide(ide)
+                .plugin(plugin)
                 .build();
         // when
         String timezone = env.getTimezone();
@@ -42,9 +43,9 @@ public class EnvironmentTest {
         // given
         String givenTimezone = "America/Barbados";
         Environment env = envBuilder
-                .application(application)
+                .ide(ide)
                 .timezone(givenTimezone)
-                .plugin(application)
+                .plugin(plugin)
                 .build();
         // when
         String timezone = env.getTimezone();
@@ -58,8 +59,8 @@ public class EnvironmentTest {
         TimeZone defaultTimeZone = TimeZone.getTimeZone("Pacific/Palau");
         TimeZone.setDefault(defaultTimeZone);
         Environment env = envBuilder
-                .application(application)
-                .plugin(application)
+                .ide(ide)
+                .plugin(plugin)
                 .build();
         // when
         String country = env.getCountry();
@@ -72,9 +73,9 @@ public class EnvironmentTest {
         // given
         String givenCountry = "CH";
         Environment env = envBuilder
-                .application(application)
+                .ide(ide)
                 .country(givenCountry)
-                .plugin(application)
+                .plugin(plugin)
                 .build();
         // when
         String country = env.getCountry();
@@ -86,9 +87,9 @@ public class EnvironmentTest {
     public void should_use_unknown_country_if_unknown_timezone() {
         // given
         Environment env = envBuilder
-                .application(application)
+                .ide(ide)
                 .timezone("bogus")
-                .plugin(application)
+                .plugin(plugin)
                 .build();
         // when
         String country = env.getCountry();
@@ -101,9 +102,9 @@ public class EnvironmentTest {
         // given
         TimeZone timezone = TimeZone.getTimeZone("America/New_York");
         Environment env = envBuilder
-                .application(application)
+                .ide(ide)
                 .timezone(timezone.getID())
-                .plugin(application)
+                .plugin(plugin)
                 .build();
         // when
         String country = env.getCountry();
@@ -116,8 +117,8 @@ public class EnvironmentTest {
         // given
         String userLocale = Locale.getDefault().toString();
         Environment env = envBuilder
-                .application(application)
-                .plugin(application)
+                .ide(ide)
+                .plugin(plugin)
                 .build();
         // when
         String locale = env.getLocale();
@@ -134,9 +135,9 @@ public class EnvironmentTest {
         // given
         String givenLocale = "en-US";
         Environment env = envBuilder
-                .application(application)
+                .ide(ide)
                 .locale(givenLocale)
-                .plugin(application)
+                .plugin(plugin)
                 .build();
         // when
         String locale = env.getLocale();

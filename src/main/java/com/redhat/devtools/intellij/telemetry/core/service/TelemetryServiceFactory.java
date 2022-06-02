@@ -21,10 +21,8 @@ import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentConfig
 public class TelemetryServiceFactory implements DumbAware {
 
     private final Environment.Builder builder = new Environment.Builder()
-            .application(new Application(
-                    ApplicationNamesInfo.getInstance().getFullProductName(),
-                    ApplicationInfo.getInstance().getFullVersion())
-                        .property("java_version", System.getProperty("java.version")));
+            .ide(new IDE.Factory().create()
+                    .setJavaVersion());
 
     public TelemetryService create(ClassLoader classLoader) {
         Environment environment = builder.plugin(classLoader).build();
