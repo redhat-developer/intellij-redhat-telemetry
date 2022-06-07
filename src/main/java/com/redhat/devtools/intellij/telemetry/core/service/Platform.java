@@ -12,6 +12,8 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.util.SystemInfo;
 
+import java.util.Objects;
+
 public class Platform {
 
     Platform() {
@@ -43,5 +45,20 @@ public class Platform {
 
     public String getVersion() {
         return version;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Platform)) return false;
+        Platform platform = (Platform) o;
+        return Objects.equals(name, platform.name)
+                && Objects.equals(distribution, platform.distribution)
+                && Objects.equals(version, platform.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, distribution, version);
     }
 }

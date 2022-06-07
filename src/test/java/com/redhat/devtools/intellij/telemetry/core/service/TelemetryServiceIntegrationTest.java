@@ -15,6 +15,7 @@ import com.jakewharton.retrofit.Ok3Client;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
+import com.redhat.devtools.intellij.telemetry.core.service.segment.IdentifyTraitsPersistence;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
 import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
 import com.redhat.devtools.intellij.telemetry.util.BlockingFlush;
@@ -35,7 +36,7 @@ import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent
 import static org.mockito.Mockito.mock;
 
 @Ignore("For manual testing purposes only")
-public class TelemetryServiceIntegrationTest {
+class TelemetryServiceIntegrationTest {
 
     private static final String EXTENSION_NAME = "com.redhat.devtools.intellij.telemetry";
     private static final String EXTENSION_VERSION = "0.0.1";
@@ -46,6 +47,7 @@ public class TelemetryServiceIntegrationTest {
     private static final String PLATFORM_VERSION = "0.1.0";
     private static final String LOCALE = "de_CH";
     private static final String TIMEZONE = "Europe/Bern";
+    private static final String COUNTRY = "Switzerland";
     public static final String SEGMENT_WRITE_KEY = "HYuMCHlIpTvukCKZA42OubI1cvGIAap6";
 
     private BlockingFlush blockingFlush;
@@ -54,7 +56,7 @@ public class TelemetryServiceIntegrationTest {
     private TelemetryEvent event;
 
     @BeforeEach
-    public void before() {
+    void before() {
         this.blockingFlush = BlockingFlush.create();
         this.analytics = createAnalytics(blockingFlush, createClient());
         ISegmentConfiguration configuration = segmentConfiguration(SEGMENT_WRITE_KEY, "");
@@ -67,26 +69,30 @@ public class TelemetryServiceIntegrationTest {
                 PLATFORM_DISTRIBUTION,
                 PLATFORM_VERSION,
                 LOCALE,
-                TIMEZONE);
+                TIMEZONE,
+                COUNTRY);
         SegmentBroker broker = new SegmentBroker(
                 false,
                 UserId.INSTANCE.get(),
-                environment, configuration,
+                IdentifyTraitsPersistence.INSTANCE,
+                environment,
+                configuration,
                 key -> analytics);
         this.service = new TelemetryService(
                 TelemetryConfiguration.getInstance(),
-                broker, mock(MessageBusConnection.class),
+                broker,
+                mock(MessageBusConnection.class),
                 mock(TelemetryNotifications.class));
         this.event = new TelemetryEvent(ACTION, "Testing Telemetry");
     }
 
     @AfterEach
-    public void after() {
+    void after() {
         shutdownAnalytics();
     }
 
     @Test
-    public void should_send_track_event() {
+    void should_send_track_event() {
         // given
         // when
         service.send(event);

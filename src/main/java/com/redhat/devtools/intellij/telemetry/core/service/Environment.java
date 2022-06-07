@@ -10,73 +10,28 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManagerCore;
-
-import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 
 public class Environment {
 
     public static final String UNKNOWN_COUNTRY = "ZZ";
 
-    private final Application plugin;
-    private final Application application;
+    private final Plugin plugin;
+    private final IDE ide;
     private final Platform platform;
     private final String timezone;
     private final String locale;
     private final String country;
 
-    private Environment(Application plugin, Application application, Platform platform, String timezone, String locale, String country) {
+    private Environment(Plugin plugin, IDE ide, Platform platform, String timezone, String locale, String country) {
         this.plugin = plugin;
-        this.application = application;
+        this.ide = ide;
         this.platform = platform;
         this.timezone = timezone;
         this.locale = locale;
         this.country = country;
-    }
-
-    /**
-     * Returns the plugin from which Telemetry events are sent.
-     */
-    public Application getPlugin() {
-        return plugin;
-    }
-
-    /**
-     * Returns the application from which Telemetry events are sent .
-     */
-    public Application getApplication() {
-        return application;
-    }
-
-    /**
-     * Returns the platform (or OS) from from which Telemetry events are sent.
-     */
-    public Platform getPlatform() {
-        return platform;
-    }
-
-    /**
-     * Returns the user timezone, eg. 'Europe/Paris'
-     */
-    public String getTimezone() {
-        return timezone;
-    }
-
-    /**
-     * Returns the user locale, eg. 'en-US'
-     */
-    public String getLocale() {
-        return locale;
-    }
-
-    /**
-     * Returns the users ISO country code, eg. 'CA' for Canada
-     */
-    public String getCountry() {
-        return country;
     }
 
     public static class Builder {
@@ -97,6 +52,15 @@ public class Environment {
             if (ide == null) {
                 ide(new IDE.Factory().create());
             }
+        }
+
+        public Buildable plugin(ClassLoader classLoader) {
+            return plugin(new Plugin.Factory().create(classLoader));
+        }
+
+        public Buildable plugin(Plugin plugin) {
+            this.plugin = plugin;
+            return new Buildable();
         }
 
         public Builder platform(Platform platform) {
@@ -153,15 +117,6 @@ public class Environment {
             }
         }
 
-        public Buildable plugin(ClassLoader classLoader) {
-            return plugin(new Plugin.Factory().create(classLoader));
-        }
-
-        public Buildable plugin(Plugin plugin) {
-            this.plugin = plugin;
-            return new Buildable();
-        }
-
         class Buildable {
             public Environment build() {
                 ensureIDE();
@@ -172,6 +127,63 @@ public class Environment {
                 return new Environment(plugin, ide, platform, timezone, locale, country);
             }
         }
+    }
+
+    /**
+     * Returns the plugin from which Telemetry events are sent.
+     */
+    public Application getPlugin() {
+        return plugin;
+    }
+
+    /**
+     * Returns the application from which Telemetry events are sent .
+     */
+    public IDE getIde() {
+        return ide;
+    }
+
+    /**
+     * Returns the platform (or OS) from from which Telemetry events are sent.
+     */
+    public Platform getPlatform() {
+        return platform;
+    }
+
+    /**
+     * Returns the user timezone, eg. 'Europe/Paris'
+     */
+    public String getTimezone() {
+        return timezone;
+    }
+
+    /**
+     * Returns the user locale, eg. 'en-US'
+     */
+    public String getLocale() {
+        return locale;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Environment)) return false;
+        Environment that = (Environment) o;
+        return Objects.equals(plugin, that.plugin)
+                && Objects.equals(ide, that.ide)
+                && Objects.equals(platform, that.platform)
+                && Objects.equals(timezone, that.timezone)
+                && Objects.equals(locale, that.locale)
+                && Objects.equals(country, that.country);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(plugin, ide, platform, timezone, locale, country);
     }
 
 }

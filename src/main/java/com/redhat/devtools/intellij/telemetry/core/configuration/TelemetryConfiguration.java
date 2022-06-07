@@ -12,9 +12,9 @@ package com.redhat.devtools.intellij.telemetry.core.configuration;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.util.messages.Topic;
+import com.redhat.devtools.intellij.telemetry.core.util.Directories;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,10 +22,8 @@ public class TelemetryConfiguration extends CompositeConfiguration {
 
     public static final String KEY_MODE = "com.redhat.devtools.intellij.telemetry.mode";
 
-    private static final SaveableFileConfiguration FILE = new SaveableFileConfiguration(Paths.get(
-            System.getProperty("user.home"),
-            ".redhat",
-            "com.redhat.devtools.intellij.telemetry"));
+    private static final SaveableFileConfiguration FILE = new SaveableFileConfiguration(
+            Directories.RED_HAT.resolve("com.redhat.devtools.intellij.telemetry"));
 
     private static TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
