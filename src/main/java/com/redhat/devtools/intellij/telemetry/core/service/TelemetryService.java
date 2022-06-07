@@ -19,6 +19,7 @@ import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfig
 import com.redhat.devtools.intellij.telemetry.core.util.CircularBuffer;
 import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.*;
@@ -33,7 +34,6 @@ public class TelemetryService implements ITelemetryService {
     private final TelemetryNotifications notifications;
     private final TelemetryConfiguration configuration;
     protected final IMessageBroker broker;
-    private final AtomicBoolean userInfoSent = new AtomicBoolean(false);
     private final AtomicBoolean userQueried = new AtomicBoolean(false);
     private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);
 
@@ -41,7 +41,10 @@ public class TelemetryService implements ITelemetryService {
         this(configuration, broker, ApplicationManager.getApplication().getMessageBus().connect(), new TelemetryNotifications());
     }
 
-    TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker, final MessageBusConnection connection, final TelemetryNotifications notifications) {
+    TelemetryService(final TelemetryConfiguration configuration,
+                     final IMessageBroker broker,
+                     final MessageBusConnection connection,
+                     final TelemetryNotifications notifications) {
         this.configuration = configuration;
         this.broker = broker;
         this.notifications = notifications;
@@ -65,11 +68,9 @@ public class TelemetryService implements ITelemetryService {
     }
 
     private void sendUserInfo() {
-        if (userInfoSent.compareAndSet(false, true)) {
-            doSend(new TelemetryEvent(
-                    Type.USER,
-                    "Anonymous ID: " + UserId.INSTANCE.get()));
-        }
+        doSend(new TelemetryEvent(
+                Type.USER,
+                "Anonymous ID: " + UserId.INSTANCE.get()));
     }
 
     private void queryUserConsent() {

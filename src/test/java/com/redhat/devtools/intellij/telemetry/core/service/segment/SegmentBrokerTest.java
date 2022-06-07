@@ -47,12 +47,13 @@ import static com.redhat.devtools.intellij.telemetry.core.service.segment.Segmen
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-public class SegmentBrokerTest {
+class SegmentBrokerTest {
 
     private static final String EXTENSION_NAME = "Telemetry by Red Hat";
     private static final String EXTENSION_VERSION = "extension-0.0.1";
@@ -64,10 +65,12 @@ public class SegmentBrokerTest {
     private static final String USER_ID = "42";
     private static final String LOCALE = "de_CH";
     private static final String TIMEZONE = "Europe/Bern";
+    private static final String COUNTRY = "Switzerland";
     public static final String NORMAL_WRITE_KEY = "writeKey_value";
     public static final String DEBUG_WRITE_KEY = "debugWriteKey_value";
 
     private Analytics analytics;
+    private IdentifyTraitsPersistence identifyTraitsPersistence;
     private Environment environment;
     private SegmentBroker broker;
     private TelemetryEvent actionEvent;
@@ -79,7 +82,7 @@ public class SegmentBrokerTest {
     @BeforeEach
     public void before() {
         this.analytics = createAnalytics();
-        this.configuration = segmentConfiguration(NORMAL_WRITE_KEY, DEBUG_WRITE_KEY);
+        this.identifyTraitsPersistence = mock(IdentifyTraitsPersistence.class);
         this.environment = environment(
                 EXTENSION_NAME,
                 EXTENSION_VERSION,
@@ -89,8 +92,10 @@ public class SegmentBrokerTest {
                 PLATFORM_DISTRIBUTION,
                 PLATFORM_VERSION,
                 LOCALE,
-                TIMEZONE);
-        this.broker = new SegmentBroker(false, USER_ID, environment, configuration, key -> analytics);
+                TIMEZONE,
+                COUNTRY);
+        this.configuration = segmentConfiguration(NORMAL_WRITE_KEY, DEBUG_WRITE_KEY);
+        this.broker = new SegmentBroker(false, USER_ID, identifyTraitsPersistence, environment, configuration, key -> analytics);
         this.actionEvent = new TelemetryEvent(ACTION, "Action event");
         this.userEvent = new TelemetryEvent(USER, "User event");
         this.startupEvent = new TelemetryEvent(STARTUP, "Startup event");
@@ -98,7 +103,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void should_create_analytics_with_normal_key_if_is_not_debug() {
+    void should_create_analytics_with_normal_key_if_is_not_debug() {
         // given
         // lambda cannot be spied on, function instance can
         Function<String, Analytics> analyticsFactory = spy(new Function<String, Analytics>() {
@@ -107,7 +112,7 @@ public class SegmentBrokerTest {
                 return analytics;
             }
         });
-        SegmentBroker broker = new SegmentBroker(false, USER_ID, environment, configuration, analyticsFactory);
+        SegmentBroker broker = new SegmentBroker(false, USER_ID, identifyTraitsPersistence, environment, configuration, analyticsFactory);
         // when
         broker.send(actionEvent);
         // then
@@ -115,7 +120,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void should_create_analytics_with_debug_key_if_is_debug() {
+    void should_create_analytics_with_debug_key_if_is_debug() {
         // given
         // lambda cannot be spied on, function instance can
         Function<String, Analytics> analyticsFactory = spy(new Function<String, Analytics>() {
@@ -124,7 +129,7 @@ public class SegmentBrokerTest {
                 return analytics;
             }
         });
-        SegmentBroker broker = new SegmentBroker(true, USER_ID, environment, configuration, analyticsFactory);
+        SegmentBroker broker = new SegmentBroker(true, USER_ID, identifyTraitsPersistence, environment, configuration, analyticsFactory);
         // when
         broker.send(actionEvent);
         // then
@@ -132,7 +137,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_enqueue_track_message_for_action_event() {
+    void send_should_enqueue_track_message_for_action_event() {
         // given
         // when
         broker.send(actionEvent);
@@ -141,7 +146,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_enqueue_track_message_with_userId() {
+    void send_should_enqueue_track_message_with_userId() {
         // given
         ArgumentCaptor<MessageBuilder<?,?>> builder = ArgumentCaptor.forClass(MessageBuilder.class);
         // when
@@ -153,7 +158,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_NOT_enqueue_if_no_analytics() {
+    void send_should_NOT_enqueue_if_no_analytics() {
         // given
         IMessageBroker broker = new SegmentBroker(false, USER_ID, environment, configuration);
         // when
@@ -163,7 +168,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_enqueue_message_with_context() {
+    void send_should_enqueue_message_with_context() {
         // given
         ArgumentCaptor<MessageBuilder<?,?>> builder = ArgumentCaptor.forClass(MessageBuilder.class);
         // when
@@ -182,7 +187,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_enqueue_track_message_for_startup_event() {
+    void send_should_enqueue_track_message_for_startup_event() {
         // given
         // when
         broker.send(startupEvent);
@@ -191,7 +196,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_enqueue_track_message_for_shutdown_event() {
+    void send_should_enqueue_track_message_for_shutdown_event() {
         // given
         // when
         broker.send(shutdownEvent);
@@ -200,7 +205,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_enqueue_identify_message_for_user_event() {
+    void send_should_enqueue_identify_message_for_user_event() {
         // given
         // when
         broker.send(userEvent);
@@ -209,7 +214,39 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_enqueue_identify_message_with_traits() {
+    void send_should_NOT_enqueue_identify_message_if_traits_were_sent_but_are_unchanged() {
+        // given
+        doReturn(new IdentifyTraits(
+                LOCALE,
+                TIMEZONE,
+                PLATFORM_NAME,
+                PLATFORM_VERSION,
+                PLATFORM_DISTRIBUTION))
+                .when(identifyTraitsPersistence).get();
+        // when
+        broker.send(userEvent);
+        // then
+        verify(analytics, never()).enqueue(isA(IdentifyMessage.Builder.class));
+    }
+
+    @Test
+    void send_should_enqueue_identify_message_if_traits_were_sent_but_are_changed() {
+        // given
+        doReturn(new IdentifyTraits(
+                LOCALE,
+                TIMEZONE,
+                "Jedi OS",
+                PLATFORM_VERSION,
+                PLATFORM_DISTRIBUTION))
+                .when(identifyTraitsPersistence).get();
+        // when
+        broker.send(userEvent);
+        // then
+        verify(analytics).enqueue(isA(IdentifyMessage.Builder.class));
+    }
+
+    @Test
+    void send_should_enqueue_identify_message_with_traits() {
         // given
         ArgumentCaptor<IdentifyMessage.Builder> builder = ArgumentCaptor.forClass(IdentifyMessage.Builder.class);
         // when
@@ -225,7 +262,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_NOT_add_NULL_properties_to_identify_message() {
+    void send_should_NOT_add_NULL_properties_to_identify_message() {
         // given
         ArgumentCaptor<IdentifyMessage.Builder> builder = ArgumentCaptor.forClass(IdentifyMessage.Builder.class);
         Environment environment = environment(
@@ -237,19 +274,21 @@ public class SegmentBrokerTest {
                 PLATFORM_DISTRIBUTION,
                 null,
                 LOCALE, // system setting used if null
-                TIMEZONE); // system setting used if null
-        SegmentBroker broker = new SegmentBroker(false, USER_ID, environment, configuration, key -> analytics);
+                TIMEZONE, // system setting used if null
+                COUNTRY);
+        SegmentBroker broker = new SegmentBroker(false, USER_ID, identifyTraitsPersistence, environment, configuration, key -> analytics);
 
         // when
         broker.send(userEvent);
         // then
         verify(analytics).enqueue(builder.capture());
         Map<String, ?> traits = builder.getValue().build().traits();
-        assertThat(traits.get(PROP_LOCALE)).isNotNull();
-        assertThat(traits.get(PROP_TIMEZONE)).isNotNull();
-        assertThat(traits.get(PROP_OS_NAME)).isNull();
-        assertThat(traits.get(PROP_OS_DISTRIBUTION)).isNotNull();
-        assertThat(traits.get(PROP_OS_VERSION)).isNull();
+        assertThat(traits)
+                .containsKey(PROP_LOCALE)
+                .containsKey(PROP_TIMEZONE)
+                .doesNotContainKey(PROP_OS_NAME)
+                .containsKey(PROP_OS_DISTRIBUTION)
+                .doesNotContainKey(PROP_OS_VERSION);
         assertContext(
                 null, // app name
                 APPLICATION_VERSION,
@@ -259,7 +298,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_enqueue_track_message_with_properties() {
+    void send_should_enqueue_track_message_with_properties() {
         // given
         ArgumentCaptor<TrackMessage.Builder> builder = ArgumentCaptor.forClass(TrackMessage.Builder.class);
         // when
@@ -274,7 +313,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void send_should_NOT_add_NULL_properties_to_track_message() {
+    void send_should_NOT_add_NULL_properties_to_track_message() {
         // given
         ArgumentCaptor<TrackMessage.Builder> builder = ArgumentCaptor.forClass(TrackMessage.Builder.class);
         Environment environment = environment(
@@ -286,18 +325,19 @@ public class SegmentBrokerTest {
                 PLATFORM_DISTRIBUTION,
                 null,
                 LOCALE, // system setting used if null
-                TIMEZONE); // system setting used if null
-        SegmentBroker broker = new SegmentBroker(false, USER_ID, environment, configuration, key -> analytics);
+                TIMEZONE, // system setting used if null
+                COUNTRY);
+        SegmentBroker broker = new SegmentBroker(false, USER_ID, identifyTraitsPersistence, environment, configuration, key -> analytics);
 
         // when
         broker.send(actionEvent);
         // then
         verify(analytics).enqueue(builder.capture());
         Map<String, ?> properties = builder.getValue().build().properties();
-        assertThat(properties.get(PROP_EXTENSION_NAME)).isNull();;
-        assertThat(properties.get(PROP_EXTENSION_VERSION)).isNotNull();;
-        assertThat(properties.get(PROP_APP_NAME)).isNull();
-        assertThat(properties.get(PROP_APP_VERSION)).isNotNull();
+        assertThat(properties).doesNotContainKey(PROP_EXTENSION_NAME);
+        assertThat(properties).containsKey(PROP_EXTENSION_VERSION);
+        assertThat(properties).doesNotContainKey(PROP_APP_NAME);
+        assertThat(properties).containsKey(PROP_APP_VERSION);
         assertContext(
                 null, // app name
                 APPLICATION_VERSION,
@@ -307,7 +347,7 @@ public class SegmentBrokerTest {
     }
 
     @Test
-    public void dispose_should_flush_and_shutdown_analytics() {
+    void dispose_should_flush_and_shutdown_analytics() {
         // given
         // when
         broker.dispose();

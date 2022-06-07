@@ -30,7 +30,11 @@ public class IDE extends Application {
     }
 
     public IDE setJavaVersion() {
-        property(PROP_JAVA_VERSION, System.getProperty("java.version"));
+        return setJavaVersion(System.getProperty("java.version"));
+    }
+
+    public IDE setJavaVersion(String version) {
+        property(PROP_JAVA_VERSION, version);
         return this;
     }
 

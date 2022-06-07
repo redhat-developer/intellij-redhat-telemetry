@@ -24,7 +24,7 @@ import java.util.List;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.telemetryConfiguration;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.USER;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
@@ -32,8 +32,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-public class TelemetryServiceTest {
+class TelemetryServiceTest {
 
+    private static final String TIMEZONE = "GMT+2:00";
+    private static final String LOCALE = "en/US";
+    private static final String COUNTRY = "Switzerland";
     private SegmentBroker broker;
     private MessageBusConnection bus;
     private ITelemetryService service;
@@ -51,7 +54,7 @@ public class TelemetryServiceTest {
     }
 
     @Test
-    public void send_should_send_if_is_enabled() {
+    void send_should_send_if_is_enabled() {
         // given
         // when
         service.send(event);
@@ -60,7 +63,7 @@ public class TelemetryServiceTest {
     }
 
     @Test
-    public void send_should_NOT_send_if_is_NOT_configured() {
+    void send_should_NOT_send_if_is_NOT_configured() {
         // given
         TelemetryConfiguration configuration = telemetryConfiguration(false, false);
         TelemetryService service = new TelemetryService(configuration, broker, bus, notifications);
@@ -71,7 +74,7 @@ public class TelemetryServiceTest {
     }
 
     @Test
-    public void send_should_send_all_events_once_it_gets_enabled() {
+    void send_should_send_all_events_once_it_gets_enabled() {
         // given
         TelemetryConfiguration configuration = telemetryConfiguration(false, false);
         TelemetryService service = new TelemetryService(configuration, broker, bus, notifications);
@@ -89,7 +92,7 @@ public class TelemetryServiceTest {
     }
 
     @Test
-    public void send_should_send_userinfo() {
+    void send_should_send_userinfo() {
         // given
         ArgumentCaptor<TelemetryEvent> eventArgument = ArgumentCaptor.forClass(TelemetryEvent.class);
         // when
@@ -102,22 +105,7 @@ public class TelemetryServiceTest {
     }
 
     @Test
-    public void send_should_send_userinfo_only_once() {
-        // given
-        ArgumentCaptor<TelemetryEvent> eventArgument = ArgumentCaptor.forClass(TelemetryEvent.class);
-        // when
-        service.send(event);
-        // then
-        verify(broker, atLeastOnce()).send(eventArgument.capture());
-        long userEvents = eventArgument.getAllValues().stream()
-                .map(TelemetryEvent::getType)
-                .filter(type -> USER == type)
-                .count();
-        assertThat(userEvents).isEqualTo(1);
-    }
-
-    @Test
-    public void send_should_query_user_consent_once() {
+    void send_should_query_user_consent_once() {
         // given
         TelemetryConfiguration configuration = telemetryConfiguration(true, false);
         TelemetryService service = new TelemetryService(configuration, broker, bus, notifications);
@@ -130,7 +118,7 @@ public class TelemetryServiceTest {
     }
 
     @Test
-    public void send_should_NOT_query_user_consent_if_configured() {
+    void send_should_NOT_query_user_consent_if_configured() {
         // given
         // when
         service.send(event);

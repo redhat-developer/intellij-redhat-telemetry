@@ -85,15 +85,17 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private final String userId;
+    private final IdentifyTraitsPersistence identifyTraitsPersistence;
     private final Environment environment;
     private Lazy<Analytics> analytics;
 
     public SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration) {
-        this(isDebug, userId, environment, configuration, new AnalyticsFactory());
+        this(isDebug, userId, IdentifyTraitsPersistence.INSTANCE, environment, configuration, new AnalyticsFactory());
     }
 
-    public SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration, Function<String, Analytics> analyticsFactory) {
+    public SegmentBroker(boolean isDebug, String userId, IdentifyTraitsPersistence identifyTraitsPersistence, Environment environment, ISegmentConfiguration configuration, Function<String, Analytics> analyticsFactory) {
         this.userId = userId;
+        this.identifyTraitsPersistence = identifyTraitsPersistence;
         this.environment = environment;
         this.analytics = new Lazy<>(() -> analyticsFactory.apply(getWriteKey(isDebug, configuration)));
     }
@@ -108,26 +110,57 @@ public class SegmentBroker implements IMessageBroker {
             Map<String, Object> context = createContext(environment);
             SegmentType segmentType = SegmentType.valueOf(event.getType());
             MessageBuilder builder = segmentType.toMessage(event, context, this);
-            LOGGER.debug("Sending message " + builder.type() + " to segment.");
-            analytics.get().enqueue(builder);
+            if (builder == null) {
+                LOGGER.debug("No message to be sent.");
+            } else {
+                LOGGER.debug("Sending message " + builder.type() + " to segment.");
+                analytics.get().enqueue(builder);
+            }
         } catch (IllegalArgumentException e) {
             LOGGER.warn("Could not send " + event.getName() + " event: unknown type '" + event.getType() + "'.");
         }
     }
 
     private MessageBuilder toMessage(IdentifyMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
+        IdentifyTraits identifyTraits = new IdentifyTraits(
+                environment.getLocale(),
+                environment.getTimezone(),
+                environment.getPlatform().getName(),
+                environment.getPlatform().getVersion(),
+                environment.getPlatform().getDistribution());
+        if (!haveChanged(identifyTraits, identifyTraitsPersistence)) {
+            LOGGER.debug("Skipping identify message: already sent." + identifyTraits);
+            return null;
+        }
         return builder
                 .userId(userId)
-                .traits(addIdentifyTraits(event.getProperties()))
+                .traits(addIdentifyTraits(identifyTraits, event.getProperties()))
                 .context(context);
     }
 
-    private Map<String, ?> addIdentifyTraits(final Map<String, String> properties) {
-        putIfNotNull(PROP_LOCALE, environment.getLocale(), properties);
-        putIfNotNull(PROP_OS_NAME, environment.getPlatform().getName(), properties);
-        putIfNotNull(PROP_OS_DISTRIBUTION, environment.getPlatform().getDistribution(), properties);
-        putIfNotNull(PROP_OS_VERSION, environment.getPlatform().getVersion(), properties);
-        putIfNotNull(PROP_TIMEZONE, environment.getTimezone(), properties);
+    /**
+     * Saves the given identify traits to persistence if persistence exists.
+     *
+     * @param identifyTraits the traits to save
+     * @return true if saving occurred or no persistence was present.
+     */
+    private synchronized boolean haveChanged(IdentifyTraits identifyTraits, IdentifyTraitsPersistence persistence) {
+        if (identifyTraitsPersistence != null) {
+            if (identifyTraits.equals(persistence.get())) {
+                return false;
+            } else {
+                persistence.set(identifyTraits);
+            }
+        }
+        return true;
+    }
+
+    private Map<String, ?> addIdentifyTraits(final IdentifyTraits identifyTraits, final Map<String, String> properties) {
+        putIfNotNull(PROP_LOCALE, identifyTraits.getLocale(), properties);
+        putIfNotNull(PROP_TIMEZONE, identifyTraits.getTimezone(), properties);
+        putIfNotNull(PROP_OS_NAME, identifyTraits.getOsName(), properties);
+        putIfNotNull(PROP_OS_DISTRIBUTION, identifyTraits.getOsDistribution(), properties);
+        putIfNotNull(PROP_OS_VERSION, identifyTraits.getOsVersion(), properties);
         return properties;
     }
 
@@ -139,7 +172,7 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private Map<String, ?> addTrackProperties(final Map<String, String> properties) {
-        Application application = environment.getApplication();
+        Application application = environment.getIde();
         putIfNotNull(PROP_APP_NAME, application.getName(), properties);
         putIfNotNull(PROP_APP_VERSION, application.getVersion(), properties);
         application.getProperties().forEach(
@@ -168,9 +201,9 @@ public class SegmentBroker implements IMessageBroker {
     private Map<String, Object> createContext(Environment environment) {
         return new MapBuilder()
                 .mapPair(PROP_APP)
-                    .pair(PROP_NAME, environment.getApplication().getName())
-                    .pair(PROP_VERSION, environment.getApplication().getVersion())
-                    .pairs(environment.getApplication().getProperties())
+                    .pair(PROP_NAME, environment.getIde().getName())
+                    .pair(PROP_VERSION, environment.getIde().getVersion())
+                    .pairs(environment.getIde().getProperties())
                     .build()
                 .pair(PROP_IP, VALUE_NULL_IP)
                 .pair(PROP_LOCALE, environment.getLocale())

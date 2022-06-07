@@ -11,13 +11,14 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.redhat.devtools.intellij.telemetry.core.util.Directories;
+import com.redhat.devtools.intellij.telemetry.core.util.FileUtils;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -26,8 +27,7 @@ public class UserId {
     private static final Logger LOGGER = Logger.getInstance(UserId.class);
 
     public static final UserId INSTANCE = new UserId();
-    private static final Path REDHAT_DIRECTORY = Paths.get(System.getProperty("user.home"), ".redhat");
-    private static final Path UUID_FILE = REDHAT_DIRECTORY.resolve("anonymousId");
+    private static final Path UUID_FILE = Directories.RED_HAT.resolve("anonymousId");
 
     private final Lazy<String> uuid = new Lazy<>(() -> loadOrCreate(UUID_FILE));
 
@@ -62,13 +62,8 @@ public class UserId {
 
     private void write(String uuid, Path uuidFile) {
         try {
-            if (!Files.exists(uuidFile.getParent())) {
-                Files.createDirectories(uuidFile.getParent());
-            }
-            Files.createFile(uuidFile);
-            try (Writer writer = Files.newBufferedWriter(uuidFile)) {
-                writer.append(uuid);
-            }
+            FileUtils.createFileAndParent(uuidFile);
+            FileUtils.write(uuid, uuidFile);
         } catch (IOException e) {
             LOGGER.warn("Could not write redhat anonymous UUID to file at " + UUID_FILE.toAbsolutePath(), e);
         }
