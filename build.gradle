@@ -34,7 +34,7 @@ publishPlugin {
 dependencies {
     implementation(
             'com.segment.analytics.java:analytics:2.1.1',
-            'com.squareup.okhttp3:okhttp:4.9.0'
+            'com.squareup.okhttp3:okhttp:4.9.3'
     )
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.2',
             "org.assertj:assertj-core:3.22.0",
