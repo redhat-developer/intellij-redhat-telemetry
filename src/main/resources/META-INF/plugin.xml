@@ -10,6 +10,11 @@
     </description>
 
     <change-notes><![CDATA[
+    <p><b>0.0.3</b></p>
+    <ul>
+      <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/46">Avoid sending unnecessary 'identify' events</a></li>
+      <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/54">~50% of users report no IDE version</a></li>
+    </ul>
     <p><b>0.0.2</b></p>
     <ul>
       <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/30">Should send country abbreviation, not country display name</a></li>
