@@ -153,6 +153,7 @@ public class TelemetryConfiguration extends CompositeConfiguration {
         }
     }
 
+    @FunctionalInterface
     public interface ConfigurationChangedListener {
         Topic<ConfigurationChangedListener> CONFIGURATION_CHANGED =
                 Topic.create("Telemetry Configuration Changed", ConfigurationChangedListener.class);
