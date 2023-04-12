@@ -10,6 +10,10 @@
     </description>
 
     <change-notes><![CDATA[
+    <p><b>1.0.0</b></p>
+    <ul>
+      <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/68">Validate UUID before using it</a></li>
+    </ul>
     <p><b>0.0.3</b></p>
     <ul>
       <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/46">Avoid sending unnecessary 'identify' events</a></li>
