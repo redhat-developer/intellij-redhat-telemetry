@@ -26,9 +26,9 @@ import java.util.stream.Stream;
  */
 public class IdentifyTraitsPersistence {
 
+    public static final IdentifyTraitsPersistence INSTANCE = new IdentifyTraitsPersistence();
     private static final Logger LOGGER = Logger.getInstance(IdentifyTraitsPersistence.class);
 
-    public static final IdentifyTraitsPersistence INSTANCE = new IdentifyTraitsPersistence();
     private static final Path FILE = Directories.RED_HAT.resolve("segment-identify-traits.json");
 
     private IdentifyTraits identifyTraits = null;
