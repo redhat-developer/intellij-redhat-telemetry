@@ -10,8 +10,6 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-import com.intellij.openapi.application.ApplicationInfo;
-import com.intellij.openapi.application.ApplicationNamesInfo;
 import com.intellij.openapi.project.DumbAware;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
@@ -20,12 +18,15 @@ import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentConfig
 
 public class TelemetryServiceFactory implements DumbAware {
 
-    private final Environment.Builder builder = new Environment.Builder()
-            .ide(new IDE.Factory().create()
-                    .setJavaVersion());
+    private final IDE ide = new IDE.Factory()
+            .create()
+            .setJavaVersion();
 
     public TelemetryService create(ClassLoader classLoader) {
-        Environment environment = builder.plugin(classLoader).build();
+        Environment environment = new Environment.Builder()
+                .ide(ide)
+                .plugin(classLoader)
+                .build();
         TelemetryConfiguration configuration = TelemetryConfiguration.getInstance();
         IMessageBroker broker = createSegmentBroker(configuration.isDebug(), classLoader, environment);
         return new TelemetryService(configuration, broker);
