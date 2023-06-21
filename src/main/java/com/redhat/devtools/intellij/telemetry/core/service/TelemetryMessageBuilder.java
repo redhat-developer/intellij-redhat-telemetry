@@ -10,26 +10,24 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-import com.intellij.ide.AppLifecycleListener;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ComponentManager;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
-import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.SHUTDOWN;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.STARTUP;
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymize;
+import static com.redhat.devtools.intellij.telemetry.core.util.TimeUtils.toLocalTime;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.SHUTDOWN;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.STARTUP;
-import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymize;
-import static com.redhat.devtools.intellij.telemetry.core.util.TimeUtils.toLocalTime;
+import com.intellij.ide.AppLifecycleListener;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.util.messages.MessageBusConnection;
+import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type;
+import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
 
 public class TelemetryMessageBuilder {
 

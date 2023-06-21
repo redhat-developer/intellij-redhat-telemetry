@@ -10,20 +10,21 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
+import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.KEY_MODE;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
+import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.ConfigurationChangedListener;
+import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.Mode;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type;
 import com.redhat.devtools.intellij.telemetry.core.util.CircularBuffer;
 import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
-
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.*;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.*;
 
 public class TelemetryService implements ITelemetryService {
 
