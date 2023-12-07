@@ -1,0 +1,69 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v20.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
+package com.redhat.devtools.intellij.telemetry.core.service;
+
+import com.intellij.openapi.diagnostic.Logger;
+import com.redhat.devtools.intellij.telemetry.core.IService;
+
+import java.util.HashMap;
+import java.util.Map;
+
+abstract class Message<T extends Message> {
+
+    private static final Logger LOGGER = Logger.getInstance(Message.class);
+
+    private final Event.Type type;
+        private final Map<String, String> properties = new HashMap<>();
+        private final String name;
+        private final IService service;
+
+        protected Message(Event.Type type, String name, IService service) {
+            this.name = name;
+            this.type = type;
+            this.service = service;
+        }
+
+        String getName() {
+            return name;
+        }
+
+        Event.Type getType() {
+            return type;
+        }
+
+        public T property(String key, String value) {
+            if (key == null
+                    || value == null) {
+                LOGGER.warn("Ignored property with key: " + key + " value: " + value);
+            } else {
+                properties.put(key, value);
+            }
+            return (T) this;
+        }
+
+        String getProperty(String key) {
+            return properties.get(key);
+        }
+
+        Map<String, String> properties() {
+            return properties;
+        }
+
+        protected boolean hasProperty(String key) {
+            return properties.containsKey(key);
+        }
+
+        public Event send() {
+            Event event = new Event(type, name, new HashMap<>(properties));
+            service.send(event);
+            return event;
+        }
+    }

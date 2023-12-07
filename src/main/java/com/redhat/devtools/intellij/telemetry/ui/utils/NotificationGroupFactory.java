@@ -37,6 +37,8 @@ import java.lang.reflect.Method;
  */
 public class NotificationGroupFactory {
 
+    private NotificationGroupFactory() {}
+
     public static NotificationGroup create(String displayId, NotificationDisplayType type, boolean logByDefault) {
         try {
             // < IC-2021.3

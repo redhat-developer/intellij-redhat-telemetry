@@ -24,13 +24,13 @@ class ClasspathConfigurationTest {
     private ClasspathConfiguration config;
 
     @BeforeEach
-    public void beforeEach() throws IOException {
+    void beforeEach() throws IOException {
         Path path = Paths.get("segment.properties");
         this.config = new ClasspathConfiguration(path);
     }
 
     @Test
-    public void get_loads_property_file() throws IOException {
+    void get_loads_property_file() throws IOException {
         // given
         // when
         String value = config.get("writeKey");

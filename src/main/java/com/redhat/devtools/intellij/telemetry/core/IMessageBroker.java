@@ -10,9 +10,9 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core;
 
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
+import com.redhat.devtools.intellij.telemetry.core.service.Event;
 
 public interface IMessageBroker {
-    void send(TelemetryEvent event);
+    void send(Event event);
     void dispose();
 }

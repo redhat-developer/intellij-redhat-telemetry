@@ -11,7 +11,7 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
+import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
 import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
@@ -22,8 +22,8 @@ import org.mockito.internal.verification.VerificationModeFactory;
 
 import java.util.List;
 
+import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.USER;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.telemetryConfiguration;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.USER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -34,23 +34,20 @@ import static org.mockito.Mockito.verify;
 
 class TelemetryServiceTest {
 
-    private static final String TIMEZONE = "GMT+2:00";
-    private static final String LOCALE = "en/US";
-    private static final String COUNTRY = "Switzerland";
     private SegmentBroker broker;
     private MessageBusConnection bus;
-    private ITelemetryService service;
-    private TelemetryEvent event;
+    private IService service;
+    private Event event;
     private TelemetryNotifications notifications;
 
     @BeforeEach
-    public void before() {
+    void before() {
         this.broker = createSegmentBroker();
         this.bus = createMessageBusConnection();
         this.notifications = createTelemetryNotifications();
         TelemetryConfiguration configuration = telemetryConfiguration(true, true);
         this.service = new TelemetryService(configuration, broker, bus, notifications);
-        this.event = new TelemetryEvent(null, "Testing Telemetry", null);
+        this.event = new Event(null, "Testing Telemetry", null);
     }
 
     @Test
@@ -59,7 +56,7 @@ class TelemetryServiceTest {
         // when
         service.send(event);
         // then
-        verify(broker, atLeastOnce()).send(any(TelemetryEvent.class));
+        verify(broker, atLeastOnce()).send(any(Event.class));
     }
 
     @Test
@@ -70,7 +67,7 @@ class TelemetryServiceTest {
         // when
         service.send(event);
         // then
-        verify(broker, never()).send(any(TelemetryEvent.class));
+        verify(broker, never()).send(any(Event.class));
     }
 
     @Test
@@ -82,24 +79,24 @@ class TelemetryServiceTest {
         service.send(event);
         service.send(event);
         // then
-        verify(broker, never()).send(any(TelemetryEvent.class));
+        verify(broker, never()).send(any(Event.class));
         // when config gets enabled
         doReturn(true)
                 .when(configuration).isEnabled();
         service.send(event);
         // then
-        verify(broker, VerificationModeFactory.atLeast(3)).send(any(TelemetryEvent.class));
+        verify(broker, VerificationModeFactory.atLeast(3)).send(any(Event.class));
     }
 
     @Test
     void send_should_send_userinfo() {
         // given
-        ArgumentCaptor<TelemetryEvent> eventArgument = ArgumentCaptor.forClass(TelemetryEvent.class);
+        ArgumentCaptor<Event> eventArgument = ArgumentCaptor.forClass(Event.class);
         // when
         service.send(event);
         // then
         verify(broker, atLeastOnce()).send(eventArgument.capture());
-        List<TelemetryEvent> allArguments = eventArgument.getAllValues();
+        List<Event> allArguments = eventArgument.getAllValues();
         assertThat(allArguments.size()).isGreaterThanOrEqualTo(2);
         assertThat(allArguments.get(0).getType()).isEqualTo(USER);
     }

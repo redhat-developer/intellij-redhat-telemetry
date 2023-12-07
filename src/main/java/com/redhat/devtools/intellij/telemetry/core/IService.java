@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat, Inc.
+ * Copyright (c) 2023 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -8,18 +8,10 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package com.redhat.devtools.intellij.telemetry.core.service.segment;
+package com.redhat.devtools.intellij.telemetry.core;
 
-public interface ISegmentConfiguration {
-    String getNormalWriteKey();
-    String getDebugWriteKey();
+import com.redhat.devtools.intellij.telemetry.core.service.Event;
 
-    default String getWriteKey(boolean isDebug) {
-        if (isDebug) {
-            return getDebugWriteKey();
-        } else {
-            return getNormalWriteKey();
-        }
-    }
-
+public interface IService {
+    void send(Event event);
 }

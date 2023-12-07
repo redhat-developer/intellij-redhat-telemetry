@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AnonymizeUtilsTest {
 
     @Test
-    public void anonymizeEmail_should_replace_email() {
+    void anonymizeEmail_should_replace_email() {
         // given
         String email = "adietish@redhat.com";
         String msgWithEmail = "This is the email address " + email + " within a message.";
@@ -28,7 +28,7 @@ public class AnonymizeUtilsTest {
     }
 
     @Test
-    public void anonymizeEmail_should_NOT_replace_bogus_email() {
+    void anonymizeEmail_should_NOT_replace_bogus_email() {
         // given
         String bogusEmail = "adietish@redhat";
         String msgWithBogusEmail = "This is the email address " + bogusEmail + " within a message.";
@@ -40,7 +40,7 @@ public class AnonymizeUtilsTest {
     }
 
     @Test
-    public void anonymizeUserName_should_replace_username() {
+    void anonymizeUserName_should_replace_username() {
         // given
         String username = AnonymizeUtils.USER_NAME;
         String msgWithUsername = "This is the username " + username + " within a message.";
@@ -52,7 +52,7 @@ public class AnonymizeUtilsTest {
     }
 
     @Test
-    public void anonymizeHomeDir_should_replace_homedir() {
+    void anonymizeHomeDir_should_replace_homedir() {
         // given
         String homeDir = AnonymizeUtils.HOME_DIR;
         String msgWithHomeDir = "This is the path to the " + homeDir + " within a message.";
@@ -64,7 +64,7 @@ public class AnonymizeUtilsTest {
     }
 
     @Test
-    public void anonymizeHomeDir_should_NOT_replace_other_directory() {
+    void anonymizeHomeDir_should_NOT_replace_other_directory() {
         // given
         String otherDir = "C:\\\\Documents and Settings\\\\All Users";
         String msgWithOtherDir = "This is the path to the " + otherDir + " within a message.";
@@ -76,7 +76,7 @@ public class AnonymizeUtilsTest {
     }
 
     @Test
-    public void anonymizeTmpDir_should_replace_tmpDir() {
+    void anonymizeTmpDir_should_replace_tmpDir() {
         // given
         String tmpDir = AnonymizeUtils.TMP_DIR;
         String msgWithTmpDir = "This is the path to the " + tmpDir + " within a message.";
@@ -88,7 +88,7 @@ public class AnonymizeUtilsTest {
     }
 
     @Test
-    public void replaceIP_should_replace_IP() {
+    void replaceIP_should_replace_IP() {
         // given
         String ip = "192.168.0.1";
         String msgWithIp = "This is the ip " + ip + " within a message.";
@@ -100,7 +100,7 @@ public class AnonymizeUtilsTest {
     }
 
     @Test
-    public void replaceIP_should_NOT_replace_bogus_IP() {
+    void replaceIP_should_NOT_replace_bogus_IP() {
         // given
         String bogusIP = "10.0.12";
         String msgWithIp = "This is the ip " + bogusIP + " within a message.";
@@ -112,7 +112,7 @@ public class AnonymizeUtilsTest {
     }
 
     @Test
-    public void anonymizeResource_should_anonymize_resource_and_namespace() {
+    void anonymizeResource_should_anonymize_resource_and_namespace() {
         // given
         String resource = "smurf village";
         String namespace = "blue county";

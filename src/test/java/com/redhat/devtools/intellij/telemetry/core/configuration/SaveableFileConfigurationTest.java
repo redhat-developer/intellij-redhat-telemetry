@@ -31,14 +31,14 @@ class SaveableFileConfigurationTest {
     private static final Pair<String, String> property2 = new Pair<>("anakin", "sith");
 
     @BeforeEach
-    public void beforeEach() throws IOException {
+    void beforeEach() throws IOException {
         this.path = Paths.get(System.getProperty("java.io.tmpdir"), getClass().getSimpleName() + ".properties");
         createPropertyFile(path, property1);
         this.config = new SaveableFileConfiguration(path);
     }
 
     @Test
-    public void save_creates_property_file_if_it_doesnt_exist() throws IOException {
+    void save_creates_property_file_if_it_doesnt_exist() throws IOException {
         // given
         Files.delete(path);
         assertThat(Files.exists(path)).isFalse();
@@ -49,7 +49,7 @@ class SaveableFileConfigurationTest {
     }
 
     @Test
-    public void save_saves_additional_properties() throws IOException {
+    void save_saves_additional_properties() throws IOException {
         // given
         assertThat(config.get(property2.first)).isNull();
         config.put(property2.first, property2.second);

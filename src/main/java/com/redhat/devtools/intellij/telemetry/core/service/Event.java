@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat, Inc.
+ * Copyright (c) 2023 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -13,7 +13,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TelemetryEvent {
+public class Event {
 
     public enum Type {
         USER, ACTION, STARTUP, SHUTDOWN
@@ -23,11 +23,11 @@ public class TelemetryEvent {
     private final String name;
     private final Map<String, String> properties;
 
-    public TelemetryEvent(Type type, String name) {
+    public Event(Type type, String name) {
         this(type, name, new HashMap<>());
     }
 
-    public TelemetryEvent(Type type, String name, Map<String, String> properties) {
+    public Event(Type type, String name, Map<String, String> properties) {
         this.type = type;
         this.name = name;
         this.properties = properties;

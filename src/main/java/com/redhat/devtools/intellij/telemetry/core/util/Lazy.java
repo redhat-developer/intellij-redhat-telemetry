@@ -25,7 +25,12 @@ public class Lazy<T> implements Supplier<T> {
     public T get() {
         if (value == null) {
             this.value = factory.get();
+            onCreated(value);
         }
         return value;
+    }
+
+    protected void onCreated(T value) {
+        // override to customized
     }
 }

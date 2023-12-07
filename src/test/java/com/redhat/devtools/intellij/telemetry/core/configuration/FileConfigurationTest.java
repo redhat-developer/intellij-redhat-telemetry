@@ -30,14 +30,14 @@ class FileConfigurationTest {
     private static final Pair<String, String> property1 = new Pair<>("luke", "jedy");
 
     @BeforeEach
-    public void beforeEach() throws IOException {
+    void beforeEach() throws IOException {
         this.path = Paths.get(System.getProperty("java.io.tmpdir"), getClass().getSimpleName() + ".properties");
         createPropertyFile(path, property1);
         this.config = new FileConfiguration(path);
     }
 
     @Test
-    public void get_loads_property_file() throws IOException {
+    void get_loads_property_file() throws IOException {
         // given
         // when
         String value = config.get(property1.first);
@@ -46,7 +46,7 @@ class FileConfigurationTest {
     }
 
     @Test
-    public void get_returns_null_if_no_file_exists() throws IOException {
+    void get_returns_null_if_no_file_exists() throws IOException {
         // given
         Files.delete(path);
         // when
