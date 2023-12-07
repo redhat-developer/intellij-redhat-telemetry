@@ -18,15 +18,15 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
-import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
+import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.ConfigurationChangedListener;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.Mode;
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type;
+import com.redhat.devtools.intellij.telemetry.core.service.Event.Type;
 import com.redhat.devtools.intellij.telemetry.core.util.CircularBuffer;
 import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
 
-public class TelemetryService implements ITelemetryService {
+public class TelemetryService implements IService {
 
     private static final Logger LOGGER = Logger.getInstance(TelemetryService.class);
 
@@ -36,16 +36,17 @@ public class TelemetryService implements ITelemetryService {
     private final TelemetryConfiguration configuration;
     protected final IMessageBroker broker;
     private final AtomicBoolean userQueried = new AtomicBoolean(false);
-    private final CircularBuffer<TelemetryEvent> onHold = new CircularBuffer<>(BUFFER_SIZE);
+    private final CircularBuffer<Event> onHold = new CircularBuffer<>(BUFFER_SIZE);
 
     public TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker) {
         this(configuration, broker, ApplicationManager.getApplication().getMessageBus().connect(), new TelemetryNotifications());
     }
 
-    TelemetryService(final TelemetryConfiguration configuration,
-                     final IMessageBroker broker,
-                     final MessageBusConnection connection,
-                     final TelemetryNotifications notifications) {
+    TelemetryService(
+            final TelemetryConfiguration configuration,
+            final IMessageBroker broker,
+            final MessageBusConnection connection,
+            final TelemetryNotifications notifications) {
         this.configuration = configuration;
         this.broker = broker;
         this.notifications = notifications;
@@ -62,14 +63,14 @@ public class TelemetryService implements ITelemetryService {
     }
 
     @Override
-    public void send(TelemetryEvent event) {
+    public void send(Event event) {
         sendUserInfo();
         doSend(event);
         queryUserConsent();
     }
 
     private void sendUserInfo() {
-        doSend(new TelemetryEvent(
+        doSend(new Event(
                 Type.USER,
                 "Anonymous ID: " + UserId.INSTANCE.get()));
     }
@@ -81,7 +82,7 @@ public class TelemetryService implements ITelemetryService {
         }
     }
 
-    private void doSend(TelemetryEvent event) {
+    private void doSend(Event event) {
         if (isEnabled()) {
             flushOnHold();
             broker.send(event);

@@ -2,7 +2,9 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
+import org.mockito.stubbing.Answer;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -45,6 +47,15 @@ public class Fakes {
                 .thenReturn(normalWriteKey);
         when(configuration.getDebugWriteKey())
                 .thenReturn(debugWriteKey);
+        when(configuration.getWriteKey(anyBoolean()))
+                .thenAnswer((Answer<String>) invocation -> {
+                    Boolean isDebug = invocation.getArgument(0);
+                    if (isDebug) {
+                        return debugWriteKey;
+                    } else {
+                        return normalWriteKey;
+                    }
+                });
         return configuration;
     }
 }

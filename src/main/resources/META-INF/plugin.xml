@@ -42,5 +42,7 @@
                 displayName="Red Hat Telemetry"/>
         <applicationService
                 serviceImplementation="com.redhat.devtools.intellij.telemetry.core.service.TelemetryServiceFactory"/>
+        <applicationService
+                serviceImplementation="com.redhat.devtools.intellij.telemetry.core.service.FeedbackServiceFactory"/>
     </extensions>
 </idea-plugin>

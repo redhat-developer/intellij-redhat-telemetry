@@ -12,7 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.ide.AppLifecycleListener;
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
+import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
 import org.junit.jupiter.api.Test;
@@ -24,33 +24,32 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.STARTUP;
+import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.ACTION;
+import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.STARTUP;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage.PROP_DURATION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage.PROP_RESULT;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ShutdownMessage;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ServiceFacade;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.TelemetryServiceFacade;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class TelemetryMessageBuilderTest {
+class TelemetryMessageBuilderTest {
 
-    private ServiceFacade serviceFacadeMock = mock(ServiceFacade.class);
-    private TelemetryMessageBuilder builder = new TelemetryMessageBuilder(serviceFacadeMock);
-
-    private ITelemetryService service = mock(ITelemetryService.class);
-    private MessageBusConnection bus = mock(MessageBusConnection.class);
-    private TestableServiceFacade serviceFacade = spy(new TestableServiceFacade(service, bus));
-    private TelemetryEvent event = new TelemetryEvent(ACTION, "smurfette collects mushrooms");
+    private final TelemetryServiceFacade serviceFacadeMock = mock(TelemetryServiceFacade.class);
+    private final TelemetryMessageBuilder builder = new TelemetryMessageBuilder(serviceFacadeMock);
+    private final IService service = mock(IService.class);
+    private final MessageBusConnection bus = mock(MessageBusConnection.class);
+    private final TestableTelemetryServiceFacade serviceFacade = spy(new TestableTelemetryServiceFacade(service, bus));
+    private final Event event = mock(Event.class);
 
     @Test
-    public void action_should_create_message_with_action_type() {
+    void action_should_create_message_with_action_type() {
         // given
         // when
         ActionMessage message = builder.action("azrael");
@@ -59,7 +58,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void action_should_create_message_with_given_name() {
+    void action_should_create_message_with_given_name() {
         // given
         String name = "papa smurf";
         // when
@@ -69,7 +68,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void property_should_add_property_with_given_key_and_name() {
+    void property_should_add_property_with_given_key_and_name() {
         // given
         String key = "likes";
         String value = "papa smurf";
@@ -80,39 +79,39 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void property_should_ignore_property_with_null_key() {
+    void property_should_ignore_property_with_null_key() {
         // given
         ActionMessage message = builder.action("smurfette");
         int beforeAdding = message.properties().size();
         // when
         message.property(null, "papa smurf");
         // then
-        assertThat(message.properties().size()).isEqualTo(beforeAdding);
+        assertThat(message.properties()).hasSize(beforeAdding);
     }
 
     @Test
-    public void property_should_ignore_property_with_null_value() {
+    void property_should_ignore_property_with_null_value() {
         // given
         ActionMessage message = builder.action("smurfette");
         int beforeAdding = message.properties().size();
         // when
         message.property("likes", null);
         // then
-        assertThat(message.properties().size()).isEqualTo(beforeAdding);
+        assertThat(message.properties()).hasSize(beforeAdding);
     }
 
     @Test
-    public void send_should_send_message_via_service_facade() {
+    void send_should_send_message_via_service_facade() {
         // given
         ActionMessage message = builder.action("gargamel");
         // when
         message.send();
         // then
-        verify(serviceFacadeMock).send(any(TelemetryEvent.class));
+        verify(serviceFacadeMock).send(any(Event.class));
     }
 
     @Test
-    public void send_should_send_event_with_given_type_name_and_properties() {
+    void send_should_send_event_with_given_type_name_and_properties() {
         // given
         String name = "gargamel";
         String key1 = "the lovliest";
@@ -122,80 +121,80 @@ public class TelemetryMessageBuilderTest {
         ActionMessage message = builder.action(name)
                 .property(key1, value1)
                 .property(key2, value2);
-        ArgumentCaptor<TelemetryEvent> eventArgument = ArgumentCaptor.forClass(TelemetryEvent.class);
+        ArgumentCaptor<Event> eventArgument = ArgumentCaptor.forClass(Event.class);
         // when
         message.send();
         // then
         verify(serviceFacadeMock).send(eventArgument.capture());
-        TelemetryEvent event = eventArgument.getValue();
+        Event event = eventArgument.getValue();
         assertThat(event.getType()).isEqualTo(ACTION);
         assertThat(event.getName()).isEqualTo(name);
-        assertThat(event.getProperties()).containsEntry(key1, value1);
-        assertThat(event.getProperties()).containsEntry(key2,value2);
+        assertThat(event.getProperties())
+                .containsEntry(key1, value1)
+                .containsEntry(key2,value2);
     }
 
     @Test
-    public void send_should_set_duration() throws InterruptedException {
+    void send_should_set_duration() {
         // given
         ActionMessage message = builder.action("jolly jumper");
         // when
-        TelemetryEvent event = message.send();
+        Event event = message.send();
         // then dont override existing duration
         assertThat(TimeUtils.toDuration(event.getProperties().get(PROP_DURATION)))
                 .isNotNull();
     }
 
     @Test
-    public void send_should_NOT_set_duration_if_already_exists() throws InterruptedException {
+    void send_should_NOT_set_duration_if_already_exists() {
         // given
         ActionMessage message = builder.action("jolly jumper");
         Duration existing = Duration.ofDays(7);
         message.duration(existing);
         // when
-        TelemetryEvent event = message.send();
+        Event event = message.send();
         // then dont override existing duration
         assertThat(TimeUtils.toDuration(event.getProperties().get(PROP_DURATION)))
                 .isEqualTo(existing);
     }
 
     @Test
-    public void send_should_set_result() throws InterruptedException {
+    void send_should_set_result() {
         // given
         ActionMessage message = builder.action("jolly jumper");
         // when
-        TelemetryEvent event = message.send();
+        Event event = message.send();
         // then
         assertThat(event.getProperties().get(PROP_RESULT))
                 .isNotNull();
     }
 
     @Test
-    public void send_should_NOT_set_result_if_error_exists() throws InterruptedException {
+    void send_should_NOT_set_result_if_error_exists() {
         // given
         ActionMessage message = builder.action("jolly jumper");
         message.error("lost luky luke");
         // when
-        TelemetryEvent event = message.send();
+        Event event = message.send();
         // then
         assertThat(event.getProperties().get(PROP_RESULT))
                 .isNull();
     }
 
     @Test
-    public void send_should_NOT_set_result_if_result_exists() throws InterruptedException {
+    void send_should_NOT_set_result_if_result_exists() {
         // given
         ActionMessage message = builder.action("jolly jumper");
         String result = "spits like a cowboy";
         message.result(result);
         // when
-        TelemetryEvent event = message.send();
+        Event event = message.send();
         // then dont override existing result
-        assertThat(event.getProperties().get(PROP_RESULT))
-                .isEqualTo(result);
+        assertThat(event.getProperties()).containsEntry(PROP_RESULT, result);
     }
 
     @Test
-    public void send_should_send_to_same_facade_instance() {
+    void send_should_send_to_same_facade_instance() {
         // given
         ActionMessage message1 = builder.action("gargamel");
         ActionMessage message2 = builder.action("azrael");
@@ -205,11 +204,11 @@ public class TelemetryMessageBuilderTest {
         message2.send();
         message3.send();
         // then
-        verify(serviceFacadeMock, times(3)).send(any(TelemetryEvent.class));
+        verify(serviceFacadeMock, times(3)).send(any(Event.class));
     }
 
     @Test
-    public void finished_should_set_duration() throws InterruptedException {
+    void finished_should_set_duration() throws InterruptedException {
         // given
         ActionMessage message = builder.action("inspector gadget");
         final long delay = 1 * 1000;
@@ -222,7 +221,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void finished_should_set_duration_btw_given_start_and_finished_when_stop_is_new_day() {
+    void finished_should_set_duration_btw_given_start_and_finished_when_stop_is_new_day() {
         // given
         ActionMessage message = builder.action("inspector gadget hits the button");
         LocalDateTime started = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 0));
@@ -237,7 +236,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void finished_should_set_duration_btw_given_start_and_finished_when_finished_is_in_new_year() {
+    void finished_should_set_duration_btw_given_start_and_finished_when_finished_is_in_new_year() {
         // given
         ActionMessage message = builder.action("the daltons break out");
         LocalDateTime started = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 0));
@@ -252,7 +251,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void result_should_set_result_property() {
+    void result_should_set_result_property() {
         // given
         ActionMessage message = builder.action("flinstones");
         String result = "crushed stones";
@@ -264,7 +263,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void result_should_clear_error() {
+    void result_should_clear_error() {
         // given
         ActionMessage message = builder.action("flinstones")
                 .error("went bowling");
@@ -276,7 +275,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void error_should_set_error_property() {
+    void error_should_set_error_property() {
         // given
         ActionMessage message = builder.action("the simpsons");
         String error = "nuclear plant emergency";
@@ -288,7 +287,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void error_should_NOT_NPE_for_given_null_exception() {
+    void error_should_NOT_NPE_for_given_null_exception() {
         // given
         ActionMessage message = builder.action("the simpsons");
         // when
@@ -299,7 +298,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void error_should_clear_result() {
+    void error_should_clear_result() {
         // given
         ActionMessage message = builder.action("the simpsons")
                 .result("went skateboarding");
@@ -311,7 +310,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void error_should_anonymize_email() {
+    void error_should_anonymize_email() {
         // given
         ActionMessage message = builder.action("the simpsons");
         String email = "bart@simpsons.com";
@@ -323,7 +322,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void error_should_anonymize_username() {
+    void error_should_anonymize_username() {
         // given
         ActionMessage message = builder.action("the simpsons");
         // when
@@ -335,7 +334,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void error_should_anonymize_homedir() {
+    void error_should_anonymize_homedir() {
         // given
         ActionMessage message = builder.action("the smurfs");
         // when
@@ -347,7 +346,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void error_should_anonymize_tmpdir() {
+    void error_should_anonymize_tmpdir() {
         // given
         ActionMessage message = builder.action("the smurfs");
         // when
@@ -359,7 +358,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void error_should_anonymize_IP_address() {
+    void error_should_anonymize_IP_address() {
         // given
         ActionMessage message = builder.action("the smurfs");
         // when
@@ -371,20 +370,20 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void serviceFacade_send_should_lazy_create_service() {
+    void serviceFacade_send_should_lazy_create_service() {
         // given
         // when
         serviceFacade.send(event);
         serviceFacade.send(event);
         serviceFacade.send(event);
         // then
-        verify(serviceFacade, times(1)).createService(any());
+        verify(serviceFacade, times(1)).onCreated(any());
     }
 
     @Test
-    public void serviceFacade_send_should_send_given_event_and_startup_message() {
+    void serviceFacade_send_should_send_given_event_and_startup_message() {
         // given
-        ArgumentCaptor<TelemetryEvent> events = ArgumentCaptor.forClass(TelemetryEvent.class);
+        ArgumentCaptor<Event> events = ArgumentCaptor.forClass(Event.class);
         // when
         serviceFacade.send(event);
         // then
@@ -395,7 +394,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void serviceFacade_send_should_subscribe_to_AppLifeCycle() {
+    void serviceFacade_send_should_subscribe_to_AppLifeCycle() {
         // given
         // when
         serviceFacade.send(event);
@@ -404,7 +403,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void serviceFacade_send_should_register_IDE_shutdown_listener() {
+    void serviceFacade_send_should_register_IDE_shutdown_listener() {
         // given
         ArgumentCaptor<AppLifecycleListener> listenerArgument = ArgumentCaptor.forClass(AppLifecycleListener.class);
         serviceFacade.send(event);
@@ -417,7 +416,7 @@ public class TelemetryMessageBuilderTest {
     }
 
     @Test
-    public void shutdownMessage_should_report_session_duration() {
+    void shutdownMessage_should_report_session_duration() {
         // given
         LocalDateTime startup = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 1));
         LocalDateTime shutdown = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(4, 2));
@@ -428,19 +427,12 @@ public class TelemetryMessageBuilderTest {
         assertThat(message.getSessionDuration()).isEqualTo(TimeUtils.toString(duration));
     }
 
-    private class TestableServiceFacade extends ServiceFacade {
-        private final ITelemetryService service;
+    private static class TestableTelemetryServiceFacade extends TelemetryServiceFacade {
         private final MessageBusConnection bus;
 
-        protected TestableServiceFacade(ITelemetryService service, MessageBusConnection bus) {
-            super(mock(ClassLoader.class));
-            this.service = service;
+        protected TestableTelemetryServiceFacade(IService service, MessageBusConnection bus) {
+            super(() -> service);
             this.bus = bus;
-        }
-
-        @Override
-        protected ITelemetryService createService(ClassLoader classLoader) {
-            return service;
         }
 
         @Override
@@ -449,8 +441,7 @@ public class TelemetryMessageBuilderTest {
         }
 
         @Override
-        public void sendShutdown() {
-        }
+        public void sendShutdown() {}
     }
 
 }

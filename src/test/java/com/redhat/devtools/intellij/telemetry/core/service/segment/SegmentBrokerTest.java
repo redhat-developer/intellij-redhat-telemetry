@@ -12,7 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.service.Environment;
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
+import com.redhat.devtools.intellij.telemetry.core.service.Event;
 import com.segment.analytics.Analytics;
 import com.segment.analytics.messages.IdentifyMessage;
 import com.segment.analytics.messages.Message;
@@ -27,10 +27,10 @@ import java.util.function.Function;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.segmentConfiguration;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.SHUTDOWN;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.STARTUP;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.USER;
+import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.ACTION;
+import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.SHUTDOWN;
+import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.STARTUP;
+import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.USER;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP_NAME;
 import static com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker.PROP_APP_VERSION;
@@ -73,14 +73,14 @@ class SegmentBrokerTest {
     private IdentifyTraitsPersistence identifyTraitsPersistence;
     private Environment environment;
     private SegmentBroker broker;
-    private TelemetryEvent actionEvent;
-    private TelemetryEvent userEvent;
-    private TelemetryEvent startupEvent;
-    private TelemetryEvent shutdownEvent;
+    private Event actionEvent;
+    private Event userEvent;
+    private Event startupEvent;
+    private Event shutdownEvent;
     private ISegmentConfiguration configuration;
 
     @BeforeEach
-    public void before() {
+    void before() {
         this.analytics = createAnalytics();
         this.identifyTraitsPersistence = mock(IdentifyTraitsPersistence.class);
         this.environment = environment(
@@ -96,10 +96,10 @@ class SegmentBrokerTest {
                 COUNTRY);
         this.configuration = segmentConfiguration(NORMAL_WRITE_KEY, DEBUG_WRITE_KEY);
         this.broker = new SegmentBroker(false, USER_ID, identifyTraitsPersistence, environment, configuration, key -> analytics);
-        this.actionEvent = new TelemetryEvent(ACTION, "Action event");
-        this.userEvent = new TelemetryEvent(USER, "User event");
-        this.startupEvent = new TelemetryEvent(STARTUP, "Startup event");
-        this.shutdownEvent = new TelemetryEvent(SHUTDOWN, "Startup event");
+        this.actionEvent = new Event(ACTION, "Action event");
+        this.userEvent = new Event(USER, "User event");
+        this.startupEvent = new Event(STARTUP, "Startup event");
+        this.shutdownEvent = new Event(SHUTDOWN, "Startup event");
     }
 
     @Test
@@ -112,7 +112,13 @@ class SegmentBrokerTest {
                 return analytics;
             }
         });
-        SegmentBroker broker = new SegmentBroker(false, USER_ID, identifyTraitsPersistence, environment, configuration, analyticsFactory);
+        SegmentBroker broker = new SegmentBroker(
+                false,
+                USER_ID,
+                identifyTraitsPersistence,
+                environment,
+                configuration,
+                analyticsFactory);
         // when
         broker.send(actionEvent);
         // then
@@ -298,7 +304,7 @@ class SegmentBrokerTest {
     }
 
     @Test
-    void send_should_enqueue_track_message_with_properties() {
+    void send_should_enqueue_track_message_with_traits() {
         // given
         ArgumentCaptor<TrackMessage.Builder> builder = ArgumentCaptor.forClass(TrackMessage.Builder.class);
         // when
@@ -311,6 +317,23 @@ class SegmentBrokerTest {
         assertThat(traits.get(PROP_EXTENSION_NAME)).isEqualTo(EXTENSION_NAME);
         assertThat(traits.get(PROP_EXTENSION_VERSION)).isEqualTo(EXTENSION_VERSION);
     }
+
+    @Test
+    void send_should_enqueue_track_message_with_additional_properties() {
+        // given
+        ArgumentCaptor<TrackMessage.Builder> builder = ArgumentCaptor.forClass(TrackMessage.Builder.class);
+        Map<String, String> properties = actionEvent.getProperties();
+        properties.put("jedi", "yoda");
+        properties.put("sith", "darth sidious");
+        // when
+        broker.send(actionEvent);
+        // then
+        verify(analytics).enqueue(builder.capture());
+        Map<String, ?> traits = builder.getValue().build().properties();
+        assertThat(traits.get("jedi")).isEqualTo("yoda");
+        assertThat(traits.get("sith")).isEqualTo("darth sidious");
+    }
+
 
     @Test
     void send_should_NOT_add_NULL_properties_to_track_message() {

@@ -14,7 +14,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.service.Application;
 import com.redhat.devtools.intellij.telemetry.core.service.Environment;
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent;
+import com.redhat.devtools.intellij.telemetry.core.service.Event;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 import com.redhat.devtools.intellij.telemetry.core.util.MapBuilder;
 import com.segment.analytics.Analytics;
@@ -23,6 +23,7 @@ import com.segment.analytics.messages.MessageBuilder;
 import com.segment.analytics.messages.PageMessage;
 import com.segment.analytics.messages.TrackMessage;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -53,25 +54,25 @@ public class SegmentBroker implements IMessageBroker {
 
     enum SegmentType {
         IDENTIFY {
-            public MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker) {
+            public MessageBuilder toMessage(Event event, Map<String, Object> context, SegmentBroker broker) {
                 return broker.toMessage(IdentifyMessage.builder(), event, context);
             }
         },
         TRACK {
-            public MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker) {
+            public MessageBuilder toMessage(Event event, Map<String, Object> context, SegmentBroker broker) {
                 return broker.toMessage(TrackMessage.builder(event.getName()), event, context);
             }
         },
         PAGE {
-            public MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker) {
+            public MessageBuilder toMessage(Event event, Map<String, Object> context, SegmentBroker broker) {
                 return broker.toMessage(PageMessage.builder(event.getName()), event, context);
             }
 
         };
 
-        public abstract MessageBuilder toMessage(TelemetryEvent event, Map<String, Object> context, SegmentBroker broker);
+        public abstract MessageBuilder toMessage(Event event, Map<String, Object> context, SegmentBroker broker);
 
-        public static SegmentType valueOf(TelemetryEvent.Type eventType) {
+        public static SegmentType valueOf(Event.Type eventType) {
             switch (eventType) {
                 case USER:
                     return IDENTIFY;
@@ -87,21 +88,28 @@ public class SegmentBroker implements IMessageBroker {
     private final String userId;
     private final IdentifyTraitsPersistence identifyTraitsPersistence;
     private final Environment environment;
-    private Lazy<Analytics> analytics;
+    private final Lazy<Analytics> analytics;
 
     public SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration) {
         this(isDebug, userId, IdentifyTraitsPersistence.INSTANCE, environment, configuration, new AnalyticsFactory());
     }
 
-    public SegmentBroker(boolean isDebug, String userId, IdentifyTraitsPersistence identifyTraitsPersistence, Environment environment, ISegmentConfiguration configuration, Function<String, Analytics> analyticsFactory) {
+    public SegmentBroker(
+            boolean isDebug,
+            String userId,
+            IdentifyTraitsPersistence identifyTraitsPersistence,
+            Environment environment,
+            ISegmentConfiguration configuration,
+            Function<String, Analytics> analyticsFactory
+    ) {
         this.userId = userId;
         this.identifyTraitsPersistence = identifyTraitsPersistence;
         this.environment = environment;
-        this.analytics = new Lazy<>(() -> analyticsFactory.apply(getWriteKey(isDebug, configuration)));
+        this.analytics = new Lazy<>(() -> analyticsFactory.apply(configuration.getWriteKey(isDebug)));
     }
 
     @Override
-    public void send(TelemetryEvent event) {
+    public void send(Event event) {
         try {
             if (analytics.get() == null) {
                 LOGGER.warn("Could not send " + event.getType() + " event '" + event.getName() + "': no analytics instance present.");
@@ -121,21 +129,31 @@ public class SegmentBroker implements IMessageBroker {
         }
     }
 
-    private MessageBuilder toMessage(IdentifyMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
-        IdentifyTraits identifyTraits = new IdentifyTraits(
-                environment.getLocale(),
-                environment.getTimezone(),
-                environment.getPlatform().getName(),
-                environment.getPlatform().getVersion(),
-                environment.getPlatform().getDistribution());
-        if (!haveChanged(identifyTraits, identifyTraitsPersistence)) {
-            LOGGER.debug("Skipping identify message: already sent." + identifyTraits);
+    private MessageBuilder toMessage(IdentifyMessage.Builder builder, Event event, Map<String, Object> context) {
+        if (!addTraits(builder, event)) {
             return null;
         }
         return builder
                 .userId(userId)
-                .traits(addIdentifyTraits(identifyTraits, event.getProperties()))
-                .context(context);
+                .context(context == null ? Collections.emptyMap() : context);
+
+    }
+
+    private boolean addTraits(IdentifyMessage.Builder builder, Event event) {
+        if (environment != null) {
+            IdentifyTraits identifyTraits = new IdentifyTraits(
+                    environment.getLocale(),
+                    environment.getTimezone(),
+                    environment.getPlatform().getName(),
+                    environment.getPlatform().getVersion(),
+                    environment.getPlatform().getDistribution());
+            if (!haveChanged(identifyTraits, identifyTraitsPersistence)) {
+                LOGGER.debug("Skipping identify message: already sent." + identifyTraits);
+                return false;
+            }
+            builder.traits(addIdentifyTraits(identifyTraits, event.getProperties()));
+        }
+        return true;
     }
 
     /**
@@ -164,7 +182,7 @@ public class SegmentBroker implements IMessageBroker {
         return properties;
     }
 
-    private MessageBuilder toMessage(TrackMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
+    private MessageBuilder toMessage(TrackMessage.Builder builder, Event event, Map<String, Object> context) {
         return builder
                 .userId(userId)
                 .properties(addTrackProperties(event.getProperties()))
@@ -172,17 +190,19 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private Map<String, ?> addTrackProperties(final Map<String, String> properties) {
-        Application application = environment.getIde();
-        putIfNotNull(PROP_APP_NAME, application.getName(), properties);
-        putIfNotNull(PROP_APP_VERSION, application.getVersion(), properties);
-        application.getProperties().forEach(
-                appProperty -> putIfNotNull(appProperty.getKey(), String.valueOf(appProperty.getValue()), properties));
-        putIfNotNull(PROP_EXTENSION_NAME, environment.getPlugin().getName(), properties);
-        putIfNotNull(PROP_EXTENSION_VERSION, environment.getPlugin().getVersion(), properties);
+        if (environment != null) {
+            Application application = environment.getIde();
+            putIfNotNull(PROP_APP_NAME, application.getName(), properties);
+            putIfNotNull(PROP_APP_VERSION, application.getVersion(), properties);
+            application.getProperties().forEach(
+                    appProperty -> putIfNotNull(appProperty.getKey(), String.valueOf(appProperty.getValue()), properties));
+            putIfNotNull(PROP_EXTENSION_NAME, environment.getPlugin().getName(), properties);
+            putIfNotNull(PROP_EXTENSION_VERSION, environment.getPlugin().getVersion(), properties);
+        }
         return properties;
     }
 
-    private MessageBuilder toMessage(PageMessage.Builder builder, TelemetryEvent event, Map<String, Object> context) {
+    private MessageBuilder toMessage(PageMessage.Builder builder, Event event, Map<String, Object> context) {
         return builder
                 .userId(userId)
                 .properties(event.getProperties())
@@ -199,6 +219,9 @@ public class SegmentBroker implements IMessageBroker {
     }
 
     private Map<String, Object> createContext(Environment environment) {
+        if (environment == null) {
+            return Collections.emptyMap();
+        }
         return new MapBuilder()
                 .mapPair(PROP_APP)
                     .pair(PROP_NAME, environment.getIde().getName())
@@ -218,18 +241,10 @@ public class SegmentBroker implements IMessageBroker {
                 .build();
     }
 
+    @Override
     public void dispose() {
         analytics.get().flush();
         analytics.get().shutdown();
-    }
-
-
-    private String getWriteKey(boolean isDebug, ISegmentConfiguration configuration) {
-        if (isDebug) {
-            return configuration.getDebugWriteKey();
-        } else {
-            return configuration.getNormalWriteKey();
-        }
     }
 
     private static class AnalyticsFactory implements Function<String, Analytics> {

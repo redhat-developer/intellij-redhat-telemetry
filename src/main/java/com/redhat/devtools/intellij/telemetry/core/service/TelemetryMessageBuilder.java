@@ -10,36 +10,36 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.ACTION;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.SHUTDOWN;
-import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type.STARTUP;
-import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymize;
-import static com.redhat.devtools.intellij.telemetry.core.util.TimeUtils.toLocalTime;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.intellij.ide.AppLifecycleListener;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.ITelemetryService;
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryEvent.Type;
+import com.redhat.devtools.intellij.telemetry.core.IService;
+import com.redhat.devtools.intellij.telemetry.core.service.Event.Type;
+import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.function.Supplier;
+
+import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.ACTION;
+import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.SHUTDOWN;
+import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.STARTUP;
+import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymize;
+import static com.redhat.devtools.intellij.telemetry.core.util.TimeUtils.toLocalTime;
 
 public class TelemetryMessageBuilder {
 
     private static final Logger LOGGER = Logger.getInstance(TelemetryMessageBuilder.class);
 
-    private final ServiceFacade service;
+    private final TelemetryServiceFacade service;
 
     public TelemetryMessageBuilder(ClassLoader classLoader) {
-        this(new ServiceFacade(classLoader));
+        this(new TelemetryServiceFacade(classLoader));
     }
 
-    TelemetryMessageBuilder(ServiceFacade serviceFacade) {
+    TelemetryMessageBuilder(TelemetryServiceFacade serviceFacade) {
         this.service = serviceFacade;
     }
 
@@ -47,26 +47,26 @@ public class TelemetryMessageBuilder {
         return new ActionMessage(name, service);
     }
 
-    static class StartupMessage extends Message<StartupMessage> {
+    static class StartupMessage extends TelemetryMessage<StartupMessage> {
 
-        private StartupMessage(ServiceFacade service) {
+        private StartupMessage(IService service) {
             super(STARTUP, "startup", service);
         }
     }
 
-    static class ShutdownMessage extends Message<ShutdownMessage> {
+    static class ShutdownMessage extends TelemetryMessage<ShutdownMessage> {
 
         private static final String PROP_SESSION_DURATION = "session_duration";
 
-        private ShutdownMessage(ServiceFacade service) {
+        private ShutdownMessage(IService service) {
             this(toLocalTime(ApplicationManager.getApplication().getStartTime()), service);
         }
 
-        private ShutdownMessage(LocalDateTime startup, ServiceFacade service) {
+        private ShutdownMessage(LocalDateTime startup, IService service) {
             this(startup, LocalDateTime.now(), service);
         }
 
-        ShutdownMessage(LocalDateTime startup, LocalDateTime shutdown, ServiceFacade service) {
+        ShutdownMessage(LocalDateTime startup, LocalDateTime shutdown, IService service) {
             super(SHUTDOWN, "shutdown", service);
             sessionDuration(startup, shutdown);
         }
@@ -84,7 +84,7 @@ public class TelemetryMessageBuilder {
         }
     }
 
-    public static class ActionMessage extends Message<ActionMessage> {
+    public static class ActionMessage extends TelemetryMessage<ActionMessage> {
 
         static final String PROP_DURATION = "duration";
         static final String PROP_ERROR = "error";
@@ -94,7 +94,7 @@ public class TelemetryMessageBuilder {
 
         private LocalDateTime started;
 
-        private ActionMessage(String name, ServiceFacade service) {
+        private ActionMessage(String name, IService service) {
             super(ACTION, name, service);
             started();
         }
@@ -166,7 +166,7 @@ public class TelemetryMessageBuilder {
         }
 
         @Override
-        public TelemetryEvent send() {
+        public Event send() {
             ensureFinished();
             ensureResultOrError();
             return super.send();
@@ -186,76 +186,26 @@ public class TelemetryMessageBuilder {
         }
     }
 
-    private abstract static class Message<T extends Message<?>> {
-
-        private final Type type;
-        private final Map<String, String> properties = new HashMap<>();
-        private final String name;
-        private final ServiceFacade service;
-
-        private Message(Type type, String name, ServiceFacade service) {
-            this.name = name;
-            this.type = type;
-            this.service = service;
-        }
-
-        String getName() {
-            return name;
-        }
-
-        Type getType() {
-            return type;
-        }
-
-        public T property(String key, String value) {
-            if (key == null
-                    || value == null) {
-                LOGGER.warn("Ignored property with key: " + key + " value: " + value);
-            } else {
-                properties.put(key, value);
-            }
-            return (T) this;
-        }
-
-        String getProperty(String key) {
-            return properties.get(key);
-        }
-
-        Map<String, String> properties() {
-            return properties;
-        }
-
-        protected boolean hasProperty(String key) {
-            return properties.containsKey(key);
-        }
-
-        public TelemetryEvent send() {
-            TelemetryEvent event = new TelemetryEvent(type, name, new HashMap<>(properties));
-            service.send(event);
-            return event;
+    private static class TelemetryMessage<M extends TelemetryMessage<?>> extends Message<M> {
+        protected TelemetryMessage(Type type, String name, IService service) {
+            super(type, name, service);
         }
     }
 
-    static class ServiceFacade {
-        private final ClassLoader classLoader;
-        private ITelemetryService service = null;
+    static class TelemetryServiceFacade extends Lazy<IService> implements IService {
 
-        protected ServiceFacade(final ClassLoader classLoader) {
-            this.classLoader = classLoader;
+        protected TelemetryServiceFacade(final ClassLoader classLoader) {
+            this(() -> ApplicationManager.getApplication().getService(TelemetryServiceFactory.class).create(classLoader));
         }
 
-        public void send(final TelemetryEvent event) {
-            if (service == null) {
-                this.service = createService(classLoader);
-                sendStartup();
-                onShutdown();
-            }
-            service.send(event);
+        protected TelemetryServiceFacade(final Supplier<IService> supplier) {
+            super(supplier);
         }
 
-        protected ITelemetryService createService(ClassLoader classLoader) {
-            TelemetryServiceFactory factory = ApplicationManager.getApplication().getService(TelemetryServiceFactory.class);
-            return factory.create(classLoader);
+        @Override
+        protected void onCreated(IService service) {
+            sendStartup();
+            onShutdown();
         }
 
         private void sendStartup() {
@@ -273,12 +223,16 @@ public class TelemetryMessageBuilder {
         }
 
         protected void sendShutdown() {
-            new ShutdownMessage(ServiceFacade.this).send();
+            new ShutdownMessage(TelemetryServiceFacade.this).send();
         }
 
         protected MessageBusConnection createMessageBusConnection() {
             return ApplicationManager.getApplication().getMessageBus().connect();
         }
 
+        @Override
+        public void send(Event event) {
+            get().send(event);
+        }
     }
 }

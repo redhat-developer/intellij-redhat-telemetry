@@ -39,7 +39,7 @@ dependencies {
     testImplementation(
             "org.junit.jupiter:junit-jupiter:5.9.1",
             "org.junit.platform:junit-platform-launcher:1.9.1",
-            "org.assertj:assertj-core:3.22.0",
+            "org.assertj:assertj-core:3.24.2",
             "org.mockito:mockito-inline:4.5.1"
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

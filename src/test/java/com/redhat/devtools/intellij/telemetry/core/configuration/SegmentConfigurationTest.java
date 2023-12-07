@@ -23,7 +23,7 @@ class SegmentConfigurationTest {
     private SegmentConfiguration config;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         this.config = new SegmentConfiguration(getClass().getClassLoader());
     }
 
