@@ -14,13 +14,17 @@ import com.intellij.ide.AppLifecycleListener;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
+import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.IService;
+import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.Event.Type;
+import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBrokerFactory;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.SubmissionPublisher;
 import java.util.function.Supplier;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.ACTION;
@@ -33,18 +37,31 @@ public class TelemetryMessageBuilder {
 
     private static final Logger LOGGER = Logger.getInstance(TelemetryMessageBuilder.class);
 
-    private final TelemetryServiceFacade service;
+    private final IService telemetryFacade;
+    private final IService feedbackFacade;
 
-    public TelemetryMessageBuilder(ClassLoader classLoader) {
-        this(new TelemetryServiceFacade(classLoader));
+    TelemetryMessageBuilder(ClassLoader classLoader) {
+        this(new SegmentBrokerFactory().create(TelemetryConfiguration.getInstance().isDebug(), classLoader));
     }
 
-    TelemetryMessageBuilder(TelemetryServiceFacade serviceFacade) {
-        this.service = serviceFacade;
+    TelemetryMessageBuilder(IMessageBroker messageBroker) {
+        this(
+            new TelemetryServiceFacade(TelemetryConfiguration.getInstance(), messageBroker),
+            new FeedbackServiceFacade(messageBroker)
+        );
+    }
+
+    TelemetryMessageBuilder(IService telemetryFacade, IService feedbackFacade) {
+        this.telemetryFacade = telemetryFacade;
+        this.feedbackFacade = feedbackFacade;
     }
 
     public ActionMessage action(String name) {
-        return new ActionMessage(name, service);
+        return new ActionMessage(name, telemetryFacade);
+    }
+
+    public FeedbackMessage feedback(String name) {
+        return new FeedbackMessage(name, feedbackFacade);
     }
 
     static class StartupMessage extends TelemetryMessage<StartupMessage> {
@@ -194,12 +211,17 @@ public class TelemetryMessageBuilder {
 
     static class TelemetryServiceFacade extends Lazy<IService> implements IService {
 
-        protected TelemetryServiceFacade(final ClassLoader classLoader) {
-            this(() -> ApplicationManager.getApplication().getService(TelemetryServiceFactory.class).create(classLoader));
+        private final MessageBusConnection messageBusConnection;
+
+        protected TelemetryServiceFacade(final TelemetryConfiguration configuration, IMessageBroker broker) {
+            this(() -> ApplicationManager.getApplication().getService(TelemetryServiceFactory.class).create(configuration, broker),
+                    ApplicationManager.getApplication().getMessageBus().connect()
+            );
         }
 
-        protected TelemetryServiceFacade(final Supplier<IService> supplier) {
+        protected TelemetryServiceFacade(final Supplier<IService> supplier, MessageBusConnection connection) {
             super(supplier);
+            this.messageBusConnection = connection;
         }
 
         @Override
@@ -213,8 +235,7 @@ public class TelemetryMessageBuilder {
         }
 
         private void onShutdown() {
-            MessageBusConnection connection = createMessageBusConnection();
-            connection.subscribe(AppLifecycleListener.TOPIC, new AppLifecycleListener() {
+            messageBusConnection.subscribe(AppLifecycleListener.TOPIC, new AppLifecycleListener() {
                 @Override
                 public void appWillBeClosed(boolean isRestart) {
                     sendShutdown();
@@ -226,8 +247,20 @@ public class TelemetryMessageBuilder {
             new ShutdownMessage(TelemetryServiceFacade.this).send();
         }
 
-        protected MessageBusConnection createMessageBusConnection() {
-            return ApplicationManager.getApplication().getMessageBus().connect();
+        @Override
+        public void send(Event event) {
+            get().send(event);
+        }
+    }
+
+    static class FeedbackServiceFacade extends Lazy<IService> implements IService {
+
+        protected FeedbackServiceFacade(final IMessageBroker broker) {
+            this(() -> ApplicationManager.getApplication().getService(FeedbackServiceFactory.class).create(broker));
+        }
+
+        protected FeedbackServiceFacade(final Supplier<IService> supplier) {
+            super(supplier);
         }
 
         @Override
@@ -235,4 +268,12 @@ public class TelemetryMessageBuilder {
             get().send(event);
         }
     }
+
+    public static class FeedbackMessage extends Message<FeedbackMessage>{
+
+        FeedbackMessage(String name, IService service) {
+            super(ACTION, name, service);
+        }
+    }
+
 }

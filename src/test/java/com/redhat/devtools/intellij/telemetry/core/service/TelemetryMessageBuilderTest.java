@@ -13,6 +13,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 import com.intellij.ide.AppLifecycleListener;
 import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.telemetry.core.IService;
+import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.FeedbackServiceFacade;
 import com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.STA
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage.PROP_DURATION;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ActionMessage.PROP_RESULT;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.FeedbackMessage;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.ShutdownMessage;
 import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.TelemetryServiceFacade;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,8 +43,9 @@ import static org.mockito.Mockito.verify;
 
 class TelemetryMessageBuilderTest {
 
-    private final TelemetryServiceFacade serviceFacadeMock = mock(TelemetryServiceFacade.class);
-    private final TelemetryMessageBuilder builder = new TelemetryMessageBuilder(serviceFacadeMock);
+    private final IService telemetryServiceFacade = mock(TelemetryServiceFacade.class);
+    private final IService feedbackServiceFacade = mock(FeedbackServiceFacade.class);
+    private final TelemetryMessageBuilder builder = new TelemetryMessageBuilder(telemetryServiceFacade, feedbackServiceFacade);
     private final IService service = mock(IService.class);
     private final MessageBusConnection bus = mock(MessageBusConnection.class);
     private final TestableTelemetryServiceFacade serviceFacade = spy(new TestableTelemetryServiceFacade(service, bus));
@@ -107,7 +110,7 @@ class TelemetryMessageBuilderTest {
         // when
         message.send();
         // then
-        verify(serviceFacadeMock).send(any(Event.class));
+        verify(telemetryServiceFacade).send(any(Event.class));
     }
 
     @Test
@@ -125,7 +128,7 @@ class TelemetryMessageBuilderTest {
         // when
         message.send();
         // then
-        verify(serviceFacadeMock).send(eventArgument.capture());
+        verify(telemetryServiceFacade).send(eventArgument.capture());
         Event event = eventArgument.getValue();
         assertThat(event.getType()).isEqualTo(ACTION);
         assertThat(event.getName()).isEqualTo(name);
@@ -204,7 +207,7 @@ class TelemetryMessageBuilderTest {
         message2.send();
         message3.send();
         // then
-        verify(serviceFacadeMock, times(3)).send(any(Event.class));
+        verify(telemetryServiceFacade, times(3)).send(any(Event.class));
     }
 
     @Test
@@ -422,26 +425,143 @@ class TelemetryMessageBuilderTest {
         LocalDateTime shutdown = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(4, 2));
         Duration duration = Duration.between(startup, shutdown);
         // when
-        ShutdownMessage message = new ShutdownMessage(startup, shutdown, serviceFacadeMock);
+        ShutdownMessage message = new ShutdownMessage(startup, shutdown, telemetryServiceFacade);
         // then
         assertThat(message.getSessionDuration()).isEqualTo(TimeUtils.toString(duration));
     }
 
+    @Test
+    void feedback_should_create_message_with_action_type() {
+        // given
+        // when
+        FeedbackMessage message = builder.feedback("azrael");
+        // then
+        assertThat(message.getType()).isEqualTo(ACTION);
+    }
+
+    @Test
+    void feedback_should_create_message_with_given_name() {
+        // given
+        String name = "papa smurf";
+        // when
+        FeedbackMessage message = builder.feedback(name);
+        // then
+        assertThat(message.getName()).isEqualTo(name);
+    }
+
+    @Test
+    void feedback_property_should_add_property_with_given_key_and_name() {
+        // given
+        String key = "likes";
+        String value = "papa smurf";
+        // when
+        FeedbackMessage message = builder.feedback("smurfette").property(key, value);
+        // then
+        assertThat(message.getProperty(key)).isEqualTo(value);
+    }
+
+    @Test
+    void feedback_property_should_ignore_property_with_null_key() {
+        // given
+        FeedbackMessage message = builder.feedback("smurfette");
+        int beforeAdding = message.properties().size();
+        // when
+        message.property(null, "papa smurf");
+        // then
+        assertThat(message.properties()).hasSize(beforeAdding);
+    }
+
+    @Test
+    void feedback_property_should_ignore_property_with_null_value() {
+        // given
+        FeedbackMessage message = builder.feedback("smurfette");
+        int beforeAdding = message.properties().size();
+        // when
+        message.property("likes", null);
+        // then
+        assertThat(message.properties()).hasSize(beforeAdding);
+    }
+
+    @Test
+    void feedback_send_should_send_message_via_service_facade() {
+        // given
+        FeedbackMessage message = builder.feedback("gargamel");
+        // when
+        message.send();
+        // then
+        verify(feedbackServiceFacade).send(any(Event.class));
+    }
+
+    @Test
+    void feedback_send_should_send_event_with_given_type_name_and_properties() {
+        // given
+        String name = "gargamel";
+        String key1 = "the lovliest";
+        String value1 = "smurfette";
+        String key2 = "the smallest";
+        String value2 = "baby smurf";
+        FeedbackMessage message = builder.feedback(name)
+                .property(key1, value1)
+                .property(key2, value2);
+        ArgumentCaptor<Event> eventArgument = ArgumentCaptor.forClass(Event.class);
+        // when
+        message.send();
+        // then
+        verify(feedbackServiceFacade).send(eventArgument.capture());
+        Event event = eventArgument.getValue();
+        assertThat(event.getType()).isEqualTo(ACTION);
+        assertThat(event.getName()).isEqualTo(name);
+        assertThat(event.getProperties())
+                .containsEntry(key1, value1)
+                .containsEntry(key2,value2);
+    }
+
+    @Test
+    void feedback_send_should_send_to_same_facade_instance() {
+        // given
+        FeedbackMessage message1 = builder.feedback("gargamel");
+        FeedbackMessage message2 = builder.feedback("azrael");
+        FeedbackMessage message3 = builder.feedback("papa smurf");
+        // when
+        message1.send();
+        message2.send();
+        message3.send();
+        // then
+        verify(feedbackServiceFacade, times(3)).send(any(Event.class));
+    }
+
+    @Test
+    void feedback_send_should_create_service_once_only() {
+        // given
+        TestableFeedbackServiceFacade facade = spy(new TestableFeedbackServiceFacade(mock(IService.class)));
+        // when
+        facade.send(event);
+        facade.send(event);
+        facade.send(event);
+        // then
+        verify(facade, times(1)).onCreated(any());
+    }
+
     private static class TestableTelemetryServiceFacade extends TelemetryServiceFacade {
-        private final MessageBusConnection bus;
 
         protected TestableTelemetryServiceFacade(IService service, MessageBusConnection bus) {
-            super(() -> service);
-            this.bus = bus;
-        }
-
-        @Override
-        protected MessageBusConnection createMessageBusConnection() {
-            return bus;
+            super(() -> service, bus);
         }
 
         @Override
         public void sendShutdown() {}
     }
 
+    private static class TestableFeedbackServiceFacade extends FeedbackServiceFacade {
+
+        protected TestableFeedbackServiceFacade(IService service) {
+            super(() -> service);
+        }
+
+        /** public for testing purposes **/
+        @Override
+        protected void onCreated(IService value) {
+            super.onCreated(value);
+        }
+    }
 }

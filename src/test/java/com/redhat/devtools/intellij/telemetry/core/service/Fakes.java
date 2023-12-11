@@ -58,4 +58,16 @@ public class Fakes {
                 });
         return configuration;
     }
+
+    public static TelemetryConfiguration telemetryConfiguration(TelemetryConfiguration.Mode mode) {
+        TelemetryConfiguration configuration = mock(TelemetryConfiguration.class);
+        when(configuration.isEnabled())
+                .thenReturn(mode != TelemetryConfiguration.Mode.DISABLED);
+        when(configuration.isConfigured())
+                .thenReturn(true);
+        when(configuration.getMode())
+                .thenReturn(mode);
+        return configuration;
+    }
+
 }

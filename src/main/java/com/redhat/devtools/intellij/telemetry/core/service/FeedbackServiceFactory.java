@@ -19,19 +19,7 @@ import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentConfig
 
 public class FeedbackServiceFactory implements DumbAware {
 
-    public IService create(ClassLoader classLoader) {
-        TelemetryConfiguration configuration = TelemetryConfiguration.getInstance();
-        IMessageBroker broker = createSegmentBroker(configuration.isDebug(), classLoader);
+    public IService create(IMessageBroker broker) {
         return new FeedbackService(broker);
     }
-
-    private IMessageBroker createSegmentBroker(boolean isDebug, ClassLoader classLoader) {
-        SegmentConfiguration brokerConfiguration = new SegmentConfiguration(classLoader);
-        return new SegmentBroker(
-                isDebug,
-                UserId.INSTANCE.get(),
-                null,
-                brokerConfiguration);
-    }
-
 }
