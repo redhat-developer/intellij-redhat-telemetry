@@ -22,9 +22,9 @@ import com.redhat.devtools.intellij.telemetry.util.BlockingFlush;
 import com.redhat.devtools.intellij.telemetry.util.StdOutLogging;
 import com.segment.analytics.Analytics;
 import okhttp3.OkHttpClient;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import retrofit.client.Client;
 
@@ -32,16 +32,18 @@ import java.util.concurrent.TimeUnit;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.environment;
 import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.segmentConfiguration;
-import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.ACTION;
+import static com.redhat.devtools.intellij.telemetry.core.service.Fakes.telemetryConfiguration;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.FeedbackServiceFacade;
+import static com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.TelemetryServiceFacade;
 import static org.mockito.Mockito.mock;
 
-@Ignore("For manual testing purposes only")
-class TelemetryServiceIntegrationTest {
+@Disabled("For manual testing purposes only")
+class TelemetryMessageBuilderIntegrationTest {
 
     private static final String EXTENSION_NAME = "com.redhat.devtools.intellij.telemetry";
-    private static final String EXTENSION_VERSION = "0.0.1";
+    private static final String EXTENSION_VERSION = "1.0.0.44";
     private static final String APPLICATION_VERSION = "1.0.0";
-    private static final String APPLICATION_NAME = TelemetryServiceIntegrationTest.class.getSimpleName();
+    private static final String APPLICATION_NAME = TelemetryMessageBuilderIntegrationTest.class.getSimpleName();
     private static final String PLATFORM_NAME = "smurfOS";
     private static final String PLATFORM_DISTRIBUTION = "red hats";
     private static final String PLATFORM_VERSION = "0.1.0";
@@ -49,17 +51,17 @@ class TelemetryServiceIntegrationTest {
     private static final String TIMEZONE = "Europe/Bern";
     private static final String COUNTRY = "Switzerland";
     public static final String SEGMENT_WRITE_KEY = "HYuMCHlIpTvukCKZA42OubI1cvGIAap6";
+    public static final String SEGMENT_DEBUG_WRITE_KEY = "ySk3bh8S8hDIGVKX9FQ1BMGOdFxbsufn";
 
     private BlockingFlush blockingFlush;
     private Analytics analytics;
-    private IService service;
-    private Event event;
+    private TelemetryMessageBuilder messageBuilder;
 
     @BeforeEach
     void before() {
         this.blockingFlush = BlockingFlush.create();
         this.analytics = createAnalytics(blockingFlush, createClient());
-        ISegmentConfiguration configuration = segmentConfiguration(SEGMENT_WRITE_KEY, "");
+        ISegmentConfiguration segmentConfiguration = segmentConfiguration(SEGMENT_WRITE_KEY, SEGMENT_DEBUG_WRITE_KEY);
         Environment environment = environment(
                 APPLICATION_NAME,
                 APPLICATION_VERSION,
@@ -76,14 +78,21 @@ class TelemetryServiceIntegrationTest {
                 UserId.INSTANCE.get(),
                 IdentifyTraitsPersistence.INSTANCE,
                 environment,
-                configuration,
+                segmentConfiguration,
                 key -> analytics);
-        this.service = new TelemetryService(
-                TelemetryConfiguration.getInstance(),
+        TelemetryConfiguration telemetryConfiguration = telemetryConfiguration(TelemetryConfiguration.Mode.DEBUG);
+
+        TelemetryService telemetryService = new TelemetryService(
+                telemetryConfiguration,
                 broker,
                 mock(MessageBusConnection.class),
                 mock(TelemetryNotifications.class));
-        this.event = new Event(ACTION, "Testing Telemetry");
+        IService telemetryServiceFacade = new TelemetryServiceFacade(() -> telemetryService, mock(MessageBusConnection.class));
+
+        FeedbackService feedbackService = new FeedbackService(broker);
+        IService feedbackServiceFacade = new FeedbackServiceFacade(() -> feedbackService);
+
+        this.messageBuilder = new TelemetryMessageBuilder(telemetryServiceFacade, feedbackServiceFacade);
     }
 
     @AfterEach
@@ -92,15 +101,31 @@ class TelemetryServiceIntegrationTest {
     }
 
     @Test
-    void should_send_track_event() {
+    void should_send_telemetry() {
         // given
         // when
-        service.send(event);
+        messageBuilder.action("testing-telemetry")
+                .property("Wicked sorcerer", "Gargamel")
+                .property("Cat", "Azrael")
+                .success()
+                .send();
+        // then
+    }
+
+    @Test
+    void should_send_feedback() {
+        // given
+        // when
+        messageBuilder.feedback("testing-feedback")
+                .property("Jedi", "Luke Skywalker")
+                .property("Sith", "Darth Vader")
+                .send();
         // then
     }
 
     private Analytics createAnalytics(BlockingFlush blockingFlush, Client client) {
         return Analytics.builder(SEGMENT_WRITE_KEY)
+                .flushQueueSize(1)
                 .plugin(new StdOutLogging())
                 .plugin(blockingFlush.plugin())
                 .client(client)

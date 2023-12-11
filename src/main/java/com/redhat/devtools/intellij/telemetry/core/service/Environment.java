@@ -117,7 +117,7 @@ public class Environment {
             }
         }
 
-        class Buildable {
+        public class Buildable {
             public Environment build() {
                 ensureIDE();
                 ensurePlatform();

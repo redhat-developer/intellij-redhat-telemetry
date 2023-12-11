@@ -15,4 +15,8 @@ import com.redhat.devtools.intellij.telemetry.core.service.Event;
 public interface IMessageBroker {
     void send(Event event);
     void dispose();
+
+    interface IMessageBrokerFactory {
+        IMessageBroker create(boolean isDebug, ClassLoader classLoader);
+    }
 }
