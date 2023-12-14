@@ -29,6 +29,12 @@ jobs:
             jvm: 17
           - IJ: IC-2022.3
             jvm: 17
+          - IJ: IC-2023.1
+            jvm: 17
+          - IJ: IC-2023.2
+            jvm: 17
+          - IJ: IC-2023.3
+            jvm: 17
 
     steps:
       - uses: actions/checkout@v2
