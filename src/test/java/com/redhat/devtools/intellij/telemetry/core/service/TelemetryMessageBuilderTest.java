@@ -16,6 +16,7 @@ import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.FeedbackServiceFacade;
 import com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -24,6 +25,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.STARTUP;
@@ -266,6 +269,26 @@ class TelemetryMessageBuilderTest {
     }
 
     @Test
+    void success_should_add_property_with_success_value() {
+        // given
+        ActionMessage message = builder.action("death star destruction");
+        // when
+        message.success();
+        // then
+        assertThat(message.getResult()).isEqualTo(Message.RESULT_SUCCESS);
+    }
+
+    @Test
+    void aborted_should_add_property_with_aborted_value() {
+        // given
+        ActionMessage message = builder.action("hiding on the ice planet");
+        // when
+        message.aborted();
+        // then
+        assertThat(message.getResult()).isEqualTo(Message.RESULT_ABORTED);
+    }
+
+    @Test
     void result_should_clear_error() {
         // given
         ActionMessage message = builder.action("flinstones")
@@ -321,7 +344,8 @@ class TelemetryMessageBuilderTest {
         message.error(email + " caused a nuclear plant emergency");
         // then
         assertThat(message.getError())
-                .doesNotContain(email);
+                .doesNotContain(email)
+                .contains(" caused a nuclear plant emergency");
     }
 
     @Test
@@ -480,6 +504,36 @@ class TelemetryMessageBuilderTest {
         message.property("likes", null);
         // then
         assertThat(message.properties()).hasSize(beforeAdding);
+    }
+
+    @Test
+    void feedback_result_should_add_property_with_given_value() {
+        // given
+        FeedbackMessage message = builder.feedback("death star destruction");
+        // when
+        message.result("succeeded");
+        // then
+        assertThat(message.getResult()).isEqualTo("succeeded");
+    }
+
+    @Test
+    void feedback_success_should_add_property_with_success_value() {
+        // given
+        FeedbackMessage message = builder.feedback("death star destruction");
+        // when
+        message.success();
+        // then
+        assertThat(message.getResult()).isEqualTo(Message.RESULT_SUCCESS);
+    }
+
+    @Test
+    void feedback_aborted_should_add_property_with_aborted_value() {
+        // given
+        FeedbackMessage message = builder.feedback("hiding on the ice planet");
+        // when
+        message.aborted();
+        // then
+        assertThat(message.getResult()).isEqualTo(Message.RESULT_ABORTED);
     }
 
     @Test
