@@ -24,13 +24,11 @@ import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.concurrent.SubmissionPublisher;
 import java.util.function.Supplier;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.SHUTDOWN;
 import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.STARTUP;
-import static com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils.anonymize;
 import static com.redhat.devtools.intellij.telemetry.core.util.TimeUtils.toLocalTime;
 
 public class TelemetryMessageBuilder {
@@ -40,7 +38,7 @@ public class TelemetryMessageBuilder {
     private final IService telemetryFacade;
     private final IService feedbackFacade;
 
-    TelemetryMessageBuilder(ClassLoader classLoader) {
+    public TelemetryMessageBuilder(ClassLoader classLoader) {
         this(new SegmentBrokerFactory().create(TelemetryConfiguration.getInstance().isDebug(), classLoader));
     }
 
@@ -104,10 +102,6 @@ public class TelemetryMessageBuilder {
     public static class ActionMessage extends TelemetryMessage<ActionMessage> {
 
         static final String PROP_DURATION = "duration";
-        static final String PROP_ERROR = "error";
-        static final String PROP_RESULT = "result";
-
-        public static final String RESULT_SUCCESS = "success";
 
         private LocalDateTime started;
 
@@ -141,45 +135,6 @@ public class TelemetryMessageBuilder {
 
         String getDuration() {
             return getProperty(PROP_DURATION);
-        }
-
-        public ActionMessage success() {
-            return result(RESULT_SUCCESS);
-        }
-
-        public ActionMessage result(String result) {
-            property(PROP_RESULT, result);
-            return clearError();
-        }
-
-        protected ActionMessage clearResult() {
-            properties().remove(PROP_RESULT);
-            return this;
-        }
-
-        String getResult() {
-            return getProperty(PROP_RESULT);
-        }
-
-        public ActionMessage error(Exception exception) {
-            if (exception == null) {
-                return this;
-            }
-            return error(exception.getMessage());
-        }
-
-        public ActionMessage error(String message) {
-            property(PROP_ERROR, anonymize(message));
-            return clearResult();
-        }
-
-        protected ActionMessage clearError() {
-            properties().remove(PROP_ERROR);
-            return this;
-        }
-
-        String getError() {
-            return getProperty(PROP_ERROR);
         }
 
         @Override
