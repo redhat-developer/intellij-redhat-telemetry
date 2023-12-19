@@ -10,6 +10,11 @@
     </description>
 
     <change-notes><![CDATA[
+    <p><b>1.1.0</b></p>
+    <ul>
+      <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/73">Add API for feedback only</a></li>
+      <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/67">ProcessCanceledException in startup when tries to send telemetry event</a></li>
+    </ul>
     <p><b>1.0.0</b></p>
     <ul>
       <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/68">Validate UUID before using it</a></li>
