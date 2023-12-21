@@ -11,7 +11,6 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.util.messages.MessageBusConnection;
-import com.jakewharton.retrofit.Ok3Client;
 import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
@@ -26,7 +25,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import retrofit.client.Client;
 
 import java.util.concurrent.TimeUnit;
 
@@ -123,7 +121,7 @@ class TelemetryMessageBuilderIntegrationTest {
         // then
     }
 
-    private Analytics createAnalytics(BlockingFlush blockingFlush, Client client) {
+    private Analytics createAnalytics(BlockingFlush blockingFlush, OkHttpClient client) {
         return Analytics.builder(SEGMENT_WRITE_KEY)
                 .flushQueueSize(1)
                 .plugin(new StdOutLogging())
@@ -132,13 +130,12 @@ class TelemetryMessageBuilderIntegrationTest {
                 .build();
     }
 
-    private Client createClient() {
-        return new Ok3Client(
-                new OkHttpClient.Builder()
-                        .connectTimeout(5, TimeUnit.SECONDS)
-                        .readTimeout(5, TimeUnit.SECONDS)
-                        .writeTimeout(5, TimeUnit.SECONDS)
-                        .build());
+    private OkHttpClient createClient() {
+        return new OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .build();
     }
 
     private void shutdownAnalytics() {
@@ -146,5 +143,4 @@ class TelemetryMessageBuilderIntegrationTest {
         blockingFlush.block();
         analytics.shutdown();
     }
-
 }

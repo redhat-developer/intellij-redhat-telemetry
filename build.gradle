@@ -32,9 +32,16 @@ publishPlugin {
 }
 
 dependencies {
+    implementation('com.segment.analytics.java:analytics:3.4.0') {
+        exclude group: 'org.jetbrains.kotlin'
+        exclude group: 'com.squareup.retrofit2', module: 'retrofit-mock'
+        exclude group: 'com.google.auto.value', module: 'auto-value-annotations'
+    }
+    implementation('com.squareup.okio:okio:3.6.0') {
+        exclude group: 'org.jetbrains.kotlin'
+    }
     implementation(
-            'com.segment.analytics.java:analytics:2.1.1',
-            'com.squareup.okhttp3:okhttp:4.9.3'
+            'com.google.code.gson:gson:2.10.1'
     )
     testImplementation(
             "org.junit.jupiter:junit-jupiter:5.9.1",
