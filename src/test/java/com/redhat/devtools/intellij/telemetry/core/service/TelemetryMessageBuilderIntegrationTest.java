@@ -48,8 +48,8 @@ class TelemetryMessageBuilderIntegrationTest {
     private static final String LOCALE = "de_CH";
     private static final String TIMEZONE = "Europe/Bern";
     private static final String COUNTRY = "Switzerland";
-    public static final String SEGMENT_WRITE_KEY = "HYuMCHlIpTvukCKZA42OubI1cvGIAap6";
-    public static final String SEGMENT_DEBUG_WRITE_KEY = "ySk3bh8S8hDIGVKX9FQ1BMGOdFxbsufn";
+    public static final String SEGMENT_WRITE_KEY = "XXXXXXXXXXXXXXX";
+    public static final String SEGMENT_DEBUG_WRITE_KEY = "YYYYYYYYYYYYYYY";
 
     private BlockingFlush blockingFlush;
     private Analytics analytics;
