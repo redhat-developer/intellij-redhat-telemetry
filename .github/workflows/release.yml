@@ -20,7 +20,7 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
       - name: Simple conventional changelog
-        uses: lstocchi/simple-conventional-changelog@6d1e7245f5829b6d5130f9f5525096f307754e52 #0.0.6
+        uses: redhat-developer/simple-conventional-changelog@0a6db1ac3910c2cf66f2e1a530951dba1ece8540 #0.0.12
         id: changelog
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
