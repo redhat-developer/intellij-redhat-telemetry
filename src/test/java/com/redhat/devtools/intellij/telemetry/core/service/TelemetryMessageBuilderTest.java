@@ -16,7 +16,6 @@ import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.FeedbackServiceFacade;
 import com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;
-import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -25,8 +24,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
-import java.util.function.Predicate;
 
 import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.ACTION;
 import static com.redhat.devtools.intellij.telemetry.core.service.Event.Type.STARTUP;

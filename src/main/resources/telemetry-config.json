@@ -1,0 +1,17 @@
+{
+  "*": {
+    "enabled":"all",
+    "refresh": "12h",
+    "includes": [
+      {
+        "name" : "*"
+      }
+    ],
+    "excludes": [
+      {
+        "name": "shutdown",
+        "ratio": "1.0"
+      }
+    ]
+  }
+}

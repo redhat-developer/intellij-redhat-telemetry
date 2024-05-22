@@ -31,6 +31,7 @@ public class UserId {
     private static final Pattern UUID_REGEX =
             Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     private final Lazy<String> uuid = new Lazy<>(() -> loadOrCreate(UUID_FILE));
+    private final Lazy<Float> percentile = new Lazy<>(this::createPercentile);
 
     /** for testing purposes */
     protected UserId() {}
@@ -89,6 +90,31 @@ public class UserId {
             FileUtils.write(uuid, uuidFile);
         } catch (IOException e) {
             LOGGER.warn("Could not write redhat anonymous UUID to file at " + UUID_FILE.toAbsolutePath(), e);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        String uuid = get();
+        for (int i = 0; i < uuid.length(); i++) {
+            int code = uuid.codePointAt(i);
+            hash = ((hash << 5) - hash) + code;
+        }
+        return hash;
+    }
+
+    public float getPercentile() {
+        return percentile.get();
+    }
+
+    private float createPercentile() {
+        try {
+            String hash = String.valueOf(Math.abs(hashCode()));
+            int length = Math.min(4, hash.length());
+            return Float.parseFloat(hash.substring(hash.length() - length)) / 10000; // use at most last 4 chars
+        } catch (NumberFormatException e) {
+            return 0;
         }
     }
 }
