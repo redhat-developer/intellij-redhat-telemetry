@@ -37,7 +37,7 @@ public class Fakes {
                 .timezone(timezone)
                 .country(country)
                 .platform(new Platform(platform_name, platform_distribution, platform_version))
-                .plugin(new Plugin.Factory().create(extensionName, extensionVersion))
+                .plugin(new Plugin.Factory().create(extensionName, extensionVersion, "bogusId"))
                 .build();
     }
 

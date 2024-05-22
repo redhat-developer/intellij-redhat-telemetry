@@ -134,7 +134,7 @@ public class Environment {
     /**
      * Returns the plugin from which Telemetry events are sent.
      */
-    public Application getPlugin() {
+    public Plugin getPlugin() {
         return plugin;
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat, Inc.
+ * Copyright (c) 2024 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v2.0 which accompanies this distribution,
@@ -8,17 +8,13 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package com.redhat.devtools.intellij.telemetry.core;
+package com.redhat.devtools.intellij.telemetry.core.configuration.limits;
 
-import com.intellij.openapi.extensions.PluginDescriptor;
-import com.redhat.devtools.intellij.telemetry.core.service.Environment;
 import com.redhat.devtools.intellij.telemetry.core.service.Event;
 
-public interface IMessageBroker {
-    void send(Event event);
-    void dispose();
+public interface IEventLimits {
 
-    interface IMessageBrokerFactory {
-        IMessageBroker create(boolean isDebug, Environment environment, PluginDescriptor descriptor);
-    }
+    boolean canSend(Event event);
+    void wasSent(Event event);
+
 }
