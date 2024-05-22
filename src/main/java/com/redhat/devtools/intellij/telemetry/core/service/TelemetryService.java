@@ -10,10 +10,6 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.KEY_MODE;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
@@ -22,9 +18,14 @@ import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.ConfigurationChangedListener;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.Mode;
+import com.redhat.devtools.intellij.telemetry.core.configuration.limits.IEventLimits;
 import com.redhat.devtools.intellij.telemetry.core.service.Event.Type;
 import com.redhat.devtools.intellij.telemetry.core.util.CircularBuffer;
 import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.KEY_MODE;
 
 public class TelemetryService implements IService {
 
@@ -34,20 +35,31 @@ public class TelemetryService implements IService {
 
     private final TelemetryNotifications notifications;
     private final TelemetryConfiguration configuration;
+    private final IEventLimits limits;
     protected final IMessageBroker broker;
     private final AtomicBoolean userQueried = new AtomicBoolean(false);
     private final CircularBuffer<Event> onHold = new CircularBuffer<>(BUFFER_SIZE);
 
-    public TelemetryService(final TelemetryConfiguration configuration, final IMessageBroker broker) {
-        this(configuration, broker, ApplicationManager.getApplication().getMessageBus().connect(), new TelemetryNotifications());
+    public TelemetryService(
+            final TelemetryConfiguration configuration,
+            final IEventLimits limits,
+            final IMessageBroker broker) {
+        this(configuration,
+                limits,
+                broker,
+                ApplicationManager.getApplication().getMessageBus().connect(),
+                new TelemetryNotifications()
+        );
     }
 
     TelemetryService(
             final TelemetryConfiguration configuration,
+            final IEventLimits limits,
             final IMessageBroker broker,
             final MessageBusConnection connection,
             final TelemetryNotifications notifications) {
         this.configuration = configuration;
+        this.limits = limits;
         this.broker = broker;
         this.notifications = notifications;
         onConfigurationChanged(connection);
@@ -85,7 +97,10 @@ public class TelemetryService implements IService {
     private void doSend(Event event) {
         if (isEnabled()) {
             flushOnHold();
-            broker.send(event);
+            if (limits.canSend(event)) {
+                broker.send(event);
+                limits.wasSent(event);
+            }
         } else if (!isConfigured()) {
             onHold.offer(event);
         }

@@ -17,6 +17,8 @@ import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
+import com.redhat.devtools.intellij.telemetry.core.configuration.limits.EventLimits;
+import com.redhat.devtools.intellij.telemetry.core.configuration.limits.IEventLimits;
 import com.redhat.devtools.intellij.telemetry.core.service.Event.Type;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBrokerFactory;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
@@ -37,12 +39,20 @@ public class TelemetryMessageBuilder {
     private final IService feedbackFacade;
 
     public TelemetryMessageBuilder(PluginDescriptor descriptor) {
-        this(new SegmentBrokerFactory().create(TelemetryConfiguration.getInstance().isDebug(), descriptor));
+        this(createEnvironment(descriptor), descriptor);
     }
 
-    TelemetryMessageBuilder(IMessageBroker messageBroker) {
+    TelemetryMessageBuilder(Environment environment, PluginDescriptor descriptor) {
+        this(environment.getPlugin().getId(),
+                new SegmentBrokerFactory().create(
+                        TelemetryConfiguration.getInstance().isDebug(),
+                        environment,
+                        descriptor));
+    }
+
+    TelemetryMessageBuilder(String pluginId, IMessageBroker messageBroker) {
         this(
-            new TelemetryServiceFacade(TelemetryConfiguration.getInstance(), messageBroker),
+            new TelemetryServiceFacade(TelemetryConfiguration.getInstance(), new EventLimits(pluginId), messageBroker),
             new FeedbackServiceFacade(messageBroker)
         );
     }
@@ -166,10 +176,12 @@ public class TelemetryMessageBuilder {
 
         private final MessageBusConnection messageBusConnection;
 
-        protected TelemetryServiceFacade(final TelemetryConfiguration configuration, IMessageBroker broker) {
-            this(() -> ApplicationManager.getApplication().getService(TelemetryServiceFactory.class).create(configuration, broker),
-                    ApplicationManager.getApplication().getMessageBus().connect()
-            );
+        protected TelemetryServiceFacade(final TelemetryConfiguration configuration, IEventLimits limits, IMessageBroker broker) {
+            this(() -> ApplicationManager.getApplication().getService(TelemetryServiceFactory.class).create(
+                            configuration,
+                            limits,
+                            broker),
+                    ApplicationManager.getApplication().getMessageBus().connect());
         }
 
         protected TelemetryServiceFacade(final Supplier<IService> supplier, MessageBusConnection connection) {
@@ -227,6 +239,16 @@ public class TelemetryMessageBuilder {
         FeedbackMessage(String name, IService service) {
             super(ACTION, name, service);
         }
+    }
+
+    private static Environment createEnvironment(PluginDescriptor descriptor) {
+        IDE ide = new IDE.Factory()
+                .create()
+                .setJavaVersion();
+        return new Environment.Builder()
+                .ide(ide)
+                .plugin(descriptor)
+                .build();
     }
 
 }

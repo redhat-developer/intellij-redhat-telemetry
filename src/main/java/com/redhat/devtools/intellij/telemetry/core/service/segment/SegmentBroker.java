@@ -22,6 +22,7 @@ import com.segment.analytics.messages.IdentifyMessage;
 import com.segment.analytics.messages.MessageBuilder;
 import com.segment.analytics.messages.PageMessage;
 import com.segment.analytics.messages.TrackMessage;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Map;
@@ -252,6 +253,7 @@ public class SegmentBroker implements IMessageBroker {
         private static final int FLUSH_INTERVAL = 10000;
         private static final int FLUSH_QUEUE_SIZE = 10;
 
+        @Nullable
         @Override
         public Analytics apply(String writeKey) {
             if (writeKey == null) {

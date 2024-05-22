@@ -10,12 +10,23 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.util;
 
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileUtils {
+
+    private static final String FILE_URL_PREFIX = "file:";
 
     private FileUtils() {
     }
@@ -37,9 +48,33 @@ public class FileUtils {
         }
     }
 
+    public static Path ensureExists(@NotNull Path path) throws IOException {
+        FileUtils.createFileAndParent(path);
+        return path;
+    }
+
     public static void write(String content, Path file) throws IOException {
         try (Writer writer = Files.newBufferedWriter(file)) {
             writer.append(content);
         }
     }
+
+    public static boolean isFileUrl(String url) {
+        return !StringUtils.isEmpty(url)
+            && url.startsWith(FILE_URL_PREFIX);
+    }
+
+    @Nullable
+    public static Path getPathForFileUrl(String url) {
+        if (!isFileUrl(url)) {
+            return null;
+        }
+        try {
+            URI uri = new URL(url).toURI();
+            return new File(uri).toPath();
+        } catch (MalformedURLException | URISyntaxException e) {
+            return null;
+        }
+    }
+
 }
