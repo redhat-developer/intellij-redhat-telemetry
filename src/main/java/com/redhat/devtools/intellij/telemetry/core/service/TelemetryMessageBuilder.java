@@ -12,7 +12,7 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.ide.AppLifecycleListener;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.util.messages.MessageBusConnection;
 import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.IService;
@@ -33,13 +33,11 @@ import static com.redhat.devtools.intellij.telemetry.core.util.TimeUtils.toLocal
 
 public class TelemetryMessageBuilder {
 
-    private static final Logger LOGGER = Logger.getInstance(TelemetryMessageBuilder.class);
-
     private final IService telemetryFacade;
     private final IService feedbackFacade;
 
-    public TelemetryMessageBuilder(ClassLoader classLoader) {
-        this(new SegmentBrokerFactory().create(TelemetryConfiguration.getInstance().isDebug(), classLoader));
+    public TelemetryMessageBuilder(PluginDescriptor descriptor) {
+        this(new SegmentBrokerFactory().create(TelemetryConfiguration.getInstance().isDebug(), descriptor));
     }
 
     TelemetryMessageBuilder(IMessageBroker messageBroker) {

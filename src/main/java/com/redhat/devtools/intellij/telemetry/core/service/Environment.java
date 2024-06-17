@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
+import com.intellij.openapi.extensions.PluginDescriptor;
+
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -54,8 +56,8 @@ public class Environment {
             }
         }
 
-        public Buildable plugin(ClassLoader classLoader) {
-            return plugin(new Plugin.Factory().create(classLoader));
+        public Buildable plugin(PluginDescriptor descriptor) {
+            return plugin(new Plugin.Factory().create(descriptor));
         }
 
         public Buildable plugin(Plugin plugin) {

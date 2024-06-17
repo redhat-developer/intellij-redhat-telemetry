@@ -10,19 +10,14 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service;
 
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManagerCore;
-
-import java.util.Arrays;
+import com.intellij.openapi.extensions.PluginDescriptor;
+import com.sun.istack.NotNull;
 
 public class Plugin extends Application {
 
     public static final class Factory {
-        public Plugin create(ClassLoader classLoader) {
-            IdeaPluginDescriptor descriptor = getPluginDescriptor(classLoader);
-            if (descriptor == null) {
-                return null;
-            }
+
+        public Plugin create(@NotNull PluginDescriptor descriptor) {
             return create(descriptor.getName(), descriptor.getVersion());
         }
 
@@ -30,12 +25,6 @@ public class Plugin extends Application {
             return new Plugin(name, version);
         }
 
-        private IdeaPluginDescriptor getPluginDescriptor(ClassLoader classLoader) {
-            return Arrays.stream(PluginManagerCore.getPlugins())
-                    .filter(descriptor -> classLoader.equals(descriptor.getPluginClassLoader()))
-                    .findFirst()
-                    .orElse(null);
-        }
     }
 
     Plugin(String name, String version) {

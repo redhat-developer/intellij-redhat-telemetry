@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core;
 
+import com.intellij.openapi.extensions.PluginDescriptor;
 import com.redhat.devtools.intellij.telemetry.core.service.Event;
 
 public interface IMessageBroker {
@@ -17,6 +18,6 @@ public interface IMessageBroker {
     void dispose();
 
     interface IMessageBrokerFactory {
-        IMessageBroker create(boolean isDebug, ClassLoader classLoader);
+        IMessageBroker create(boolean isDebug, PluginDescriptor descriptor);
     }
 }
