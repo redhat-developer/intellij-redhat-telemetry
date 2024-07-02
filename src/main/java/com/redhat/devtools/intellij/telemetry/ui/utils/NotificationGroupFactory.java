@@ -14,6 +14,7 @@ import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.diagnostic.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -39,6 +40,7 @@ public class NotificationGroupFactory {
 
     private NotificationGroupFactory() {}
 
+    @Nullable
     public static NotificationGroup create(String displayId, NotificationDisplayType type, boolean logByDefault) {
         try {
             // < IC-2021.3

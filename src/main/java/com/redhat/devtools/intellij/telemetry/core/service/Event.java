@@ -13,6 +13,8 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.redhat.devtools.intellij.telemetry.core.service.Message.PROP_ERROR;
+
 public class Event {
 
     public enum Type {
@@ -43,5 +45,10 @@ public class Event {
 
     public Map<String, String> getProperties() {
         return properties;
+    }
+
+    public boolean hasError() {
+        return properties != null
+                && properties.containsKey(PROP_ERROR);
     }
 }

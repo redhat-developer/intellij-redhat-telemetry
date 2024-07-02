@@ -53,6 +53,7 @@ dependencies {
 }
 
 test {
+    // Discover and execute all other JUnit5-based tests
     useJUnitPlatform()
     afterSuite { desc, result ->
         if (!desc.parent)
@@ -62,6 +63,15 @@ test {
                     "${result.failedTestCount} failures, " +
                     "${result.skippedTestCount} skipped)")
     }
+}
+
+tasks.register('platformTests', Test) {
+    // Discover and execute JUnit4-based EventCountsTest
+    useJUnit()
+    description = 'Runs the platform tests.'
+    group = 'verification'
+    outputs.upToDateWhen { false }
+    mustRunAfter test
 }
 
 configurations {

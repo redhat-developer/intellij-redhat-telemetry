@@ -33,12 +33,12 @@ import static org.mockito.Mockito.verify;
 
 class TelemetryConfigurationTest {
 
-    private SaveableFileConfiguration file = configuration(new Properties(), SaveableFileConfiguration.class);
-    private IConfiguration defaults = mock(IConfiguration.class);
-    private IConfiguration overrides = mock(IConfiguration.class);
-    private List<IConfiguration> configurations = Arrays.asList(overrides, file, defaults);
-    private ConfigurationChangedListener listener = mock(ConfigurationChangedListener.class);
-    private TelemetryConfiguration config = new TestableTelemetryConfiguration(file, configurations, listener);
+    private final SaveableFileConfiguration file = configuration(new Properties(), SaveableFileConfiguration.class);
+    private final IConfiguration defaults = mock(IConfiguration.class);
+    private final IConfiguration overrides = mock(IConfiguration.class);
+    private final List<IConfiguration> configurations = Arrays.asList(overrides, file, defaults);
+    private final ConfigurationChangedListener listener = mock(ConfigurationChangedListener.class);
+    private final TelemetryConfiguration config = new TestableTelemetryConfiguration(file, configurations, listener);
 
     @Test
     void get_should_return_overridden_value() {

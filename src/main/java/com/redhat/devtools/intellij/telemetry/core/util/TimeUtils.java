@@ -10,12 +10,17 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,6 +66,7 @@ public class TimeUtils {
      * 
      * @see #toString(Duration)
      */
+    @Nullable
     public static Duration toDuration(String hoursMinutesSeconds) {
         Matcher matcher = HH_MM_SS_DURATION.matcher(hoursMinutesSeconds);
         if (!matcher.matches()) {
@@ -73,6 +79,18 @@ public class TimeUtils {
         long seconds = Integer.parseInt(matcher.group(3));
         duration = duration.plusSeconds(seconds);
         return duration;
+    }
+
+    /**
+     * Returns {@code true} if the given {@link LocalDate} is today.
+     * Returns {@code false} otherwise.
+     *
+     * @param dateTime the date/time to check whether it's today.
+     *
+     * @return true if the given date/time is today.
+     */
+    public static boolean isToday(LocalDateTime dateTime) {
+        return ChronoUnit.DAYS.between(dateTime.toLocalDate(), LocalDate.now()) == 0;
     }
 
 }

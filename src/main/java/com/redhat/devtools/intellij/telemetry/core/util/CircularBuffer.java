@@ -26,6 +26,8 @@
  */
 package com.redhat.devtools.intellij.telemetry.core.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +58,7 @@ public class CircularBuffer<E> {
         return false;
     }
 
+    @Nullable
     public E poll() {
         if (!isEmpty()) {
             E nextValue = data[readSequence % capacity];

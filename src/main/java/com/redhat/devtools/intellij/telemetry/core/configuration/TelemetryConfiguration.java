@@ -25,7 +25,7 @@ public class TelemetryConfiguration extends CompositeConfiguration {
     private static final SaveableFileConfiguration FILE = new SaveableFileConfiguration(
             Directories.RED_HAT.resolve("com.redhat.devtools.intellij.telemetry"));
 
-    private static TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
+    private static final TelemetryConfiguration INSTANCE = new TelemetryConfiguration();
 
     public static TelemetryConfiguration getInstance() {
         return INSTANCE;

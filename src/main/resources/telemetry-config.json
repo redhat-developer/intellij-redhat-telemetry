@@ -1,0 +1,21 @@
+{
+  "*": {
+    "enabled": "all",
+    "refresh": "12h",
+    "includes": [
+      {
+        "name": "startup",
+        "dailyLimit": 1
+      },
+      {
+        "name": "*"
+      }
+    ],
+    "excludes": [
+      {
+        "name": "shutdown",
+        "ratio": "1.0"
+      }
+    ]
+  }
+}

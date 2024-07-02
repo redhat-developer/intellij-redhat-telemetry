@@ -16,19 +16,20 @@ import com.sun.istack.NotNull;
 public class Plugin extends Application {
 
     public static final class Factory {
-
         public Plugin create(@NotNull PluginDescriptor descriptor) {
-            return create(descriptor.getName(), descriptor.getVersion());
+            return create(descriptor.getName(), descriptor.getVersion(), descriptor.getPluginId().getIdString());
         }
 
-        public Plugin create(String name, String version) {
-            return new Plugin(name, version);
+        public Plugin create(String name, String version, String id) {
+            return new Plugin(name, version, id);
         }
-
     }
 
-    Plugin(String name, String version) {
+    private final String id;
+
+    Plugin(String name, String version, String id) {
         super(name, version);
+        this.id = id;
     }
 
     @Override
@@ -37,4 +38,7 @@ public class Plugin extends Application {
         return this;
     }
 
+    public String getId() {
+        return id;
+    }
 }

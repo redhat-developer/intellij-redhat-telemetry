@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.diagnostic.Logger;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +47,7 @@ public class Country {
         // for testing purposes
     }
 
+    @Nullable
     public String get(TimeZone timeZone) {
         if (timeZone == null) {
             return null;
@@ -53,6 +55,7 @@ public class Country {
         return get(timeZone.getID());
     }
 
+    @Nullable
     public String get(String timezoneId) {
         Map<String, String> timezone = timezones.get().get(timezoneId);
         if (timezone == null) {
