@@ -11,6 +11,7 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.ide.AppLifecycleListener;
+import com.intellij.ide.plugins.cl.PluginAwareClassLoader;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.util.messages.MessageBusConnection;
@@ -37,6 +38,11 @@ public class TelemetryMessageBuilder {
 
     private final IService telemetryFacade;
     private final IService feedbackFacade;
+
+    @Deprecated
+    public TelemetryMessageBuilder(ClassLoader classLoader) {
+        this(getDescriptor(classLoader));
+    }
 
     public TelemetryMessageBuilder(PluginDescriptor descriptor) {
         this(createEnvironment(descriptor), descriptor);
@@ -249,6 +255,14 @@ public class TelemetryMessageBuilder {
                 .ide(ide)
                 .plugin(descriptor)
                 .build();
+    }
+
+    private static PluginDescriptor getDescriptor(ClassLoader classLoader) {
+        if (classLoader instanceof PluginAwareClassLoader) {
+            return ((PluginAwareClassLoader) classLoader).getPluginDescriptor();
+        } else {
+            return null;
+        }
     }
 
 }
