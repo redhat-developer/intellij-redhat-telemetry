@@ -12,12 +12,11 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.DumbAware;
-import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.configuration.limits.IEventLimits;
 
 @Service
-public final class TelemetryServiceFactory implements DumbAware {
+final class TelemetryServiceFactory implements DumbAware {
 
     public TelemetryService create(TelemetryConfiguration configuration, IEventLimits limits, IMessageBroker broker) {
         return new TelemetryService(configuration, limits, broker);

@@ -11,7 +11,7 @@
 package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
+import com.redhat.devtools.intellij.telemetry.core.service.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.service.Application;
 import com.redhat.devtools.intellij.telemetry.core.service.Environment;
 import com.redhat.devtools.intellij.telemetry.core.service.Event;
@@ -53,7 +53,7 @@ public class SegmentBroker implements IMessageBroker {
     public static final String PROP_APP_NAME = "app_name";
     public static final String PROP_APP_VERSION = "app_version";
 
-    enum SegmentType {
+    private enum SegmentType {
         IDENTIFY {
             public MessageBuilder toMessage(Event event, Map<String, Object> context, SegmentBroker broker) {
                 return broker.toMessage(IdentifyMessage.builder(), event, context);
@@ -73,7 +73,7 @@ public class SegmentBroker implements IMessageBroker {
 
         public abstract MessageBuilder toMessage(Event event, Map<String, Object> context, SegmentBroker broker);
 
-        public static SegmentType valueOf(Event.Type eventType) {
+        static SegmentType valueOf(Event.Type eventType) {
             switch (eventType) {
                 case USER:
                     return IDENTIFY;
@@ -91,11 +91,12 @@ public class SegmentBroker implements IMessageBroker {
     private final Environment environment;
     private final Lazy<Analytics> analytics;
 
-    public SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration) {
+    SegmentBroker(boolean isDebug, String userId, Environment environment, ISegmentConfiguration configuration) {
         this(isDebug, userId, IdentifyTraitsPersistence.INSTANCE, environment, configuration, new AnalyticsFactory());
     }
 
-    public SegmentBroker(
+    /* for testing purposes */
+    protected SegmentBroker(
             boolean isDebug,
             String userId,
             IdentifyTraitsPersistence identifyTraitsPersistence,

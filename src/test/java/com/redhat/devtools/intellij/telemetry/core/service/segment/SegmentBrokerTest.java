@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
-import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
+import com.redhat.devtools.intellij.telemetry.core.service.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.service.Environment;
 import com.redhat.devtools.intellij.telemetry.core.service.Event;
 import com.segment.analytics.Analytics;

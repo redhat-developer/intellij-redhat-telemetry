@@ -13,8 +13,6 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
-import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.ConfigurationChangedListener;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.Mode;
@@ -27,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration.KEY_MODE;
 
-public class TelemetryService implements IService {
+class TelemetryService implements IService {
 
     private static final Logger LOGGER = Logger.getInstance(TelemetryService.class);
 

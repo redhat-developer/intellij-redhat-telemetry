@@ -8,9 +8,8 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package com.redhat.devtools.intellij.telemetry.core.configuration;
+package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
-import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

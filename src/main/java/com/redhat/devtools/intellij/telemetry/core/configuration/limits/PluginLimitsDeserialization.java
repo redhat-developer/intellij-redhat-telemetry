@@ -21,7 +21,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.text.StringUtil;
 import com.redhat.devtools.intellij.telemetry.core.configuration.limits.Filter.EventNameFilter;
 import com.redhat.devtools.intellij.telemetry.core.configuration.limits.Filter.EventPropertyFilter;
-import com.redhat.devtools.intellij.telemetry.core.service.TelemetryService;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

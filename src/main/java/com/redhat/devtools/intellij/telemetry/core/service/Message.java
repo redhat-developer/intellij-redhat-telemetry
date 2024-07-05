@@ -11,7 +11,6 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.redhat.devtools.intellij.telemetry.core.IService;
 
 import java.util.HashMap;
 import java.util.Map;

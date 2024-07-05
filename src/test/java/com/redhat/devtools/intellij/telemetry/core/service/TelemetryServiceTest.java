@@ -11,7 +11,6 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.configuration.limits.IEventLimits;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;

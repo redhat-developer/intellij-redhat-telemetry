@@ -11,12 +11,11 @@
 package com.redhat.devtools.intellij.telemetry.core.service.segment;
 
 import com.intellij.openapi.extensions.PluginDescriptor;
-import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
+import com.redhat.devtools.intellij.telemetry.core.service.IMessageBroker;
 import com.redhat.devtools.intellij.telemetry.core.service.Environment;
-import com.redhat.devtools.intellij.telemetry.core.service.IDE;
 import com.redhat.devtools.intellij.telemetry.core.service.UserId;
 
-import static com.redhat.devtools.intellij.telemetry.core.IMessageBroker.*;
+import static com.redhat.devtools.intellij.telemetry.core.service.IMessageBroker.*;
 
 public class SegmentBrokerFactory implements IMessageBrokerFactory {
 

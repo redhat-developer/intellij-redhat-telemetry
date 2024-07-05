@@ -8,11 +8,9 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package com.redhat.devtools.intellij.telemetry.core;
+package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.extensions.PluginDescriptor;
-import com.redhat.devtools.intellij.telemetry.core.service.Environment;
-import com.redhat.devtools.intellij.telemetry.core.service.Event;
 
 public interface IMessageBroker {
     void send(Event event);

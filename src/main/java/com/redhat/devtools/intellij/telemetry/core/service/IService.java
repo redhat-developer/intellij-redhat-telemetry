@@ -8,9 +8,7 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package com.redhat.devtools.intellij.telemetry.core;
-
-import com.redhat.devtools.intellij.telemetry.core.service.Event;
+package com.redhat.devtools.intellij.telemetry.core.service;
 
 public interface IService {
     void send(Event event);

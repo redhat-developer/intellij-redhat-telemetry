@@ -15,14 +15,14 @@ import java.util.Objects;
 /**
  * Traits that the segment broker sends with am identify event.
  */
-public class IdentifyTraits {
+class IdentifyTraits {
         private final String locale;
         private final String timezone;
         private final String osName;
         private final String osVersion;
         private final String osDistribution;
 
-        public IdentifyTraits(String locale, String timezone, String osName, String osVersion, String osDistribution) {
+        IdentifyTraits(String locale, String timezone, String osName, String osVersion, String osDistribution) {
             this.locale = locale;
             this.timezone = timezone;
             this.osName = osName;

@@ -12,14 +12,9 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.DumbAware;
-import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
-import com.redhat.devtools.intellij.telemetry.core.IService;
-import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
-import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
-import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentConfiguration;
 
 @Service
-public final class FeedbackServiceFactory implements DumbAware {
+final class FeedbackServiceFactory implements DumbAware {
 
     public IService create(IMessageBroker broker) {
         return new FeedbackService(broker);

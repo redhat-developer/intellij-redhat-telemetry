@@ -15,8 +15,6 @@ import com.intellij.ide.plugins.cl.PluginAwareClassLoader;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
-import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.configuration.limits.EventLimits;
 import com.redhat.devtools.intellij.telemetry.core.configuration.limits.IEventLimits;
@@ -39,7 +37,7 @@ public class TelemetryMessageBuilder {
     private final IService telemetryFacade;
     private final IService feedbackFacade;
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public TelemetryMessageBuilder(ClassLoader classLoader) {
         this(getDescriptor(classLoader));
     }

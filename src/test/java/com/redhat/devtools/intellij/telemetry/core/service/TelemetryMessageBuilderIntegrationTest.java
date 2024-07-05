@@ -11,7 +11,6 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.configuration.limits.EventLimits;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
@@ -79,7 +78,7 @@ class TelemetryMessageBuilderIntegrationTest {
                 IdentifyTraitsPersistence.INSTANCE,
                 environment,
                 segmentConfiguration,
-                key -> analytics);
+                key -> analytics) {};
         TelemetryConfiguration telemetryConfiguration = telemetryConfiguration(TelemetryConfiguration.Mode.DEBUG);
 
         TelemetryService telemetryService = new TelemetryService(
