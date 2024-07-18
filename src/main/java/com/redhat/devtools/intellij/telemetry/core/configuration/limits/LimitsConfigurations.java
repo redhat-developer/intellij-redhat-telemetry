@@ -39,7 +39,7 @@ class LimitsConfigurations {
     private static final Logger LOGGER = Logger.getInstance(LimitsConfigurations.class);
     static final Path LOCAL = Directories.RED_HAT.resolve("telemetry-config.json");
     static final String EMBEDDED = "/telemetry-config.json";
-    static final String REMOTE = "https://raw.githubusercontent.com/adietish/intellij-redhat-telemetry/issue-82/src/main/resources/telemetry-config.json";
+    static final String REMOTE = "https://raw.githubusercontent.com/redhat-developer/intellij-redhat-telemetry/blob/main/src/main/resources/telemetry-config.json";
     static final String SYSTEM_PROP_REMOTE = "REDHAT_TELEMETRY_REMOTE_CONFIG_URL";
 
     protected final OkHttpClient client = new OkHttpClient.Builder()
