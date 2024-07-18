@@ -10,6 +10,11 @@
     </description>
 
     <change-notes><![CDATA[
+    <p><b>1.2.0</b></p>
+    <ul>
+      <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/82">Allow limits to be configured</a></li>
+      <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/86">Fixed reported plugin</a></li>
+    </ul>
     <p><b>1.1.0</b></p>
     <ul>
       <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/73">Add API for feedback only</a></li>
