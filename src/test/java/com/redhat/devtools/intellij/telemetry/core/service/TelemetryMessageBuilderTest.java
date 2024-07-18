@@ -12,7 +12,6 @@ package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.ide.AppLifecycleListener;
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.service.TelemetryMessageBuilder.FeedbackServiceFacade;
 import com.redhat.devtools.intellij.telemetry.core.util.AnonymizeUtils;
 import com.redhat.devtools.intellij.telemetry.core.util.TimeUtils;

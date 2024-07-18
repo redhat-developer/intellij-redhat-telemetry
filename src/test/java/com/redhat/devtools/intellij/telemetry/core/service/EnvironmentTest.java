@@ -284,12 +284,12 @@ class EnvironmentTest {
     @Test
     void equals_should_be_false_if_plugin_name_is_different() {
         // given
-        Plugin jediPlugin = new Plugin.Factory().create("jedi", "42");
+        Plugin jediPlugin = new Plugin.Factory().create("jedi", "42", "starwars.jedi.id");
         Environment jediEnv = envBuilder
                 .ide(ide)
                 .plugin(jediPlugin)
                 .build();
-        Plugin sithPlugin = new Plugin.Factory().create("sith", "42");
+        Plugin sithPlugin = new Plugin.Factory().create("sith", "42","starwars.jedi.id");
         Environment sithEnv = envBuilder
                 .ide(ide)
                 .plugin(sithPlugin)
@@ -303,12 +303,12 @@ class EnvironmentTest {
     @Test
     void equals_should_be_false_if_plugin_version_is_different() {
         // given
-        Plugin jedi42Plugin = new Plugin.Factory().create("jedi", "42");
+        Plugin jedi42Plugin = new Plugin.Factory().create("jedi", "42", "starwars.jedi.id");
         Environment jedi42Env = envBuilder
                 .ide(ide)
                 .plugin(jedi42Plugin)
                 .build();
-        Plugin jedi84Plugin = new Plugin.Factory().create("jedi", "84");
+        Plugin jedi84Plugin = new Plugin.Factory().create("jedi", "84", "starwars.jedi.id");
         Environment jedi84Env = envBuilder
                 .ide(ide)
                 .plugin(jedi84Plugin)

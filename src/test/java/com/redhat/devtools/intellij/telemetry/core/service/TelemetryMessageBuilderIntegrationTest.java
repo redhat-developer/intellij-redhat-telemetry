@@ -11,8 +11,8 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
+import com.redhat.devtools.intellij.telemetry.core.configuration.limits.EventLimits;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.ISegmentConfiguration;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.IdentifyTraitsPersistence;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.mock;
 class TelemetryMessageBuilderIntegrationTest {
 
     private static final String EXTENSION_NAME = "com.redhat.devtools.intellij.telemetry";
-    private static final String EXTENSION_VERSION = "1.0.0.44";
+    private static final String EXTENSION_VERSION = "1.2.0-SNAPSHOT";
     private static final String APPLICATION_VERSION = "1.0.0";
     private static final String APPLICATION_NAME = TelemetryMessageBuilderIntegrationTest.class.getSimpleName();
     private static final String PLATFORM_NAME = "smurfOS";
@@ -71,17 +71,19 @@ class TelemetryMessageBuilderIntegrationTest {
                 LOCALE,
                 TIMEZONE,
                 COUNTRY);
+        EventLimits limits = new EventLimits("*");
         SegmentBroker broker = new SegmentBroker(
                 false,
                 UserId.INSTANCE.get(),
                 IdentifyTraitsPersistence.INSTANCE,
                 environment,
                 segmentConfiguration,
-                key -> analytics);
+                key -> analytics) {};
         TelemetryConfiguration telemetryConfiguration = telemetryConfiguration(TelemetryConfiguration.Mode.DEBUG);
 
         TelemetryService telemetryService = new TelemetryService(
                 telemetryConfiguration,
+                limits,
                 broker,
                 mock(MessageBusConnection.class),
                 mock(TelemetryNotifications.class));

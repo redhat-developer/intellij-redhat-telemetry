@@ -35,8 +35,6 @@
   ]]>
     </change-notes>
 
-    <idea-version since-build="203" />
-
     <depends>com.intellij.modules.lang</depends>
     <extensions defaultExtensionNs="com.intellij">
         <!-- <applicationService serviceImplementation="com.redhat.devtools.intellij.telemetry.core.preferences.TelemetryState"/> -->
@@ -49,5 +47,7 @@
                 serviceImplementation="com.redhat.devtools.intellij.telemetry.core.service.TelemetryServiceFactory"/>
         <applicationService
                 serviceImplementation="com.redhat.devtools.intellij.telemetry.core.service.FeedbackServiceFactory"/>
+        <applicationService
+                serviceImplementation="com.redhat.devtools.intellij.telemetry.core.configuration.limits.EventCounts"/>
     </extensions>
 </idea-plugin>

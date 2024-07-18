@@ -11,8 +11,8 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
+import com.redhat.devtools.intellij.telemetry.core.configuration.limits.IEventLimits;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBroker;
 import com.redhat.devtools.intellij.telemetry.ui.TelemetryNotifications;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,24 +34,27 @@ import static org.mockito.Mockito.verify;
 
 class TelemetryServiceTest {
 
+    private IEventLimits limits;
     private SegmentBroker broker;
     private MessageBusConnection bus;
+    private TelemetryConfiguration configuration;
     private IService service;
     private Event event;
     private TelemetryNotifications notifications;
 
     @BeforeEach
     void before() {
+        this.limits = createEventLimits();
         this.broker = createSegmentBroker();
         this.bus = createMessageBusConnection();
         this.notifications = createTelemetryNotifications();
-        TelemetryConfiguration configuration = telemetryConfiguration(true, true);
-        this.service = new TelemetryService(configuration, broker, bus, notifications);
+        this.configuration = telemetryConfiguration(true, true);
+        this.service = new TelemetryService(configuration, limits, broker, bus, notifications);
         this.event = new Event(null, "Testing Telemetry", null);
     }
 
     @Test
-    void send_should_send_if_is_enabled() {
+    void send_should_send_if_is_enabled_and_limits_allow_it() {
         // given
         // when
         service.send(event);
@@ -60,10 +63,34 @@ class TelemetryServiceTest {
     }
 
     @Test
+    void send_should_NOT_send_if_is_enabled_but_limits_DONT_allow_it() {
+        // given
+        doReturn(false)
+                .when(limits).canSend(any());
+        // when
+        service.send(event);
+        // then
+        verify(broker, never()).send(any(Event.class));
+    }
+
+    @Test
+    void send_should_NOT_send_if_is_NOT_enabled_but_limits_allow_it() {
+        // given
+        doReturn(false)
+                .when(configuration).isEnabled();
+        doReturn(true)
+                .when(limits).canSend(any());
+        // when
+        service.send(event);
+        // then
+        verify(broker, never()).send(any(Event.class));
+    }
+
+    @Test
     void send_should_NOT_send_if_is_NOT_configured() {
         // given
         TelemetryConfiguration configuration = telemetryConfiguration(false, false);
-        TelemetryService service = new TelemetryService(configuration, broker, bus, notifications);
+        TelemetryService service = new TelemetryService(configuration, limits, broker, bus, notifications);
         // when
         service.send(event);
         // then
@@ -74,7 +101,7 @@ class TelemetryServiceTest {
     void send_should_send_all_events_once_it_gets_enabled() {
         // given
         TelemetryConfiguration configuration = telemetryConfiguration(false, false);
-        TelemetryService service = new TelemetryService(configuration, broker, bus, notifications);
+        TelemetryService service = new TelemetryService(configuration, limits, broker, bus, notifications);
         // when config is disabled
         service.send(event);
         service.send(event);
@@ -105,7 +132,7 @@ class TelemetryServiceTest {
     void send_should_query_user_consent_once() {
         // given
         TelemetryConfiguration configuration = telemetryConfiguration(true, false);
-        TelemetryService service = new TelemetryService(configuration, broker, bus, notifications);
+        TelemetryService service = new TelemetryService(configuration, limits, broker, bus, notifications);
         // when
         service.send(event);
         service.send(event);
@@ -121,6 +148,46 @@ class TelemetryServiceTest {
         service.send(event);
         // then
         verify(notifications, never()).queryUserConsent();
+    }
+
+    @Test
+    void send_should_send_if_limits_allow_it() {
+        // given
+        doReturn(true)
+                .when(limits).canSend(event);
+        // when
+        service.send(event);
+        // then
+        verify(broker).send(event);
+    }
+
+    @Test
+    void send_should_notify_limits_that_event_was_sent() {
+        // given
+        doReturn(true)
+                .when(limits).canSend(event);
+        // when
+        service.send(event);
+        // then
+        verify(limits).wasSent(event);
+    }
+
+    @Test
+    void send_should_NOT_send_if_limits_DONT_allow_it() {
+        // given
+        doReturn(false)
+                .when(limits).canSend(event);
+        // when
+        service.send(event);
+        // then
+        verify(broker, never()).send(event);
+    }
+
+    private IEventLimits createEventLimits() {
+        IEventLimits mock = mock(IEventLimits.class);
+        doReturn(true)
+                .when(mock).canSend(any());
+        return mock;
     }
 
     private SegmentBroker createSegmentBroker() {

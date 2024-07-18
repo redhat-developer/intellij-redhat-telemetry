@@ -35,14 +35,14 @@ public class IdentifyTraitsPersistence {
 
     protected IdentifyTraitsPersistence() {}
 
-    public synchronized IdentifyTraits get() {
+    synchronized IdentifyTraits get() {
         if (identifyTraits == null) {
             this.identifyTraits = deserialize(load(FILE));
         }
         return identifyTraits;
     }
 
-    public synchronized void set(IdentifyTraits identifyTraits) {
+    synchronized void set(IdentifyTraits identifyTraits) {
         if (Objects.equals(identifyTraits, this.identifyTraits)) {
             return;
         }

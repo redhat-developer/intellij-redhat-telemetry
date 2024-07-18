@@ -10,11 +10,14 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.configuration;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.Objects;
 
 public abstract class CompositeConfiguration implements IConfiguration {
 
+    @Nullable
     @Override
     public String get(final String key) {
         List<IConfiguration> configurations = getConfigurations();

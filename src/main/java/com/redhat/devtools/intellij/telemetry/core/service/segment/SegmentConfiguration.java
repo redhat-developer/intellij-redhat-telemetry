@@ -29,11 +29,11 @@ public class SegmentConfiguration extends CompositeConfiguration implements ISeg
 
     private final ClasspathConfiguration consumerClasspathConfiguration;
 
-    public SegmentConfiguration(ClassLoader classLoader) {
+    SegmentConfiguration(ClassLoader classLoader) {
         this(new ClasspathConfiguration(Paths.get(SEGMENT_PROPERTIES), classLoader));
     }
 
-    protected SegmentConfiguration(ClasspathConfiguration consumerClasspathConfiguration) {
+    SegmentConfiguration(ClasspathConfiguration consumerClasspathConfiguration) {
         this.consumerClasspathConfiguration = consumerClasspathConfiguration;
     }
 

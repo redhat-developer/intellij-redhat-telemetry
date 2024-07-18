@@ -11,12 +11,13 @@
 package com.redhat.devtools.intellij.telemetry.core.service;
 
 import com.intellij.ide.AppLifecycleListener;
+import com.intellij.ide.plugins.cl.PluginAwareClassLoader;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.util.messages.MessageBusConnection;
-import com.redhat.devtools.intellij.telemetry.core.IMessageBroker;
-import com.redhat.devtools.intellij.telemetry.core.IService;
 import com.redhat.devtools.intellij.telemetry.core.configuration.TelemetryConfiguration;
+import com.redhat.devtools.intellij.telemetry.core.configuration.limits.EventLimits;
+import com.redhat.devtools.intellij.telemetry.core.configuration.limits.IEventLimits;
 import com.redhat.devtools.intellij.telemetry.core.service.Event.Type;
 import com.redhat.devtools.intellij.telemetry.core.service.segment.SegmentBrokerFactory;
 import com.redhat.devtools.intellij.telemetry.core.util.Lazy;
@@ -36,13 +37,26 @@ public class TelemetryMessageBuilder {
     private final IService telemetryFacade;
     private final IService feedbackFacade;
 
-    public TelemetryMessageBuilder(PluginDescriptor descriptor) {
-        this(new SegmentBrokerFactory().create(TelemetryConfiguration.getInstance().isDebug(), descriptor));
+    @Deprecated(forRemoval = true)
+    public TelemetryMessageBuilder(ClassLoader classLoader) {
+        this(getDescriptor(classLoader));
     }
 
-    TelemetryMessageBuilder(IMessageBroker messageBroker) {
+    public TelemetryMessageBuilder(PluginDescriptor descriptor) {
+        this(createEnvironment(descriptor), descriptor);
+    }
+
+    TelemetryMessageBuilder(Environment environment, PluginDescriptor descriptor) {
+        this(environment.getPlugin().getId(),
+                new SegmentBrokerFactory().create(
+                        TelemetryConfiguration.getInstance().isDebug(),
+                        environment,
+                        descriptor));
+    }
+
+    TelemetryMessageBuilder(String pluginId, IMessageBroker messageBroker) {
         this(
-            new TelemetryServiceFacade(TelemetryConfiguration.getInstance(), messageBroker),
+            new TelemetryServiceFacade(TelemetryConfiguration.getInstance(), new EventLimits(pluginId), messageBroker),
             new FeedbackServiceFacade(messageBroker)
         );
     }
@@ -166,10 +180,12 @@ public class TelemetryMessageBuilder {
 
         private final MessageBusConnection messageBusConnection;
 
-        protected TelemetryServiceFacade(final TelemetryConfiguration configuration, IMessageBroker broker) {
-            this(() -> ApplicationManager.getApplication().getService(TelemetryServiceFactory.class).create(configuration, broker),
-                    ApplicationManager.getApplication().getMessageBus().connect()
-            );
+        protected TelemetryServiceFacade(final TelemetryConfiguration configuration, IEventLimits limits, IMessageBroker broker) {
+            this(() -> ApplicationManager.getApplication().getService(TelemetryServiceFactory.class).create(
+                            configuration,
+                            limits,
+                            broker),
+                    ApplicationManager.getApplication().getMessageBus().connect());
         }
 
         protected TelemetryServiceFacade(final Supplier<IService> supplier, MessageBusConnection connection) {
@@ -226,6 +242,24 @@ public class TelemetryMessageBuilder {
 
         FeedbackMessage(String name, IService service) {
             super(ACTION, name, service);
+        }
+    }
+
+    private static Environment createEnvironment(PluginDescriptor descriptor) {
+        IDE ide = new IDE.Factory()
+                .create()
+                .setJavaVersion();
+        return new Environment.Builder()
+                .ide(ide)
+                .plugin(descriptor)
+                .build();
+    }
+
+    private static PluginDescriptor getDescriptor(ClassLoader classLoader) {
+        if (classLoader instanceof PluginAwareClassLoader) {
+            return ((PluginAwareClassLoader) classLoader).getPluginDescriptor();
+        } else {
+            return null;
         }
     }
 
