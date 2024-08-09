@@ -10,6 +10,10 @@
     </description>
 
     <change-notes><![CDATA[
+    <p><b>1.2.1</b></p>
+    <ul>
+      <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/90">Corrected url to remote limits configuration</a></li>
+    </ul>
     <p><b>1.2.0</b></p>
     <ul>
       <li><a href="https://github.com/redhat-developer/intellij-redhat-telemetry/issues/82">Allow limits to be configured</a></li>
