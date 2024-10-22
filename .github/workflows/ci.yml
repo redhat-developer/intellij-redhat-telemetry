@@ -24,8 +24,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build --continue
+        run: ./gradlew build
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: linux-test-reports
           path: build/reports
@@ -44,8 +45,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build --continue
+        run: ./gradlew build
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: macos-test-reports
           path: build/reports
@@ -64,8 +66,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build --continue
+        run: ./gradlew build
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: windows-test-reports
           path: build/reports
