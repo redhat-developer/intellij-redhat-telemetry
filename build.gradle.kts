@@ -82,7 +82,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.platform.launcher)
     testImplementation(libs.assertj.core)
-    testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockito.core)
 
     testRuntimeOnly(libs.junit.jupiter.engine)
 }
@@ -94,7 +94,7 @@ val platformTests by intellijPlatformTesting.testIde.registering {
         description = "Runs the platform tests."
         group = "verification"
         outputs.upToDateWhen { false }
-        shouldRunAfter(tasks["test"])
+        mustRunAfter(tasks["test"])
     }
 }
 
