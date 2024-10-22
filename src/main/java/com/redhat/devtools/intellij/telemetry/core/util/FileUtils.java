@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.util;
 
-import org.apache.commons.lang.StringUtils;
+import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,7 +60,7 @@ public class FileUtils {
     }
 
     public static boolean isFileUrl(String url) {
-        return !StringUtils.isEmpty(url)
+        return !StringUtil.isEmpty(url)
             && url.startsWith(FILE_URL_PREFIX);
     }
 
