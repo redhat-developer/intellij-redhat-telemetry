@@ -14,35 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - IJ: 2021.1
-            jvm: 17
-          - IJ: 2021.2
-            jvm: 17
-          - IJ: 2021.3
-            jvm: 17
-          - IJ: 2022.1
-            jvm: 17
-          - IJ: 2022.2
-            jvm: 17
-          - IJ: 2022.3
-            jvm: 17
-          - IJ: 2023.1
-            jvm: 17
-          - IJ: 2023.2
-            jvm: 17
-          - IJ: 2023.3
-            jvm: 17
-          - IJ: 2024.1
-            jvm: 17
-          - IJ: 2024.2
-            jvm: 17
+        IJ: [ 2022.3, 2023.1, 2023.2, 2023.3, 2024.1, 2024.2 ]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK ${{ matrix.jvm }}
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.jvm }}
+          java-version: 17
           distribution: 'temurin'
           cache: 'gradle'
       - name: Grant execute permission for gradlew
