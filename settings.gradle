@@ -1,6 +1,0 @@
-pluginManagement {
-    plugins {
-        id "org.jetbrains.intellij" version "${intellijPluginVersion}"
-    }
-}
-rootProject.name = 'intellij-redhat-telemetry'

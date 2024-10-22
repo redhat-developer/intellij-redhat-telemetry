@@ -29,7 +29,7 @@
  ******************************************************************************/
 package com.redhat.devtools.intellij.telemetry.core.util;
 
-import org.apache.commons.lang.StringUtils;
+import com.intellij.openapi.util.text.StringUtil;
 
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -60,7 +60,7 @@ public class BasicGlobPattern {
     }
 
     public boolean matches(String toMatch) {
-        if (StringUtils.isEmpty(toMatch)) {
+        if (StringUtil.isEmpty(toMatch)) {
             return false;
         }
         return globPattern.matcher(toMatch).matches();
