@@ -35,7 +35,8 @@ jobs:
             jvm: 17
           - IJ: IC-2024.1
             jvm: 17
-
+          - IJ: IC-2024.2
+            jvm: 17
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK ${{ matrix.jvm }}
