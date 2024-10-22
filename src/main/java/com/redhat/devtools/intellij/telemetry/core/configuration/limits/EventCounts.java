@@ -15,9 +15,9 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.redhat.devtools.intellij.telemetry.core.service.Event;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,7 +107,7 @@ public final class EventCounts implements PersistentStateComponent<EventCounts> 
     }
 
     private Count toCount(String string) {
-        if (StringUtils.isEmpty(string)) {
+        if (StringUtil.isEmpty(string)) {
             return null;
         }
         String[] split = string.split(COUNT_VALUES_SEPARATOR);
