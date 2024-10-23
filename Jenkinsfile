@@ -3,7 +3,7 @@
 node('rhel7'){
 	def recipientList = 'jbosstools-builds@lists.jboss.org'
 
-	def javaHome = tool 'openjdk-11'
+	def javaHome = tool 'openjdk-17'
 	env.JAVA_HOME = "${javaHome}"
 
 	try {
@@ -35,7 +35,7 @@ node('rhel7'){
 	
 		if(publishToMarketPlace.equals('true')){
 			timeout(time:5, unit:'DAYS') {
-				input message:'Approve deployment?', submitter: 'jmaury,adietish'
+				input message:'Approve deployment?', submitter: 'sbouchet,adietish'
 			}
 	
 			def channel = isSnapshot?"nightly":"stable"
