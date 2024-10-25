@@ -55,16 +55,19 @@ public class SegmentBroker implements IMessageBroker {
 
     private enum SegmentType {
         IDENTIFY {
+            @Override
             public MessageBuilder toMessage(Event event, Map<String, Object> context, SegmentBroker broker) {
                 return broker.toMessage(IdentifyMessage.builder(), event, context);
             }
         },
         TRACK {
+            @Override
             public MessageBuilder toMessage(Event event, Map<String, Object> context, SegmentBroker broker) {
                 return broker.toMessage(TrackMessage.builder(event.getName()), event, context);
             }
         },
         PAGE {
+            @Override
             public MessageBuilder toMessage(Event event, Map<String, Object> context, SegmentBroker broker) {
                 return broker.toMessage(PageMessage.builder(event.getName()), event, context);
             }
