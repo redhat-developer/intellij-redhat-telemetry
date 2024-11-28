@@ -133,7 +133,6 @@ java {
 
 repositories {
     mavenLocal()
-    maven { url = uri("https://repository.jboss.org") }
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
