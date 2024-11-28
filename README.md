@@ -7,7 +7,7 @@
 [![JetBrains plugins][plugin-version-svg]][plugin-repo]
 [![JetBrains plugins][plugin-downloads-svg]][plugin-repo]
 
-This library provides Telemetry APIs specifically meant to be used by IDEA plugins developped by Red Hat.
+This library provides Telemetry APIs specifically meant to be used by IDEA plugins developed by Red Hat.
 ## Telemetry reporting
 With your approval, plugins published by Red Hat collect anonymous 
 [usage data](https://github.com/redhat-developer/intellij-redhat-telemetry/blob/master/USAGE_DATA.md) 
@@ -77,7 +77,7 @@ You can then chain properties with their values to the point where you can send 
 telemetry
     .property("kindness", "smurfette")
     .property("magic", "papa smurf")
-    .send();   
+    .send();
 ```
 
 ### Send special properties
@@ -86,28 +86,28 @@ There's no need for you to send those messages, it's all done for you behind the
 
 Success may be used to indicate particular outcomes.
 ```java
-telemetry.success("found the magic cauldron")
+telemetry.success("found the magic cauldron");
 ```
 Errors are passed along similarly. Error and success are both mutually exclusive.
 ```java
-telemetry.error("Gargamel was there")
+telemetry.error("Gargamel was there");
 ```
 A duration may be provided to indicate how long an operation took. You start by signaling when the action started. 
 ```java
-telemetry.started()
+telemetry.started();
 ```
 Once the action is finished you provide the end time to the message.
 ```java
-telemetry.finished(LocalDateTime.now())
+telemetry.finished(LocalDateTime.now());
 ```
-Not providing it won't harm, it'll done automatically for you.
+Not providing it won't harm, it'll be done automatically for you.
 
 ### Retrieve the anonymous User Id
 Each message sends an anonymous user id along with the other payloads. 
 This type 4 UUID is automatically created and stored in a file at `~/.redhat/anonymousId` 
 To retrieve it you can query the class `UserId`.
 ```java
-String userId = UserId.INSTANCE.get()
+String userId = UserId.INSTANCE.get();
 ```
 
 ### Add a link to telemetry preferences
