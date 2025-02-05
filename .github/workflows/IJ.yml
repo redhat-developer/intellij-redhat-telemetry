@@ -12,9 +12,6 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        IJ: [ 2022.3, 2023.1, 2023.2, 2023.3, 2024.1, 2024.2, 2024.3 ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -25,13 +22,15 @@ jobs:
           cache: 'gradle'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Build with Gradle
-        run: ./gradlew build -PideaVersion=${{ matrix.IJ }}
       - name: Validate with Gradle
-        run: ./gradlew verifyPlugin -PideaVersion=${{ matrix.IJ }}
+        run: |
+          ./gradlew verifyPlugin
+          REPORTS=$(cat ${{ github.workspace }}/build/reports/pluginVerifier/*/report.md | sed 's/^#/##/')
+          echo "$REPORTS" >> $GITHUB_STEP_SUMMARY
       - name: Upload report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ${{ matrix.IJ }}-verifier-report
+          name: verifier-reports
           path: build/reports/pluginVerifier
+          if-no-files-found: ignore
