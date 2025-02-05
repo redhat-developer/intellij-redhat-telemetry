@@ -10,7 +10,7 @@ analytics = "3.4.0"
 okio = "3.6.0"
 
 # plugins
-gradleIntelliJPlugin = "2.1.0"
+gradleIntelliJPlugin = "2.2.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -1,6 +1,8 @@
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.VerificationReportsFormats.*
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel.*
 
 plugins {
     alias(libs.plugins.gradleIntelliJPlugin) // Gradle IntelliJ Plugin
@@ -48,8 +50,10 @@ intellijPlatform {
     }
 
     pluginVerification {
+        failureLevel = listOf(INVALID_PLUGIN, COMPATIBILITY_PROBLEMS, MISSING_DEPENDENCIES)
+        verificationReportsFormats = listOf(MARKDOWN, PLAIN)
         ides {
-            ide(IntelliJPlatformType.IntellijIdeaCommunity, platformVersion)
+            recommended()
         }
         freeArgs = listOf(
             "-mute",
@@ -61,8 +65,6 @@ intellijPlatform {
 dependencies {
     intellijPlatform {
         create(IntelliJPlatformType.IntellijIdeaCommunity, platformVersion)
-
-        instrumentationTools()
 
         pluginVerifier()
 
@@ -126,8 +128,6 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(javaVersion)
     }
-    sourceCompatibility = JavaVersion.toVersion(javaVersion)
-    targetCompatibility = JavaVersion.toVersion(javaVersion)
     withSourcesJar()
 }
 
