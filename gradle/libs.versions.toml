@@ -3,7 +3,7 @@
 junit = "4.13.2"
 assertj-core = "3.22.0"
 mockito-core = "5.14.2"
-junit-platform = "1.10.3"
+junit-platform = "1.11.4"
 junit-jupiter = "5.10.3"
 gson = "2.10.1"
 analytics = "3.4.0"
