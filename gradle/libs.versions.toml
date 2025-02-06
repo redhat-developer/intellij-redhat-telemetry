@@ -7,7 +7,7 @@ junit-platform = "1.10.3"
 junit-jupiter = "5.10.3"
 gson = "2.10.1"
 analytics = "3.4.0"
-okio = "3.6.0"
+okio = "3.10.2"
 
 # plugins
 gradleIntelliJPlugin = "2.2.1"
