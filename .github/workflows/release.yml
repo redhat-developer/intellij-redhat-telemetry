@@ -42,7 +42,7 @@ jobs:
 
       # Setup Gradle
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/setup-gradle@abc608cff69be5976b7da7964bec1fb81d6bd281 # v4.0.0
         with:
           add-job-summary: 'on-failure'
           add-job-summary-as-pr-comment: 'on-failure'
